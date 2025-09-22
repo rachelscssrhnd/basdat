@@ -2,47 +2,74 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
+     * Nama tabel yang terhubung dengan model ini.
+     */
+    protected $table = 'user';
+
+    /**
+     * Primary key untuk model ini.
+     */
+    protected $primaryKey = 'user_id';
+
+    /**
+     * Tabel ini tidak memiliki kolom created_at dan updated_at.
+     */
+    public $timestamps = false;
+
+    /**
      * The attributes that are mass assignable.
-     *
-     * @var list<string>
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'username',
+        'password_hash',
+        'role_id',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password_hash',
     ];
+    
+    /**
+     * Override default password column for authentication.
+     */
+    public function getAuthPassword()
+    {
+        return $this->password_hash;
+    }
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Relasi "belongsTo": Setiap user memiliki satu Role.
      */
-    protected function casts(): array
+    public function role()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsTo(Role::class, 'role_id', 'role_id');
+    }
+
+    /**
+     * Relasi "hasOne": Akun user ini mungkin memiliki satu profil Pasien.
+     */
+    public function pasien()
+    {
+        return $this->hasOne(Pasien::class, 'user_id', 'user_id');
+    }
+
+    /**
+     * Relasi "hasOne": Akun user ini mungkin memiliki satu profil Staf.
+     */
+    public function staf()
+    {
+        return $this->hasOne(Staf::class, 'user_id', 'user_id');
     }
 }
