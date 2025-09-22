@@ -1,9 +1,6 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Booking</title>
+@extends('layouts.app')
+
+@section('content')
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -90,48 +87,28 @@
       background-color: #1B5E20;
     }
   </style>
-</head>
-<body>
-
   <h1>Silakan Unduh Hasil Tes Laboratorium Kamu</h1>
 
+  @forelse($items as $item)
   <div class="card">
     <div class="left">
-      Booking ID <br> BK-001
+      Booking ID <br> {{ $item->booking_id ?? ('HS-'.$item->id) }}
     </div>
     <div class="middle">
       <div>
         <div class="field">Tanggal Input</div>
-        <div>22-09-2025</div>
+        <div>{{ \Illuminate\Support\Carbon::parse($item->tanggal_input ?? now())->format('d-m-Y') }}</div>
       </div>
       <div>
         <div class="field">Dibuat Oleh</div>
-        <div>Admin Satu</div>
+        <div>{{ optional($item->pembuat)->username ?? 'System' }}</div>
       </div>
     </div>
     <div class="right">
       <a href="#" class="download-btn">Unduh Hasil</a>
     </div>
   </div>
-
-  <div class="card">
-    <div class="left">
-      Booking ID <br> BK-002
-    </div>
-    <div class="middle">
-      <div>
-        <div class="field">Tanggal Input</div>
-        <div>23-09-2025</div>
-      </div>
-      <div>
-        <div class="field">Dibuat Oleh</div>
-        <div>Admin Dua</div>
-      </div>
-    </div>
-    <div class="right">
-      <a href="#" class="download-btn">Unduh Hasil</a>
-    </div>
-  </div>
-
-</body>
-</html>
+  @empty
+    <p style="text-align:center;color:#6D2323;">Belum ada hasil tersedia.</p>
+  @endforelse
+@endsection
