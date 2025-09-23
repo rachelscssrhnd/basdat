@@ -1,7 +1,9 @@
-<?php include 'home_admin.php'; ?>
-<div class="container">
-  <h3>Booking Management</h3>
-  <p>📅 Fitur booking masih dalam pengembangan.</p>
+@extends('layouts.admin')
+
+@section('content')
+  <div class="card">
+    <h3 style="margin-top:0;color:#A31D1D;">Booking Management</h3>
+    <p>📅 Fitur booking masih dalam pengembangan.</p>
 
   <div class="booking-grid">
     <div class="booking-card">
@@ -23,7 +25,7 @@
       </div>
     </div>
   </div>
-</div>
+  </div>
 
 <style>
   .container { 
@@ -101,4 +103,5 @@
   @keyframes growLine { 
     from{width:0;} to{width:50%;} 
   }
-</style>
+  </style>
+@endsection

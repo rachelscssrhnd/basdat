@@ -1,19 +1,8 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Patient Management</title>
+@extends('layouts.admin')
+
+@section('content')
   <style>
-    body { font-family: 'Segoe UI', sans-serif; margin:0; background:#f7f7f7; }
-    header {
-      background: #A31D1D; color:#FEF9E1; padding:15px 40px;
-      display:flex; justify-content:space-between; align-items:center;
-      box-shadow:0 4px 12px rgba(0,0,0,0.15);
-    }
-    nav { display:flex; gap:20px; }
-    nav a { color:#FEF9E1; text-decoration:none; font-weight:bold; transition:0.3s; }
-    nav a:hover { color:#FFD3B6; }
-    .container { padding:30px; animation: fadeIn 0.6s ease; }
+    .container { padding:0; animation: fadeIn 0.6s ease; }
     h3 {
       font-size: 1.8rem; color: #A31D1D; margin-bottom: 20px;
       position: relative; display:inline-block;
@@ -45,10 +34,6 @@
     @keyframes fadeIn { from{opacity:0; transform:translateY(15px);} to{opacity:1; transform:translateY(0);} }
     @keyframes growLine { from{width:0;} to{width:50%;} }
   </style>
-</head>
-<body>
-  <?php include 'header_admin.php'; ?>
-
   <div class="container">
     <h3>Patient Management</h3>
     <div class="search-box">
@@ -115,5 +100,4 @@
       });
     });
   </script>
-</body>
-</html>
+@endsection

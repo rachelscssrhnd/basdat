@@ -36,17 +36,33 @@ class BookingController extends Controller
         }
 
         $data = $request->validate([
-            'pasien_id' => ['required','exists:pasien,pasien_id'],
-            'cabang_id' => ['required','exists:cabang,cabang_id'],
+            'pasien_id' => ['nullable','exists:pasien,pasien_id'],
+            'cabang_id' => ['nullable','exists:cabang,cabang_id'],
             'tanggal_booking' => ['required','date'],
+            'nama_depan' => ['nullable','string'],
+            'nama_belakang' => ['nullable','string'],
+            'telepon' => ['nullable','string'],
+            'email' => ['nullable','string'],
+            'tes' => ['nullable','string'],
+            'sesi' => ['nullable','string'],
         ]);
 
         $data['status_pembayaran'] = 'belum_bayar';
         $data['status_tes'] = 'menunggu';
 
-        Booking::create($data);
+        // Simpan jika referensi pasien/cabang tersedia
+        if (!empty($data['pasien_id']) && !empty($data['cabang_id'])) {
+            Booking::create([
+                'pasien_id' => $data['pasien_id'],
+                'cabang_id' => $data['cabang_id'],
+                'tanggal_booking' => $data['tanggal_booking'],
+                'status_pembayaran' => $data['status_pembayaran'],
+                'status_tes' => $data['status_tes'],
+            ]);
+        }
 
-        return redirect()->route('booking.index')->with('success','Booking dibuat.');
+        // Redirect ke halaman pembayaran dan tampilkan data input
+        return redirect()->route('pembayaran.show')->with('booking_input', $data);
     }
 }
 

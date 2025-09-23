@@ -1,28 +1,6 @@
-<?php
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-  $nama = $_POST["nama_depan"] . " " . $_POST["nama_belakang"];
-  $telepon = $_POST["telepon"];
-  $email = $_POST["email"];
-  
-  // tes disimpan sebagai "harga|nama tes"
-  $tesData = explode("|", $_POST["tes"]);
-  $harga = $tesData[0];
-  $tes = $tesData[1];
-  
-  $cabang = $_POST["cabang"];
-  $tanggal = $_POST["tanggal"];
-  $sesi = $_POST["sesi"];
-} else {
-  // fallback kalau akses langsung tanpa booking
-  $nama = "John Doe";
-  $telepon = "0812-3456-7890";
-  $email = "john@example.com";
-  $tes = "Tes Darah (Hemoglobin)";
-  $harga = 75000;
-  $cabang = "Cabang A";
-  $tanggal = "2025-09-25";
-  $sesi = "2";
-}
+<?php 
+  $nama = trim(($nama_depan ?? '').' '.($nama_belakang ?? ''));
+  $tanggal = $tanggal_booking ?? null;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -50,8 +28,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
       animation: fadeInUp 0.9s ease forwards;
     }
     @keyframes fadeInUp {
-      from {opacity: 0; transform: translateY(30px);}
-      to {opacity: 1; transform: translateY(0);}
+      from {opacity: 0; transform: translateY(30px);} 
+      to {opacity: 1; transform: translateY(0);} 
     }
     h2 {
       text-align: center;
@@ -125,14 +103,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
   <div class="container">
     <h2>Konfirmasi & Pembayaran</h2>
     <div class="detail">
-      <p><strong>Nama:</strong> <?= $nama ?></p>
-      <p><strong>Telepon:</strong> <?= $telepon ?></p>
-      <p><strong>Email:</strong> <?= $email ?></p>
-      <p><strong>Jenis Tes:</strong> <?= $tes ?></p>
-      <p><strong>Cabang:</strong> <?= $cabang ?></p>
-      <p><strong>Tanggal:</strong> <?= $tanggal ?></p>
-      <p><strong>Sesi:</strong> Sesi <?= $sesi ?></p>
-      <p class="total">Total: Rp <?= number_format($harga, 0, ',', '.') ?></p>
+      <p><strong>Nama:</strong> <?= htmlspecialchars($nama) ?></p>
+      <p><strong>Telepon:</strong> <?= htmlspecialchars($telepon ?? '') ?></p>
+      <p><strong>Email:</strong> <?= htmlspecialchars($email ?? '') ?></p>
+      <p><strong>Jenis Tes:</strong> <?= htmlspecialchars($tes ?? '') ?></p>
+      <p><strong>Cabang:</strong> <?= htmlspecialchars($cabang ?? '') ?></p>
+      <p><strong>Tanggal:</strong> <?= htmlspecialchars($tanggal ?? '') ?></p>
+      <p><strong>Sesi:</strong> Sesi <?= htmlspecialchars($sesi ?? '') ?></p>
+      <p class="total">Total: Rp <?= number_format((int)($harga ?? 0), 0, ',', '.') ?></p>
     </div>
 
     <label for="metode">Pilih Metode Pembayaran</label>
@@ -187,13 +165,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
           <h3>Scan QRIS untuk Membayar</h3>
           <img src="qris-sample.png" alt="QRIS Code">
           <p><b>Merchant:</b> HEBAT Health Center</p>
-          <p><b>Total:</b> Rp <?= number_format($harga, 0, ',', '.') ?></p>
+          <p><b>Total:</b> Rp <?= number_format((int)($harga ?? 0), 0, ',', '.') ?></p>
         `;
       } else if (metode === "ewallet") {
         modalBody.innerHTML = `
           <h3>Pembayaran via E-Wallet</h3>
           <p><b>Merchant:</b> HEBAT Health Center</p>
-          <p><b>Total:</b> Rp <?= number_format($harga, 0, ',', '.') ?></p>
+          <p><b>Total:</b> Rp <?= number_format((int)($harga ?? 0), 0, ',', '.') ?></p>
           <p><b>No. E-Wallet:</b> 081234567890</p>
           <p>(Bisa transfer via OVO, GoPay, atau DANA)</p>
         `;

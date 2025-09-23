@@ -1,7 +1,9 @@
-<?php include 'home_admin.php'; ?>
-<div class="container">
-  <h3>Test Management</h3>
-  <p>🧪 Kelola data tes pasien di sini.</p>
+@extends('layouts.admin')
+
+@section('content')
+  <div class="card">
+    <h3 style="margin-top:0;color:#A31D1D;">Test Management</h3>
+    <p>🧪 Kelola data tes pasien di sini.</p>
 
   <div class="test-grid">
     <div class="test-card">
@@ -20,7 +22,8 @@
       <button class="btn">Kelola</button>
     </div>
   </div>
-</div>
+  </div>
+  </div>
 
 <style>
   .container { 
@@ -78,4 +81,5 @@
   @keyframes growLine { 
     from{width:0;} to{width:50%;} 
   }
-</style>
+  </style>
+@endsection
