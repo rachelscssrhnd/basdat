@@ -109,7 +109,7 @@
 <body>
     <header class="navbar">
         <div class="nav-wrap">
-            <div class="brand">Basdat Klinik</div>
+            <div class="brand">E-Clinic Lab</div>
             <nav class="nav">
                 <a href="{{ route('home') }}">Home</a>
                 <a href="{{ route('booking.index') }}">Booking</a>
