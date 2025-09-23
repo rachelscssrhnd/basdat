@@ -3,28 +3,46 @@
 @section('content')
   <div class="card">
     <h3 style="margin-top:0;color:#A31D1D;">Booking Management</h3>
-    <p>📅 Fitur booking masih dalam pengembangan.</p>
+    @if(session('success'))
+      <div class="alert success">{{ session('success') }}</div>
+    @endif
 
-  <div class="booking-grid">
-    <div class="booking-card">
-      <h4>Budi Setiawan</h4>
-      <p>Tanggal: 25 Sept 2025</p>
-      <p>Status: Menunggu Konfirmasi</p>
-      <div class="actions">
-        <button class="btn confirm">Konfirmasi</button>
-        <button class="btn cancel">Batalkan</button>
-      </div>
+    <div class="booking-grid">
+      @forelse($bookings as $booking)
+        <div class="booking-card">
+          <h4>{{ $booking->pasien->nama ?? 'Tanpa Nama' }}</h4>
+          <p>Tanggal: {{ \Carbon\Carbon::parse($booking->tanggal_booking)->format('d M Y') }}</p>
+          <p>Cabang: {{ $booking->cabang->nama_cabang ?? '-' }}</p>
+          <form method="POST" action="{{ route('admin.booking.update', $booking) }}" class="actions">
+            @csrf
+            @method('PUT')
+            <select name="status_pembayaran" class="select">
+              <option value="belum_bayar" {{ $booking->status_pembayaran==='belum_bayar' ? 'selected' : '' }}>Belum Bayar</option>
+              <option value="menunggu_konfirmasi" {{ $booking->status_pembayaran==='menunggu_konfirmasi' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+              <option value="terbayar" {{ $booking->status_pembayaran==='terbayar' ? 'selected' : '' }}>Terbayar</option>
+            </select>
+            <select name="status_tes" class="select">
+              <option value="menunggu" {{ $booking->status_tes==='menunggu' ? 'selected' : '' }}>Menunggu</option>
+              <option value="dijadwalkan" {{ $booking->status_tes==='dijadwalkan' ? 'selected' : '' }}>Dijadwalkan</option>
+              <option value="selesai" {{ $booking->status_tes==='selesai' ? 'selected' : '' }}>Selesai</option>
+              <option value="dibatalkan" {{ $booking->status_tes==='dibatalkan' ? 'selected' : '' }}>Dibatalkan</option>
+            </select>
+            <button class="btn confirm" type="submit">Simpan</button>
+          </form>
+          <form method="POST" action="{{ route('admin.booking.destroy', $booking) }}" class="actions">
+            @csrf
+            @method('DELETE')
+            <button class="btn cancel" type="submit" onclick="return confirm('Hapus booking ini?')">Hapus</button>
+          </form>
+        </div>
+      @empty
+        <p>Tidak ada booking.</p>
+      @endforelse
     </div>
 
-    <div class="booking-card">
-      <h4>Siti Aisyah</h4>
-      <p>Tanggal: 27 Sept 2025</p>
-      <p>Status: Dikonfirmasi</p>
-      <div class="actions">
-        <button class="btn detail">Detail</button>
-      </div>
+    <div class="pagination">
+      {{ $bookings->links() }}
     </div>
-  </div>
   </div>
 
 <style>
@@ -69,6 +87,9 @@
     gap:10px;
     flex-wrap:wrap;
   }
+  .alert.success { background:#e8f7ee; color:#2e7d32; padding:10px 12px; border-radius:8px; margin-bottom:12px; }
+  .select { padding:8px 10px; border:1px solid #ddd; border-radius:8px; }
+  .pagination { margin-top:16px; }
   .btn {
     padding:8px 14px;
     border:none;

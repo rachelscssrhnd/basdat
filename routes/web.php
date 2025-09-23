@@ -5,6 +5,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HasilTesController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\AdminBookingController;
+use App\Http\Controllers\AdminPatientController;
+use App\Http\Controllers\AdminTestResultController;
 
 Route::get('/', function () {
     // Always show index page, but redirect admins to admin panel if logged in
@@ -48,9 +51,26 @@ Route::get('/pembayaran', function () {
 // Admin panel routes
 Route::middleware('admin')->group(function () {
     Route::get('/admin', function () { return view('dashboard_admin'); })->name('admin.dashboard');
-    Route::view('/admin/patients', 'patients_admin')->name('admin.patients');
-    Route::view('/admin/tests', 'tes_admin')->name('admin.tests');
-    Route::view('/admin/booking', 'booking_admin')->name('admin.booking');
+    // Patients CRUD
+    Route::get('/admin/patients', [AdminPatientController::class, 'index'])->name('admin.patients');
+    Route::post('/admin/patients', [AdminPatientController::class, 'store'])->name('admin.patients.store');
+    Route::put('/admin/patients/{pasien}', [AdminPatientController::class, 'update'])->name('admin.patients.update');
+    Route::delete('/admin/patients/{pasien}', [AdminPatientController::class, 'destroy'])->name('admin.patients.destroy');
+
+    // Bookings management
+    Route::get('/admin/booking', [AdminBookingController::class, 'index'])->name('admin.booking');
+    Route::put('/admin/booking/{booking}', [AdminBookingController::class, 'update'])->name('admin.booking.update');
+    Route::delete('/admin/booking/{booking}', [AdminBookingController::class, 'destroy'])->name('admin.booking.destroy');
+
+    // Test results CRUD
+    Route::get('/admin/tests', [AdminTestResultController::class, 'index'])->name('admin.tests');
+    Route::post('/admin/tests', [AdminTestResultController::class, 'storeHeader'])->name('admin.tests.header.store');
+    Route::put('/admin/tests/{header}', [AdminTestResultController::class, 'updateHeader'])->name('admin.tests.header.update');
+    Route::delete('/admin/tests/{header}', [AdminTestResultController::class, 'destroyHeader'])->name('admin.tests.header.destroy');
+
+    Route::post('/admin/tests/{header}/values', [AdminTestResultController::class, 'storeValue'])->name('admin.tests.value.store');
+    Route::put('/admin/tests/{header}/values/{value}', [AdminTestResultController::class, 'updateValue'])->name('admin.tests.value.update');
+    Route::delete('/admin/tests/{header}/values/{value}', [AdminTestResultController::class, 'destroyValue'])->name('admin.tests.value.destroy');
 });
 
 // User home

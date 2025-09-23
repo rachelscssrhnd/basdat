@@ -3,26 +3,89 @@
 @section('content')
   <div class="card">
     <h3 style="margin-top:0;color:#A31D1D;">Test Management</h3>
-    <p>🧪 Kelola data tes pasien di sini.</p>
+    @if(session('success'))
+      <div class="alert success">{{ session('success') }}</div>
+    @endif
 
-  <div class="test-grid">
-    <div class="test-card">
-      <h4>Covid-19</h4>
-      <p>Status: Aktif</p>
-      <button class="btn">Kelola</button>
+    <div class="card" style="margin-bottom:16px; padding:12px;">
+      <form method="POST" action="{{ route('admin.tests.header.store') }}" class="form-inline">
+        @csrf
+        <label>Pilih Booking:</label>
+        <select name="booking_id" class="select" required>
+          <option value="">- pilih -</option>
+          @foreach($bookings as $b)
+            <option value="{{ $b->booking_id }}">#{{ $b->booking_id }} - {{ $b->pasien->nama ?? 'Tanpa Nama' }}</option>
+          @endforeach
+        </select>
+        <button class="btn" type="submit">Buat Hasil Tes</button>
+      </form>
     </div>
-    <div class="test-card">
-      <h4>Diabetes</h4>
-      <p>Status: Aktif</p>
-      <button class="btn">Kelola</button>
+
+    <div class="headers">
+      @forelse($headers as $header)
+        <div class="test-card">
+          <h4>Hasil Tes #{{ $header->hasil_id }} - {{ $header->booking->pasien->nama ?? '-' }}</h4>
+          <div class="row actions">
+            <form method="POST" action="{{ route('admin.tests.header.update', $header) }}" style="display:flex; gap:8px; align-items:center;">
+              @csrf
+              @method('PUT')
+              <select name="booking_id" class="select">
+                @foreach($bookings as $b)
+                  <option value="{{ $b->booking_id }}" {{ $header->booking_id===$b->booking_id ? 'selected' : '' }}>#{{ $b->booking_id }} - {{ $b->pasien->nama ?? 'Tanpa Nama' }}</option>
+                @endforeach
+              </select>
+              <button class="btn" type="submit">Simpan</button>
+            </form>
+            <form method="POST" action="{{ route('admin.tests.header.destroy', $header) }}">
+              @csrf
+              @method('DELETE')
+              <button class="btn cancel" type="submit" onclick="return confirm('Hapus header ini?')">Hapus</button>
+            </form>
+          </div>
+          <div class="values">
+            <h5>Nilai Parameter</h5>
+            <ul>
+              @foreach($header->detailHasil as $val)
+                <li>
+                  <form method="POST" action="{{ route('admin.tests.value.update', [$header, $val]) }}" style="display:inline-flex; gap:8px; align-items:center;">
+                    @csrf
+                    @method('PUT')
+                    <select name="param_id" class="select">
+                      @foreach($parameters as $p)
+                        <option value="{{ $p->param_id }}" {{ $val->param_id===$p->param_id ? 'selected' : '' }}>{{ $p->nama_parameter ?? ('Param '.$p->param_id) }}</option>
+                      @endforeach
+                    </select>
+                    <input type="text" name="nilai_hasil" value="{{ $val->nilai_hasil }}" class="input small" />
+                    <button class="btn" type="submit">Simpan</button>
+                  </form>
+                  <form method="POST" action="{{ route('admin.tests.value.destroy', [$header, $val]) }}" style="display:inline; margin-left:6px;">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn cancel" type="submit">Hapus</button>
+                  </form>
+                </li>
+              @endforeach
+            </ul>
+
+            <form method="POST" action="{{ route('admin.tests.value.store', $header) }}" style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+              @csrf
+              <select name="param_id" class="select" required>
+                <option value="">- pilih parameter -</option>
+                @foreach($parameters as $p)
+                  <option value="{{ $p->param_id }}">{{ $p->nama_parameter ?? ('Param '.$p->param_id) }}</option>
+                @endforeach
+              </select>
+              <input type="text" name="nilai_hasil" placeholder="Nilai" class="input small" required />
+              <button class="btn" type="submit">Tambah Nilai</button>
+            </form>
+          </div>
+        </div>
+      @empty
+        <p>Belum ada hasil tes.</p>
+      @endforelse
     </div>
-    <div class="test-card">
-      <h4>Kolesterol</h4>
-      <p>Status: Tidak Aktif</p>
-      <button class="btn">Kelola</button>
-    </div>
-  </div>
-  </div>
+
+    <div class="pagination">{{ $headers->links() }}</div>
   </div>
 
 <style>
@@ -74,6 +137,10 @@
     background:#8c1717;
     transform:scale(1.05);
   }
+  .alert.success { background:#e8f7ee; color:#2e7d32; padding:10px 12px; border-radius:8px; margin-bottom:12px; }
+  .form-inline .select, .form-inline .input { padding:8px 10px; border:1px solid #ddd; border-radius:8px; margin-right:8px; }
+  .select { padding:8px 10px; border:1px solid #ddd; border-radius:8px; }
+  .input.small { width:160px; }
   @keyframes fadeIn { 
     from{opacity:0; transform:translateY(15px);} 
     to{opacity:1; transform:translateY(0);} 

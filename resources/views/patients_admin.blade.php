@@ -36,68 +36,76 @@
   </style>
   <div class="container">
     <h3>Patient Management</h3>
+    @if(session('success'))
+      <div class="alert success">{{ session('success') }}</div>
+    @endif
+
     <div class="search-box">
-      <input type="text" id="searchInput" placeholder="🔍 Cari pasien...">
+      <form method="GET" action="{{ route('admin.patients') }}">
+        <input type="text" name="q" value="{{ $q ?? '' }}" placeholder="🔍 Cari nama/email/no HP...">
+      </form>
     </div>
+
+    <div class="card" style="margin-bottom:16px; padding:12px;">
+      <form method="POST" action="{{ route('admin.patients.store') }}" class="form-inline">
+        @csrf
+        <input type="text" name="nama" placeholder="Nama" required class="input" />
+        <input type="date" name="tgl_lahir" class="input" />
+        <input type="email" name="email" placeholder="Email" class="input" />
+        <input type="text" name="no_hp" placeholder="No HP" class="input" />
+        <button class="btn" type="submit">Tambah Pasien</button>
+      </form>
+    </div>
+
     <table id="patientTable">
       <thead>
         <tr>
-          <th class="sortable">Nama Depan ⬍</th>
-          <th class="sortable">Nama Belakang ⬍</th>
-          <th class="sortable">Riwayat Tes ⬍</th>
-          <th class="sortable">Status ⬍</th>
+          <th>Nama</th>
+          <th>Tgl Lahir</th>
+          <th>Email</th>
+          <th>No HP</th>
+          <th style="width:200px;">Aksi</th>
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Budi</td>
-          <td>Setiawan</td>
-          <td>Covid-19, Kolesterol</td>
-          <td>Sudah Tes</td>
-        </tr>
-        <tr>
-          <td>Siti</td>
-          <td>Aisyah</td>
-          <td>Diabetes</td>
-          <td>Belum Tes</td>
-        </tr>
-        <tr>
-          <td>Andi</td>
-          <td>Wijaya</td>
-          <td>Kolesterol</td>
-          <td>Sudah Tes</td>
-        </tr>
+        @forelse($pasiens as $pasien)
+          <tr>
+            <td>{{ $pasien->nama }}</td>
+            <td>{{ $pasien->tgl_lahir }}</td>
+            <td>{{ $pasien->email }}</td>
+            <td>{{ $pasien->no_hp }}</td>
+            <td>
+              <form method="POST" action="{{ route('admin.patients.update', $pasien) }}" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+                @csrf
+                @method('PUT')
+                <input type="text" name="nama" value="{{ $pasien->nama }}" class="input small" />
+                <input type="date" name="tgl_lahir" value="{{ $pasien->tgl_lahir }}" class="input small" />
+                <input type="email" name="email" value="{{ $pasien->email }}" class="input small" />
+                <input type="text" name="no_hp" value="{{ $pasien->no_hp }}" class="input small" />
+                <button class="btn confirm" type="submit">Simpan</button>
+              </form>
+              <form method="POST" action="{{ route('admin.patients.destroy', $pasien) }}" style="margin-top:6px;">
+                @csrf
+                @method('DELETE')
+                <button class="btn cancel" type="submit" onclick="return confirm('Hapus pasien ini?')">Hapus</button>
+              </form>
+            </td>
+          </tr>
+        @empty
+          <tr><td colspan="5">Tidak ada data pasien.</td></tr>
+        @endforelse
       </tbody>
     </table>
+
+    <div class="pagination">{{ $pasiens->links() }}</div>
   </div>
 
-  <script>
-    // === SEARCH ===
-    document.getElementById("searchInput").addEventListener("keyup", function() {
-      let filter = this.value.toLowerCase();
-      let rows = document.querySelectorAll("#patientTable tbody tr");
-      rows.forEach(row => {
-        let text = row.textContent.toLowerCase();
-        row.style.display = text.includes(filter) ? "" : "none";
-      });
-    });
-
-    // === SORTING ===
-    document.querySelectorAll("th.sortable").forEach((th, index) => {
-      th.addEventListener("click", () => {
-        let table = th.closest("table");
-        let tbody = table.querySelector("tbody");
-        let rows = Array.from(tbody.querySelectorAll("tr"));
-        let asc = th.classList.toggle("asc");
-
-        rows.sort((a, b) => {
-          let valA = a.children[index].innerText.toLowerCase();
-          let valB = b.children[index].innerText.toLowerCase();
-          return asc ? valA.localeCompare(valB) : valB.localeCompare(valA);
-        });
-
-        rows.forEach(row => tbody.appendChild(row));
-      });
-    });
-  </script>
+  <style>
+    .alert.success { background:#e8f7ee; color:#2e7d32; padding:10px 12px; border-radius:8px; margin-bottom:12px; }
+    .form-inline .input { padding:8px 10px; border:1px solid #ddd; border-radius:8px; margin-right:8px; }
+    .input.small { width:140px; }
+    .btn { padding:8px 14px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; }
+    .btn.confirm { background:#2ecc71; color:#fff; }
+    .btn.cancel { background:#e74c3c; color:#fff; }
+  </style>
 @endsection
