@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Beranda Pengguna</title>
+@extends('layouts.app')
+
+@section('content')
   <style>
     body { 
       font-family: 'Segoe UI', sans-serif; 
@@ -44,26 +42,11 @@
     @keyframes popIn { from {opacity:0; transform: translateY(-20px) scale(0.95);} to {opacity:1; transform: translateY(0) scale(1);} }
     @keyframes fadeUp { from {opacity:0; transform: translateY(20px);} to {opacity:1; transform: translateY(0);} }
   </style>
-</head>
-<body>
-  <header>
-    <h1>Basdat Klinik</h1>
-    <nav>
-      <a href="{{ route('home.user') }}">Home</a>
-      <a href="{{ route('booking.index') }}">Booking</a>
-      <a href="{{ route('hasil.index') }}">Hasil</a>
-      <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit">Logout</button>
-      </form>
-    </nav>
-  </header>
 
   <section class="hero">
     <h2>Selamat Datang!</h2>
     <p>Pesan tes dan lihat hasil pemeriksaanmu di sini.</p>
   </section>
-</body>
-</html>
+@endsection
 
 

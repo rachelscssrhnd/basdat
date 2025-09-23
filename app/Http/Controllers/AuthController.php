@@ -28,7 +28,7 @@ class AuthController extends Controller
             'role' => $validated['role'],
         ]);
 
-        return redirect()->route($validated['role'] === 'admin' ? 'home.admin' : 'home.user');
+        return redirect()->route($validated['role'] === 'admin' ? 'home.admin' : 'home');
     }
 
     public function logout()

@@ -7,9 +7,9 @@ use App\Http\Controllers\HasilTesController;
 use App\Http\Controllers\BookingController;
 
 Route::get('/', function () {
-    // Redirect to proper home based on role if logged in
-    if (session()->has('user_id')) {
-        return session('role') === 'admin' ? redirect()->route('home.admin') : redirect()->route('home.user');
+    // Always show index page, but redirect admins to admin panel if logged in
+    if (session()->has('user_id') && session('role') === 'admin') {
+        return redirect()->route('home.admin');
     }
     return view('index');
 })->name('home');
@@ -23,6 +23,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/hasil-tes', [HasilTesController::class, 'index'])->name('hasil.index');
 Route::view('/faq', 'faq')->name('faq');
+Route::view('/about', 'about')->name('about');
 
 // Booking
 Route::get('/booking', [BookingController::class, 'index'])->name('booking.index');

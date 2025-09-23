@@ -1,8 +1,6 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <title>Admin Panel</title>
+@extends('layouts.app')
+
+@section('content')
   <style>
     body { 
       font-family: 'Segoe UI', sans-serif; 
@@ -83,13 +81,9 @@
       animation: fadeIn 0.8s ease-in;
     }
   </style>
-</head>
-<body>
-  <?php include 'header_admin.php'; ?>
 
   <section class="hero">
     <h2>Selamat Datang, Admin!</h2>
     <p>Kelola pasien, tes, dan booking dengan mudah melalui panel ini.</p>
   </section>
-</body>
-</html>
+@endsection

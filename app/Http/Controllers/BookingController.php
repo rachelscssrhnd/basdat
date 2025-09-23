@@ -9,7 +9,7 @@ use App\Models\Cabang;
 
 class BookingController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!session()->has('user_id')) {
             return redirect()->route('login');
@@ -23,7 +23,10 @@ class BookingController extends Controller
         $pasiens = Pasien::query()->orderBy('nama')->get(['pasien_id','nama']);
         $cabangs = Cabang::query()->orderBy('nama_cabang')->get(['cabang_id','nama_cabang']);
 
-        return view('booking', compact('bookings', 'pasiens', 'cabangs'));
+        // Get test type from query parameter
+        $selectedTestType = $request->get('type', '');
+
+        return view('booking', compact('bookings', 'pasiens', 'cabangs', 'selectedTestType'));
     }
 
     public function store(Request $request)
