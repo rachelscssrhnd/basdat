@@ -1,21 +1,21 @@
 @extends('layouts.app')
 
 @section('content')
-<style>
+  <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Open+Sans:wght@300;400;500;600;700&display=swap');
   
   .test-results-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
-  }
+      padding: 20px;
+    }
 
   .test-results-title {
     font-family: 'Poppins', sans-serif;
     font-size: 2.8rem;
     font-weight: 700;
     color: #A31D1D;
-    text-align: center;
+      text-align: center;
     margin-bottom: 3rem;
     letter-spacing: -0.02em;
   }
@@ -25,12 +25,12 @@
     border-radius: 20px;
     padding: 32px;
     margin: 24px auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     box-shadow: 0 8px 32px rgba(163, 29, 29, 0.12);
     border: 1px solid rgba(163, 29, 29, 0.08);
-    max-width: 1100px;
+      max-width: 1100px;
     opacity: 0;
     transform: translateY(30px);
     animation: slideUp 0.8s ease forwards;
@@ -47,14 +47,14 @@
   .result-card:nth-child(4) { animation-delay: 0.3s; }
 
   @keyframes slideUp {
-    to {
-      opacity: 1;
+      to {
+        opacity: 1;
       transform: translateY(0);
+      }
     }
-  }
 
   .result-booking-id {
-    flex: 1;
+      flex: 1;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     color: #A31D1D;
@@ -77,10 +77,10 @@
   }
 
   .result-middle {
-    flex: 2;
-    display: flex;
-    justify-content: center;
-    text-align: center;
+      flex: 2;
+      display: flex;
+      justify-content: center;
+      text-align: center;
     gap: 60px;
   }
 
@@ -111,11 +111,11 @@
   }
 
   .result-download {
-    flex: 1;
-    text-align: center;
-  }
+      flex: 1;
+      text-align: center;
+    }
 
-  .download-btn {
+    .download-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -123,15 +123,15 @@
     color: white;
     padding: 14px 28px;
     border-radius: 50px;
-    text-decoration: none;
+      text-decoration: none;
     font-family: 'Open Sans', sans-serif;
     font-weight: 600;
     font-size: 1rem;
     transition: all 0.3s ease;
     box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
-  }
+    }
 
-  .download-btn:hover {
+    .download-btn:hover {
     background: linear-gradient(135deg, #059669, #047857);
     transform: translateY(-2px);
     box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
@@ -171,8 +171,8 @@
     .test-results-title {
       font-size: 2rem;
     }
-  }
-</style>
+    }
+  </style>
 
 <div class="test-results-container">
   <h1 class="test-results-title">Silakan Unduh Hasil Tes Laboratorium Kamu</h1>
@@ -202,5 +202,5 @@
       Belum ada hasil tersedia.
     </div>
   @endforelse
-</div>
+      </div>
 @endsection
