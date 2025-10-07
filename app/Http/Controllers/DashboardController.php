@@ -30,7 +30,7 @@ class DashboardController extends Controller
         }
 
         if ($role === 'admin') {
-            return view('dashboard_admin', compact('userName', 'recentBookings', 'recentHasil'));
+            return view('admin', compact('userName', 'recentBookings', 'recentHasil'));
         }
 
         return view('dashboard', compact('userName', 'recentBookings', 'recentHasil'));

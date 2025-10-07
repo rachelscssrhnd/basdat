@@ -15,12 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         // Roles
         $adminRoleId = DB::table('role')->insertGetId([
-            'name' => 'Administrator',
-            'slug' => 'admin',
+            'nama_role' => 'Administrator',
         ]);
         $userRoleId = DB::table('role')->insertGetId([
-            'name' => 'User',
-            'slug' => 'user',
+            'nama_role' => 'User',
         ]);
 
         // Users
@@ -53,9 +51,73 @@ class DatabaseSeeder extends Seeder
 
         // Jenis Tes
         $tesHematologi = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Hematologi Lengkap',
-            'deskripsi' => 'Pemeriksaan darah lengkap',
-            'harga' => 150000,
+            'nama_tes' => 'Basic Health Panel',
+            'deskripsi' => '12 tests included - Complete blood count, basic metabolic panel',
+            'harga' => 89000,
+            'persiapan_khusus' => 'Fasting required for 8-12 hours',
+        ]);
+
+        $tesMetabolic = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Complete Metabolic Panel',
+            'deskripsi' => '20 tests included - Comprehensive metabolic assessment',
+            'harga' => 129000,
+            'persiapan_khusus' => 'Fasting required for 8-12 hours',
+        ]);
+
+        $tesImmunity = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Immunity Checkup',
+            'deskripsi' => '8 tests included - Immune system assessment',
+            'harga' => 75000,
+            'persiapan_khusus' => 'No special preparation required',
+        ]);
+
+        $tesCholesterol = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Cholesterol Panel',
+            'deskripsi' => '4 tests included - Complete cholesterol analysis',
+            'harga' => 45000,
+            'persiapan_khusus' => 'Fasting required for 12 hours',
+        ]);
+
+        $tesThyroid = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Thyroid Panel',
+            'deskripsi' => '3 tests included - Thyroid function assessment',
+            'harga' => 65000,
+            'persiapan_khusus' => 'No special preparation required',
+        ]);
+
+        $tesEnergy = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Energy & Vitality',
+            'deskripsi' => '6 tests included - Energy level assessment',
+            'harga' => 95000,
+            'persiapan_khusus' => 'Fasting required for 8 hours',
+        ]);
+
+        $tesVision = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Vision Health',
+            'deskripsi' => '5 tests included - Eye health assessment',
+            'harga' => 55000,
+            'persiapan_khusus' => 'No special preparation required',
+        ]);
+
+        $tesDiabetes = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Diabetes Monitoring',
+            'deskripsi' => '4 tests included - Blood sugar monitoring',
+            'harga' => 35000,
+            'persiapan_khusus' => 'Fasting required for 8 hours',
+        ]);
+
+        $tesLiver = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Liver Function Test',
+            'deskripsi' => '6 tests included - Liver health assessment',
+            'harga' => 85000,
+            'persiapan_khusus' => 'Fasting required for 8 hours',
+        ]);
+
+        $tesKidney = DB::table('jenis_tes')->insertGetId([
+            'nama_tes' => 'Kidney Function Test',
+            'deskripsi' => '5 tests included - Kidney health assessment',
+            'harga' => 75000,
+            'persiapan_khusus' => 'No special preparation required',
         ]);
 
         // Parameter untuk tes di atas
@@ -65,19 +127,46 @@ class DatabaseSeeder extends Seeder
             'satuan' => 'g/dL',
         ]);
 
+        $paramWBC = DB::table('parameter_tes')->insertGetId([
+            'tes_id' => $tesHematologi,
+            'nama_parameter' => 'WBC Count',
+            'satuan' => '×10³/µL',
+        ]);
+
+        $paramGlucose = DB::table('parameter_tes')->insertGetId([
+            'tes_id' => $tesMetabolic,
+            'nama_parameter' => 'Fasting Glucose',
+            'satuan' => 'mg/dL',
+        ]);
+
+        $paramCholesterol = DB::table('parameter_tes')->insertGetId([
+            'tes_id' => $tesMetabolic,
+            'nama_parameter' => 'Total Cholesterol',
+            'satuan' => 'mg/dL',
+        ]);
+
         // Booking
         $bookingId = DB::table('booking')->insertGetId([
             'pasien_id' => $pasienId,
             'cabang_id' => $cabangId,
             'tanggal_booking' => date('Y-m-d'),
-            'status_pembayaran' => 'lunas',
-            'status_tes' => 'selesai',
+            'status_pembayaran' => 'paid',
+            'status_tes' => 'completed',
         ]);
 
         // Detail Booking
         DB::table('detail_booking')->insert([
             'booking_id' => $bookingId,
             'tes_id' => $tesHematologi,
+        ]);
+
+        // Payment
+        DB::table('pembayaran')->insert([
+            'booking_id' => $bookingId,
+            'metode_bayar' => 'bank_transfer',
+            'jumlah' => 89000,
+            'status' => 'paid',
+            'tanggal_bayar' => date('Y-m-d H:i:s'),
         ]);
 
         // Hasil Tes Header

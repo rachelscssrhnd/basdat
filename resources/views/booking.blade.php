@@ -1,209 +1,270 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Clinic Lab - Booking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+</head>
+<body class="font-sans antialiased text-gray-800">
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <i data-feather="activity" class="h-8 w-8 text-primary-600"></i>
+                        <span class="ml-2 text-2xl font-bold text-primary-700">E-Clinic Lab</span>
+                    </div>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                    <a href="{{ route('home') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <i data-feather="home" class="mr-2"></i> Home
+                    </a>
+                    <a href="{{ route('labtest') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <i data-feather="activity" class="mr-2"></i> Lab Test
+                    </a>
+                    <a href="{{ route('myorder') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <i data-feather="shopping-bag" class="mr-2"></i> My Order
+                    </a>
+                </div>
+                <div class="hidden sm:ml-6 sm:flex sm:items-center">
+                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                        <i data-feather="user" class="mr-2"></i> Sign In
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
 
-@section('content')
-  <style>
-    .booking-container {
-      display: flex;
-      width: 100%;
-      max-width: 1200px;
-      margin: 0 auto;
-      border-radius: 16px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.15);
-      overflow: hidden;
-      background: #fff;
-      animation: slideUp 1s ease forwards;
-    }
-    @keyframes slideUp {
-      from { transform: translateY(40px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-    .booking-left { 
-      flex: 1; 
-      background: #fff8d8; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      padding: 30px; 
-      animation: float 3s ease-in-out infinite; 
-    }
-    .booking-left img { 
-      max-width: 85%; 
-      max-height: 420px; 
-      animation: zoomIn 1.5s ease; 
-    }
-    @keyframes zoomIn { 
-      from { transform: scale(0.9); opacity: 0; } 
-      to { transform: scale(1); opacity: 1; } 
-    }
-    @keyframes float { 
-      0%, 100% { transform: translateY(0); } 
-      50% { transform: translateY(-12px); } 
-    }
-    .booking-right { 
-      flex: 1; 
-      background: #6D2323; 
-      color: white; 
-      padding: 40px; 
-      position: relative; 
-    }
-    .booking-right h2 { 
-      margin-bottom: 20px; 
-      text-align: center; 
-      color: #FEF9E1; 
-      font-size: 26px; 
-      letter-spacing: 1px; 
-      animation: popIn 0.8s ease; 
-    }
-    @keyframes popIn { 
-      from { transform: scale(0.9); opacity: 0; } 
-      to { transform: scale(1); opacity: 1; } 
-    }
-    .booking-right label { 
-      display: block; 
-      margin-top: 15px; 
-      font-weight: bold; 
-    }
-    .booking-right input, .booking-right select { 
-      width: 100%; 
-      padding: 12px; 
-      margin-top: 6px; 
-      border: none; 
-      border-radius: 8px; 
-      transition: all 0.3s ease; 
-      font-size: 14px; 
-    }
-    .booking-right input:focus, .booking-right select:focus { 
-      outline: none; 
-      box-shadow: 0 0 12px #FEF9E1; 
-      transform: scale(1.02); 
-    }
-    .booking-right button { 
-      margin-top: 25px; 
-      width: 100%; 
-      padding: 14px; 
-      background: #A31D1D; 
-      color: #FEF9E1; 
-      border: none; 
-      border-radius: 8px; 
-      font-weight: bold; 
-      font-size: 15px; 
-      cursor: pointer; 
-      transition: all 0.3s ease; 
-    }
-    .booking-right button:hover { 
-      background: #FEF9E1; 
-      color: #6D2323; 
-      border: 2px solid #A31D1D; 
-      transform: translateY(-3px) scale(1.05); 
-      box-shadow: 0 8px 18px rgba(0,0,0,0.2); 
-    }
-    .booking-right .harga { 
-      margin-top: 10px; 
-      font-size: 14px; 
-      color: #FFD580; 
-      font-style: italic; 
-    }
-    
-    /* Responsive */
-    @media (max-width: 768px) {
-      .booking-container {
-        flex-direction: column;
-      }
-      .booking-left {
-        padding: 20px;
-      }
-      .booking-right {
-        padding: 30px;
-      }
-    }
-  </style>
-  <div class="booking-container">
-    <div class="booking-left">
-      <img src="{{ asset('images/lab_project/Gambar 1_Jenis Tes.jpeg') }}" alt="Tes Laboratorium">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-primary-50 to-secondary-50 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-extrabold text-gray-900">Book Your Test</h1>
+            <p class="mt-2 text-gray-600">Review details, set your schedule, and choose payment</p>
+        </div>
     </div>
-    <div class="booking-right">
-      <h2>Formulir Pemesanan Tes</h2>
-      <form action="{{ route('booking.store') }}" method="POST">
-        @csrf
-        <label for="nama_depan">Nama Depan</label>
-        <input type="text" id="nama_depan" name="nama_depan" required>
 
-        <label for="nama_belakang">Nama Belakang</label>
-        <input type="text" id="nama_belakang" name="nama_belakang" required>
+    <!-- Booking Content -->
+    <div class="bg-white py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Details -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Order Detail -->
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="file-text" class="mr-2 text-green-600"></i> Order Details</h2>
+                        <a href="{{ route('labtest') }}" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500"><i data-feather="plus" class="mr-2"></i>Add Test</a>
+                    </div>
+                    <div class="mt-4 divide-y divide-gray-100" id="selected-tests">
+                        @if(session('selected_tests'))
+                            @foreach(session('selected_tests') as $test)
+                                <div class="py-4 flex items-center justify-between">
+                                    <div class="flex items-center">
+                                        <div class="flex-shrink-0 bg-primary-100 rounded-md p-3"><i data-feather="heart" class="h-5 w-5 text-primary-600"></i></div>
+                                        <div class="ml-4">
+                                            <p class="font-medium text-gray-900">{{ $test['nama_tes'] }}</p>
+                                            <p class="text-sm text-gray-500">{{ $test['deskripsi'] }}</p>
+                                        </div>
+                                    </div>
+                                    <p class="font-semibold text-gray-900">Rp{{ number_format($test['harga'], 0, ',', '.') }}</p>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="py-4 text-center text-gray-500">
+                                <p>No tests selected. <a href="{{ route('labtest') }}" class="text-primary-600 hover:text-primary-700">Browse tests</a></p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
 
-        <label for="telepon">Nomor Telepon</label>
-        <input type="tel" id="telepon" name="telepon" required>
+                <!-- Booking Form -->
+                <form id="booking-form" method="POST" action="{{ route('booking.store') }}" class="space-y-6">
+                    @csrf
+                    
+                    <!-- Patient Information -->
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="user" class="mr-2 text-green-600"></i> Patient Information</h2>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">First Name</label>
+                                <input type="text" name="nama_depan" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('nama_depan') }}">
+                                @error('nama_depan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Last Name</label>
+                                <input type="text" name="nama_belakang" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('nama_belakang') }}">
+                                @error('nama_belakang') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('email') }}">
+                                @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
+                                <input type="tel" name="no_hp" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('no_hp') }}">
+                                @error('no_hp') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    </div>
 
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
+                    <!-- Schedule -->
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="calendar" class="mr-2 text-green-600"></i> Set Schedule</h2>
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Date</label>
+                                <input type="date" name="tanggal_booking" required min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('tanggal_booking') }}">
+                                @error('tanggal_booking') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Time</label>
+                                <input type="time" name="waktu_booking" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('waktu_booking', '09:00') }}">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Branch</label>
+                                <select name="cabang_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <option value="">Select Branch</option>
+                                    @foreach($branches as $branch)
+                                        <option value="{{ $branch->cabang_id }}" {{ old('cabang_id') == $branch->cabang_id ? 'selected' : '' }}>{{ $branch->nama_cabang }}</option>
+                                    @endforeach
+                                </select>
+                                @error('cabang_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700">Visit Type</label>
+                                <select name="visit_type" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <option value="branch" {{ old('visit_type') == 'branch' ? 'selected' : '' }}>Visit Branch</option>
+                                    <option value="home" {{ old('visit_type') == 'home' ? 'selected' : '' }}>Home Collection</option>
+                                </select>
+                                @error('visit_type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                            </div>
+                        </div>
+                    </div>
 
-        <label for="tes">Pilih Jenis Tes</label>
-        <select id="tes" name="tes" required onchange="updateHarga()">
-          <option value="">-- Pilih Jenis Tes --</option>
-          @if($selectedTestType === 'darah')
-            <option value="75000|Tes Darah (Hemoglobin)" selected>Tes Darah (Hemoglobin)</option>
-            <option value="90000|Tes Darah (Golongan Darah)">Tes Darah (Golongan Darah)</option>
-            <option value="100000|Tes Darah (Agregasi Trombosit)">Tes Darah (Agregasi Trombosit)</option>
-          @elseif($selectedTestType === 'urine')
-            <option value="50000|Tes Urine" selected>Tes Urine</option>
-          @elseif($selectedTestType === 'kehamilan')
-            <option value="120000|Tes Kehamilan (Anti-Rubella lgG)" selected>Tes Kehamilan (Anti-Rubella lgG)</option>
-            <option value="120000|Tes Kehamilan (Anti-CMV lgG)">Tes Kehamilan (Anti-CMV lgG)</option>
-            <option value="120000|Tes Kehamilan (Anti-HSV1 lgG)">Tes Kehamilan (Anti-HSV1 lgG)</option>
-          @elseif($selectedTestType === 'gigi')
-            <option value="100000|Tes Rontgen Gigi (Dental I CR)" selected>Tes Rontgen Gigi (Dental I CR)</option>
-            <option value="150000|Tes Rontgen Gigi (Panoramic)">Tes Rontgen Gigi (Panoramic)</option>
-            <option value="200000|Tes Rontgen Gigi (Water's Foto)">Tes Rontgen Gigi (Water's Foto)</option>
-          @else
-            <option value="100000|Tes Rontgen Gigi (Dental I CR)">Tes Rontgen Gigi (Dental I CR)</option>
-            <option value="150000|Tes Rontgen Gigi (Panoramic)">Tes Rontgen Gigi (Panoramic)</option>
-            <option value="200000|Tes Rontgen Gigi (Water's Foto)">Tes Rontgen Gigi (Water's Foto)</option>
-            <option value="50000|Tes Urine">Tes Urine</option>
-            <option value="120000|Tes Kehamilan (Anti-Rubella lgG)">Tes Kehamilan (Anti-Rubella lgG)</option>
-            <option value="120000|Tes Kehamilan (Anti-CMV lgG)">Tes Kehamilan (Anti-CMV lgG)</option>
-            <option value="120000|Tes Kehamilan (Anti-HSV1 lgG)">Tes Kehamilan (Anti-HSV1 lgG)</option>
-            <option value="75000|Tes Darah (Hemoglobin)">Tes Darah (Hemoglobin)</option>
-            <option value="90000|Tes Darah (Golongan Darah)">Tes Darah (Golongan Darah)</option>
-            <option value="100000|Tes Darah (Agregasi Trombosit)">Tes Darah (Agregasi Trombosit)</option>
-          @endif
-        </select>
-        <div class="harga" id="hargaTes">Harga: -</div>
+                    <!-- Selected Tests -->
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-green-600"></i> Selected Tests</h2>
+                        <div class="mt-4 space-y-3">
+                            @foreach($tests as $test)
+                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                                    <input type="checkbox" name="tes_ids[]" value="{{ $test->tes_id }}" class="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+                                    <div class="ml-3 flex-1">
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $test->nama_tes }}</p>
+                                                <p class="text-sm text-gray-500">{{ $test->deskripsi }}</p>
+                                            </div>
+                                            <p class="font-semibold text-gray-900">Rp{{ number_format($test->harga, 0, ',', '.') }}</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                        @error('tes_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
 
-        <label for="cabang">Pilih Cabang</label>
-        <select id="cabang" name="cabang" required>
-          <option value="">-- Pilih Cabang --</option>
-          <option value="Cabang A">Cabang A</option>
-          <option value="Cabang B">Cabang B</option>
-          <option value="Cabang C">Cabang C</option>
-        </select>
+                    <!-- Payment Details -->
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="list" class="mr-2 text-green-600"></i> Payment Details</h2>
+                        <dl class="mt-4 space-y-2 text-sm text-gray-700" id="payment-summary">
+                            <div class="flex justify-between"><dt>Subtotal</dt><dd class="font-medium" id="subtotal">Rp0</dd></div>
+                            <div class="flex justify-between"><dt>Service Fee</dt><dd class="font-medium">Rp5.000</dd></div>
+                            <div class="flex justify-between border-t pt-2 text-base font-semibold text-gray-900"><dt>Total</dt><dd id="total">Rp5.000</dd></div>
+                        </dl>
+                    </div>
+                </form>
+            </div>
 
-        <label for="tanggal_booking">Pilih Tanggal Tes</label>
-        <input type="date" id="tanggal_booking" name="tanggal_booking" required>
-
-        <label for="sesi">Pilih Sesi Tes</label>
-        <select id="sesi" name="sesi" required>
-          <option value="">-- Pilih Sesi --</option>
-          <option value="1">Sesi 1: 09.00 - 10.00</option>
-          <option value="2">Sesi 2: 10.00 - 11.00</option>
-          <option value="3">Sesi 3: 11.00 - 12.00</option>
-          <option value="4">Sesi 4: 13.00 - 14.00</option>
-        </select>
-
-        <button type="submit">Pesan Tes</button>
-      </form>
+            <!-- Right: Payment Options -->
+            <div class="space-y-6">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="credit-card" class="mr-2 text-green-600"></i> Payment Options</h2>
+                    <div class="mt-4 space-y-3">
+                        <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <input name="payment_method" type="radio" value="card" class="h-4 w-4 text-primary-600">
+                                <span class="ml-3 text-sm text-gray-800">Credit/Debit Card</span>
+                            </div>
+                            <i data-feather="credit-card" class="text-gray-400"></i>
+                        </label>
+                        <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <input name="payment_method" type="radio" value="transfer" class="h-4 w-4 text-primary-600">
+                                <span class="ml-3 text-sm text-gray-800">Bank Transfer</span>
+                            </div>
+                            <i data-feather="repeat" class="text-gray-400"></i>
+                        </label>
+                        <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                            <div class="flex items-center">
+                                <input name="payment_method" type="radio" value="ewallet" class="h-4 w-4 text-primary-600">
+                                <span class="ml-3 text-sm text-gray-800">E-Wallet</span>
+                            </div>
+                            <i data-feather="smartphone" class="text-gray-400"></i>
+                        </label>
+                    </div>
+                    <button type="submit" form="booking-form" class="mt-6 w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                        <i data-feather="check-circle" class="mr-2"></i> Book Now
+                    </button>
+                </div>
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="info" class="mr-2 text-green-600"></i> Summary</h2>
+                    <p class="mt-2 text-sm text-gray-600">By proceeding, you agree to our terms and conditions. You will receive a confirmation email with your booking details.</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    function updateHarga() {
-      let tes = document.getElementById("tes");
-      let hargaTes = document.getElementById("hargaTes");
-      if (tes.value) {
-        let harga = tes.value.split("|")[0];
-        hargaTes.innerText = "Harga: Rp " + parseInt(harga).toLocaleString();
-      } else {
-        hargaTes.innerText = "Harga: -";
-      }
-    }
-  </script>
-@endsection
+    <!-- Footer -->
+    <footer class="bg-gray-50">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="mt-12 border-t border-gray-200 pt-8">
+                <p class="text-base text-gray-400 text-center">
+                    &copy; 2025 E-Clinic Lab. All rights reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        AOS.init();
+        feather.replace();
+
+        // Handle test selection and price calculation
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('input[name="tes_ids[]"]');
+            const subtotalElement = document.getElementById('subtotal');
+            const totalElement = document.getElementById('total');
+            
+            function updateTotal() {
+                let subtotal = 0;
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        const priceText = checkbox.closest('label').querySelector('.font-semibold').textContent;
+                        const price = parseInt(priceText.replace('Rp', '').replace(/\./g, ''));
+                        subtotal += price;
+                    }
+                });
+                
+                const serviceFee = 5000;
+                const total = subtotal + serviceFee;
+                
+                subtotalElement.textContent = 'Rp' + subtotal.toLocaleString('id-ID');
+                totalElement.textContent = 'Rp' + total.toLocaleString('id-ID');
+            }
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateTotal);
+            });
+            
+            // Initial calculation
+            updateTotal();
+        });
+    </script>
+</body>
+</html>
