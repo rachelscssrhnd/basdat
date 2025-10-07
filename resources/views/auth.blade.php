@@ -61,6 +61,9 @@
                 <!-- Login Form -->
                 <form id="login-form" method="POST" action="{{ route('login.submit') }}" class="space-y-4">
                     @csrf
+                    @if(session('success'))
+                        <div class="p-3 rounded-md bg-green-50 text-green-700 text-sm">{{ session('success') }}</div>
+                    @endif
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Username</label>
                         <input type="text" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Enter your username" value="{{ old('username') }}">
@@ -89,6 +92,9 @@
                 <!-- Register Form -->
                 <form id="register-form" method="POST" action="{{ route('register.submit') }}" class="space-y-4 hidden">
                     @csrf
+                    @if(session('success'))
+                        <div class="p-3 rounded-md bg-green-50 text-green-700 text-sm">{{ session('success') }}</div>
+                    @endif
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Username</label>
                         <input type="text" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Choose a username" value="{{ old('username') }}">
@@ -201,6 +207,25 @@
             @if(isset($mode) && $mode === 'register')
                 registerTab.click();
             @endif
+
+            // Simple popup for success messages
+            const msg = @json(session('success'));
+            if (msg) {
+                const popup = document.createElement('div');
+                popup.className = 'fixed inset-0 flex items-center justify-center z-50';
+                popup.innerHTML = `
+                    <div class="absolute inset-0 bg-black/30"></div>
+                    <div class="relative bg-white rounded-lg shadow-lg p-6 w-full max-w-sm">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Success</h3>
+                        <p class="text-sm text-gray-700">${msg}</p>
+                        <div class="mt-4 text-right">
+                            <button id="popup-close" class="px-4 py-2 rounded-md bg-green-600 text-white">OK</button>
+                        </div>
+                    </div>`;
+                document.body.appendChild(popup);
+                document.getElementById('popup-close').onclick = () => popup.remove();
+                setTimeout(() => popup.remove(), 2500);
+            }
         });
     </script>
 </body>

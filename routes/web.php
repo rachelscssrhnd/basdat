@@ -23,44 +23,55 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
 Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Lab test routes
-Route::get('/labtest', [LabTestController::class, 'index'])->name('labtest');
-Route::get('/labtest/search', [LabTestController::class, 'search'])->name('labtest.search');
-Route::get('/labtest/filter', [LabTestController::class, 'filter'])->name('labtest.filter');
+// Role-based dashboards
+Route::middleware('role:user')->group(function () {
+    Route::get('/user/home', [HomeController::class, 'index'])->name('user.home');
+});
 
-// Booking routes
-Route::get('/booking', [BookingController::class, 'index'])->name('booking');
-Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
-Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
-Route::put('/booking/{id}', [BookingController::class, 'update'])->name('booking.update');
+Route::middleware('role:admin')->group(function () {
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+});
 
-// My order routes
-Route::get('/myorder', [MyOrderController::class, 'index'])->name('myorder');
-Route::get('/myorder/{id}', [MyOrderController::class, 'show'])->name('myorder.show');
-Route::get('/myorder/search', [MyOrderController::class, 'search'])->name('myorder.search');
-Route::post('/myorder/{bookingId}/upload-proof', function(Request $request, $bookingId) {
-    $validated = $request->validate([
-        'proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120'
-    ]);
-    try {
-        $booking = \App\Models\Booking::with('pembayaran')->findOrFail($bookingId);
-        if (!$booking->pembayaran) {
-            abort(404);
-        }
-        $path = $request->file('proof')->store('payment_proofs', 'public');
-        $booking->pembayaran->update([
-            'bukti_path' => $path,
-            'status' => 'pending',
+// Lab test routes (require login)
+Route::middleware(['auth.session'])->group(function() {
+    Route::get('/labtest', [LabTestController::class, 'index'])->name('labtest');
+    Route::get('/labtest/search', [LabTestController::class, 'search'])->name('labtest.search');
+    Route::get('/labtest/filter', [LabTestController::class, 'filter'])->name('labtest.filter');
+
+    // Booking routes
+    Route::get('/booking', [BookingController::class, 'index'])->name('booking');
+    Route::post('/booking', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/booking/{id}', [BookingController::class, 'show'])->name('booking.show');
+    Route::put('/booking/{id}', [BookingController::class, 'update'])->name('booking.update');
+
+    // My order routes
+    Route::get('/myorder', [MyOrderController::class, 'index'])->name('myorder');
+    Route::get('/myorder/{id}', [MyOrderController::class, 'show'])->name('myorder.show');
+    Route::get('/myorder/search', [MyOrderController::class, 'search'])->name('myorder.search');
+    Route::post('/myorder/{bookingId}/upload-proof', function(Request $request, $bookingId) {
+        $validated = $request->validate([
+            'proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120'
         ]);
-        return back()->with('success', 'Payment proof uploaded. Awaiting verification.');
-    } catch (\Exception $e) {
-        return back()->withErrors(['error' => 'Failed to upload proof']);
-    }
-})->name('myorder.upload_proof');
+        try {
+            $booking = \App\Models\Booking::with('pembayaran')->findOrFail($bookingId);
+            if (!$booking->pembayaran) {
+                abort(404);
+            }
+            $path = $request->file('proof')->store('payment_proofs', 'public');
+            $booking->pembayaran->update([
+                'bukti_path' => $path,
+                'status' => 'pending',
+            ]);
+            return back()->with('success', 'Payment proof uploaded. Awaiting verification.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Failed to upload proof']);
+        }
+    })->name('myorder.upload_proof');
 
-// Result routes
-Route::get('/result', [ResultController::class, 'index'])->name('result');
-Route::get('/result/download/{transactionId}', [ResultController::class, 'download'])->name('result.download');
+    // Result routes
+    Route::get('/result', [ResultController::class, 'index'])->name('result');
+    Route::get('/result/download/{transactionId}', [ResultController::class, 'download'])->name('result.download');
+});
 
 // Branch routes
 Route::get('/branches', [BranchController::class, 'index'])->name('branches');
