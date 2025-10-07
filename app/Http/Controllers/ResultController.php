@@ -7,6 +7,7 @@ use App\Models\HasilTesHeader;
 use App\Models\HasilTesValue;
 use App\Models\Booking;
 use App\Models\ParameterTes;
+use Illuminate\Support\Facades\View;
 
 class ResultController extends Controller
 {
@@ -128,8 +129,14 @@ class ResultController extends Controller
                 ->where('booking_id', $booking->booking_id)
                 ->get();
 
-            // For now, just redirect to print view
-            return redirect()->route('result', ['transaction_id' => $transactionId, 'print' => '1']);
+            // Render HTML and convert to PDF using dompdf (barryvdh/laravel-dompdf)
+            $html = View::make('pdf.result', [
+                'booking' => $booking,
+                'hasilTes' => $hasilTes
+            ])->render();
+
+            $pdf = \PDF::loadHTML($html);
+            return $pdf->download('result-' . $transactionId . '.pdf');
         } catch (\Exception $e) {
             return redirect()->route('result')->withErrors(['error' => 'Failed to download result']);
         }

@@ -80,7 +80,7 @@ class BookingController extends Controller
                 'cabang_id' => $validated['cabang_id'],
                 'tanggal_booking' => $validated['tanggal_booking'],
                 'status_pembayaran' => 'pending',
-                'status_tes' => 'scheduled'
+                'status_tes' => 'pending_approval'
             ]);
 
             // Attach selected tests to booking
@@ -94,6 +94,12 @@ class BookingController extends Controller
                 'jumlah' => $totalHarga,
                 'status' => 'pending',
                 'tanggal_bayar' => now()
+            ]);
+
+            \App\Models\LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Created booking ID: ' . $booking->booking_id,
+                'created_at' => now(),
             ]);
 
             DB::commit();

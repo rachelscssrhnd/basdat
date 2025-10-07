@@ -52,10 +52,18 @@ Route::middleware('admin')->group(function () {
     Route::get('/admin/bookings', [AdminController::class, 'getBookings'])->name('admin.bookings');
     Route::put('/admin/bookings/{id}', [AdminController::class, 'updateBooking'])->name('admin.bookings.update');
     Route::delete('/admin/bookings/{id}', [AdminController::class, 'deleteBooking'])->name('admin.bookings.delete');
+    Route::post('/admin/bookings/{id}/approve', [AdminController::class, 'approveBooking'])->name('admin.bookings.approve');
+    Route::post('/admin/bookings/{id}/approve-payment', [AdminController::class, 'approvePayment'])->name('admin.bookings.approve_payment');
     
     // Admin test management
     Route::get('/admin/tests', [AdminController::class, 'getTests'])->name('admin.tests');
     Route::post('/admin/tests', [AdminController::class, 'createTest'])->name('admin.tests.create');
     Route::put('/admin/tests/{id}', [AdminController::class, 'updateTest'])->name('admin.tests.update');
     Route::delete('/admin/tests/{id}', [AdminController::class, 'deleteTest'])->name('admin.tests.delete');
+    
+    // Parameters management
+    Route::get('/admin/tests/{testId}/parameters', [AdminController::class, 'listParameters'])->name('admin.parameters.list');
+    Route::post('/admin/tests/{testId}/parameters', [AdminController::class, 'createParameter'])->name('admin.parameters.create');
+    Route::put('/admin/parameters/{paramId}', [AdminController::class, 'updateParameter'])->name('admin.parameters.update');
+    Route::delete('/admin/parameters/{paramId}', [AdminController::class, 'deleteParameter'])->name('admin.parameters.delete');
 });
