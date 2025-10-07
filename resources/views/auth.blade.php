@@ -132,24 +132,7 @@
                     </button>
                 </form>
 
-                <div class="mt-6">
-                    <div class="relative">
-                        <div class="absolute inset-0 flex items-center">
-                            <div class="w-full border-t border-gray-200"></div>
-                        </div>
-                        <div class="relative flex justify-center text-sm">
-                            <span class="px-2 bg-white text-gray-500">Or continue with</span>
-                        </div>
-                    </div>
-                    <div class="mt-6 grid grid-cols-2 gap-3">
-                        <button class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            <i data-feather="facebook" class="text-blue-600"></i>
-                        </button>
-                        <button class="inline-flex justify-center items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                            <i data-feather="mail" class="text-red-500"></i>
-                        </button>
-                    </div>
-                </div>
+                
             </div>
             <p class="mt-6 text-center text-sm text-gray-600">Don't have an account? <a href="#" class="text-primary-600 hover:text-primary-700 font-medium">Create one</a></p>
         </div>
@@ -162,41 +145,21 @@
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Services</h3>
                     <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Lab Tests</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Health Packages</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Home Collection</a></li>
+                        <li><a href="{{ route('labtest') }}" class="text-base text-gray-500 hover:text-primary-600">Lab Test</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Company</h3>
                     <ul class="mt-4 space-y-4">
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">About Us</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Careers</a></li>
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Legal</h3>
-                    <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Privacy</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Terms</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Cookie Policy</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Connect</h3>
                     <div class="mt-4 flex space-x-6">
                         <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="facebook"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
                             <i data-feather="instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="linkedin"></i>
                         </a>
                     </div>
                 </div>

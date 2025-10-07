@@ -33,9 +33,29 @@
                     </a>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
-                        <i data-feather="user" class="mr-2"></i> Sign In
-                    </a>
+                @if(session()->has('user_id'))
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-700">Welcome, {{ session('username') }}</span>
+                        <a href="{{ route('myorder') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i data-feather="shopping-bag" class="mr-1"></i> My Orders
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="text-white px-4 py-2 rounded-md text-sm font-medium bg-red-500 hover:bg-red-600">
+                                <i data-feather="log-out" class="mr-1"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('register') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i data-feather="user-plus" class="mr-1"></i> Sign Up
+                        </a>
+                        <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <i data-feather="user" class="mr-2"></i> Sign In
+                        </a>
+                    </div>
+                @endif
                 </div>
             </div>
         </div>
@@ -139,41 +159,21 @@
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Services</h3>
                     <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Lab Tests</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Health Packages</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Home Collection</a></li>
+                        <li><a href="{{ route('labtest') }}" class="text-base text-gray-500 hover:text-primary-600">Lab Test</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Company</h3>
                     <ul class="mt-4 space-y-4">
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">About Us</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Careers</a></li>
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Legal</h3>
-                    <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Privacy</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Terms</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Cookie Policy</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Connect</h3>
                     <div class="mt-4 flex space-x-6">
                         <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="facebook"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
                             <i data-feather="instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="linkedin"></i>
                         </a>
                     </div>
                 </div>

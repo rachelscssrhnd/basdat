@@ -17,9 +17,11 @@ class MyOrderController extends Controller
         $tab = $request->get('tab', 'current');
         
         try {
-            // For demo purposes, get all bookings
-            // In a real app, you'd filter by authenticated user
+            $userId = session('user_id');
             $allBookings = Booking::with(['pasien', 'cabang', 'jenisTes', 'pembayaran'])
+                ->whereHas('pasien', function($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })
                 ->orderBy('tanggal_booking', 'desc')
                 ->get();
                 

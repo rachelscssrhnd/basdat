@@ -62,6 +62,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Proof</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -80,8 +81,16 @@
                                             {{ strtoupper($booking->status_pembayaran) }}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        @if(optional($booking->pembayaran)->bukti_path)
+                                            <a href="{{ Storage::disk('public')->url($booking->pembayaran->bukti_path) }}" target="_blank" class="text-primary-600 hover:text-primary-700">View</a>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                        <button onclick="editBooking({{ $booking->booking_id }})" class="px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Edit</button>
+                                        <button onclick="verifyPayment({{ $booking->booking_id }})" class="px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700">Verify Payment</button>
+                                        <button onclick="editBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Edit</button>
                                         <button onclick="deleteBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
                                     </td>
                                 </tr>
@@ -255,6 +264,19 @@
                     alert('Failed to delete booking');
                 });
             }
+        }
+
+        function verifyPayment(id) {
+            fetch(`/admin/bookings/${id}/approve-payment`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.message || (data.success ? 'Payment verified' : 'Verification failed'));
+                if (data.success) location.reload();
+            })
+            .catch(() => alert('Verification failed'));
         }
 
         // Add test functionality

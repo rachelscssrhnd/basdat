@@ -49,76 +49,30 @@ class DatabaseSeeder extends Seeder
             'user_id' => $userId,
         ]);
 
-        // Jenis Tes
-        $tesHematologi = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Basic Health Panel',
-            'deskripsi' => '12 tests included - Complete blood count, basic metabolic panel',
-            'harga' => 89000,
-            'persiapan_khusus' => 'Fasting required for 8-12 hours',
-        ]);
-
-        $tesMetabolic = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Complete Metabolic Panel',
-            'deskripsi' => '20 tests included - Comprehensive metabolic assessment',
-            'harga' => 129000,
-            'persiapan_khusus' => 'Fasting required for 8-12 hours',
-        ]);
-
-        $tesImmunity = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Immunity Checkup',
-            'deskripsi' => '8 tests included - Immune system assessment',
-            'harga' => 75000,
-            'persiapan_khusus' => 'No special preparation required',
-        ]);
-
-        $tesCholesterol = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Cholesterol Panel',
-            'deskripsi' => '4 tests included - Complete cholesterol analysis',
-            'harga' => 45000,
-            'persiapan_khusus' => 'Fasting required for 12 hours',
-        ]);
-
-        $tesThyroid = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Thyroid Panel',
-            'deskripsi' => '3 tests included - Thyroid function assessment',
-            'harga' => 65000,
-            'persiapan_khusus' => 'No special preparation required',
-        ]);
-
-        $tesEnergy = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Energy & Vitality',
-            'deskripsi' => '6 tests included - Energy level assessment',
-            'harga' => 95000,
-            'persiapan_khusus' => 'Fasting required for 8 hours',
-        ]);
-
-        $tesVision = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Vision Health',
-            'deskripsi' => '5 tests included - Eye health assessment',
-            'harga' => 55000,
-            'persiapan_khusus' => 'No special preparation required',
-        ]);
-
-        $tesDiabetes = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Diabetes Monitoring',
-            'deskripsi' => '4 tests included - Blood sugar monitoring',
-            'harga' => 35000,
-            'persiapan_khusus' => 'Fasting required for 8 hours',
-        ]);
-
-        $tesLiver = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Liver Function Test',
-            'deskripsi' => '6 tests included - Liver health assessment',
-            'harga' => 85000,
-            'persiapan_khusus' => 'Fasting required for 8 hours',
-        ]);
-
-        $tesKidney = DB::table('jenis_tes')->insertGetId([
-            'nama_tes' => 'Kidney Function Test',
-            'deskripsi' => '5 tests included - Kidney health assessment',
-            'harga' => 75000,
-            'persiapan_khusus' => 'No special preparation required',
-        ]);
+        // Jenis Tes - replace with provided list
+        $providedTests = [
+            [100000, 'Tes Rontgen Gigi (Dental I CR)'],
+            [150000, 'Tes Rontgen Gigi (Panoramic)'],
+            [200000, "Tes Rontgen Gigi (Water's Foto)"],
+            [50000, 'Tes Urine'],
+            [120000, 'Tes Kehamilan (Anti-Rubella lgG)'],
+            [120000, 'Tes Kehamilan (Anti-CMV lgG)'],
+            [120000, 'Tes Kehamilan (Anti-HSV1 lgG)'],
+            [75000, 'Tes Darah (Hemoglobin)'],
+            [90000, 'Tes Darah (Golongan Darah)'],
+            [100000, 'Tes Darah (Agregasi Trombosit)'],
+        ];
+        $tesIds = [];
+        foreach ($providedTests as $pt) {
+            $tesIds[] = DB::table('jenis_tes')->insertGetId([
+                'nama_tes' => $pt[1],
+                'deskripsi' => 'Deskripsi ' . $pt[1],
+                'harga' => $pt[0],
+                'persiapan_khusus' => null,
+            ]);
+        }
+        $tesHematologi = $tesIds[7];
+        $tesMetabolic = $tesIds[0];
 
         // Parameter untuk tes di atas
         $paramHb = DB::table('parameter_tes')->insertGetId([

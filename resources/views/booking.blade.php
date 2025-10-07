@@ -33,9 +33,29 @@
                     </a>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
-                        <i data-feather="user" class="mr-2"></i> Sign In
-                    </a>
+                @if(session()->has('user_id'))
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-700">Welcome, {{ session('username') }}</span>
+                        <a href="{{ route('myorder') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i data-feather="shopping-bag" class="mr-1"></i> My Orders
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="text-white px-4 py-2 rounded-md text-sm font-medium bg-red-500 hover:bg-red-600">
+                                <i data-feather="log-out" class="mr-1"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('register') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i data-feather="user-plus" class="mr-1"></i> Sign Up
+                        </a>
+                        <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <i data-feather="user" class="mr-2"></i> Sign In
+                        </a>
+                    </div>
+                @endif
                 </div>
             </div>
         </div>
@@ -54,64 +74,12 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Left: Details -->
             <div class="lg:col-span-2 space-y-6">
-                <!-- Order Detail -->
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="file-text" class="mr-2 text-green-600"></i> Order Details</h2>
-                        <a href="{{ route('labtest') }}" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500"><i data-feather="plus" class="mr-2"></i>Add Test</a>
-                    </div>
-                    <div class="mt-4 divide-y divide-gray-100" id="selected-tests">
-                        @if(session('selected_tests'))
-                            @foreach(session('selected_tests') as $test)
-                                <div class="py-4 flex items-center justify-between">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 bg-primary-100 rounded-md p-3"><i data-feather="heart" class="h-5 w-5 text-primary-600"></i></div>
-                                        <div class="ml-4">
-                                            <p class="font-medium text-gray-900">{{ $test['nama_tes'] }}</p>
-                                            <p class="text-sm text-gray-500">{{ $test['deskripsi'] }}</p>
-                                        </div>
-                                    </div>
-                                    <p class="font-semibold text-gray-900">Rp{{ number_format($test['harga'], 0, ',', '.') }}</p>
-                                </div>
-                            @endforeach
-                        @else
-                            <div class="py-4 text-center text-gray-500">
-                                <p>No tests selected. <a href="{{ route('labtest') }}" class="text-primary-600 hover:text-primary-700">Browse tests</a></p>
-                            </div>
-                        @endif
-                    </div>
-                </div>
 
                 <!-- Booking Form -->
                 <form id="booking-form" method="POST" action="{{ route('booking.store') }}" class="space-y-6">
                     @csrf
                     
-                    <!-- Patient Information -->
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="user" class="mr-2 text-green-600"></i> Patient Information</h2>
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">First Name</label>
-                                <input type="text" name="nama_depan" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('nama_depan') }}">
-                                @error('nama_depan') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Last Name</label>
-                                <input type="text" name="nama_belakang" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('nama_belakang') }}">
-                                @error('nama_belakang') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Email</label>
-                                <input type="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('email') }}">
-                                @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Phone Number</label>
-                                <input type="tel" name="no_hp" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('no_hp') }}">
-                                @error('no_hp') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                        </div>
-                    </div>
+                    
 
                     <!-- Schedule -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
@@ -136,43 +104,38 @@
                                 </select>
                                 @error('cabang_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700">Visit Type</label>
-                                <select name="visit_type" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
-                                    <option value="branch" {{ old('visit_type') == 'branch' ? 'selected' : '' }}>Visit Branch</option>
-                                    <option value="home" {{ old('visit_type') == 'home' ? 'selected' : '' }}>Home Collection</option>
-                                </select>
-                                @error('visit_type') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                            </div>
+                            
                         </div>
                     </div>
 
-                    <!-- Selected Tests -->
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-green-600"></i> Selected Tests</h2>
-                        <div class="mt-4 space-y-3">
-                            @foreach($tests as $test)
-                                <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                                    <input type="checkbox" name="tes_ids[]" value="{{ $test->tes_id }}" class="h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
-                                    <div class="ml-3 flex-1">
-                                        <div class="flex justify-between items-center">
-                                            <div>
-                                                <p class="font-medium text-gray-900">{{ $test->nama_tes }}</p>
-                                                <p class="text-sm text-gray-500">{{ $test->deskripsi }}</p>
-                                            </div>
-                                            <p class="font-semibold text-gray-900">Rp{{ number_format($test->harga, 0, ',', '.') }}</p>
-                                        </div>
+                <!-- Test Details -->
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-green-600"></i> Test Details</h2>
+                    <div class="mt-4 space-y-3" id="test-details">
+                        @php($selected = isset($selectedTests) ? $selectedTests : collect())
+                        @if($selected->isNotEmpty())
+                            @foreach($selected as $test)
+                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                                    <div>
+                                        <p class="font-medium text-gray-900">{{ $test->nama_tes }}</p>
+                                        <p class="text-sm text-gray-500">{{ $test->deskripsi }}</p>
                                     </div>
-                                </label>
+                                    <p class="font-semibold text-gray-900">Rp{{ number_format($test->harga, 0, ',', '.') }}</p>
+                                </div>
+                                <input type="hidden" name="tes_ids[]" value="{{ $test->tes_id }}" data-price="{{ $test->harga }}">
                             @endforeach
-                        </div>
-                        @error('tes_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @else
+                            <p class="text-gray-500">No test selected. Please go back to <a href="{{ route('labtest') }}" class="text-primary-600 hover:text-primary-700">Lab Test</a> to choose a test.</p>
+                        @endif
                     </div>
+                    @error('tes_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                </div>
 
                     <!-- Payment Details -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                         <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="list" class="mr-2 text-green-600"></i> Payment Details</h2>
                         <dl class="mt-4 space-y-2 text-sm text-gray-700" id="payment-summary">
+                            <div class="flex justify-between"><dt>Selected Test(s)</dt><dd class="font-medium" id="selected-tests-list">-</dd></div>
                             <div class="flex justify-between"><dt>Subtotal</dt><dd class="font-medium" id="subtotal">Rp0</dd></div>
                             <div class="flex justify-between"><dt>Service Fee</dt><dd class="font-medium">Rp5.000</dd></div>
                             <div class="flex justify-between border-t pt-2 text-base font-semibold text-gray-900"><dt>Total</dt><dd id="total">Rp5.000</dd></div>
@@ -186,13 +149,6 @@
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                     <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="credit-card" class="mr-2 text-green-600"></i> Payment Options</h2>
                     <div class="mt-4 space-y-3">
-                        <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <div class="flex items-center">
-                                <input name="payment_method" type="radio" value="card" class="h-4 w-4 text-primary-600">
-                                <span class="ml-3 text-sm text-gray-800">Credit/Debit Card</span>
-                            </div>
-                            <i data-feather="credit-card" class="text-gray-400"></i>
-                        </label>
                         <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
                             <div class="flex items-center">
                                 <input name="payment_method" type="radio" value="transfer" class="h-4 w-4 text-primary-600">
@@ -212,10 +168,7 @@
                         <i data-feather="check-circle" class="mr-2"></i> Book Now
                     </button>
                 </div>
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="info" class="mr-2 text-green-600"></i> Summary</h2>
-                    <p class="mt-2 text-sm text-gray-600">By proceeding, you agree to our terms and conditions. You will receive a confirmation email with your booking details.</p>
-                </div>
+                
             </div>
         </div>
     </div>
@@ -237,19 +190,24 @@
 
         // Handle test selection and price calculation
         document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('input[name="tes_ids[]"]');
+            const hiddenTestInputs = document.querySelectorAll('input[name="tes_ids[]"][type="hidden"]');
             const subtotalElement = document.getElementById('subtotal');
             const totalElement = document.getElementById('total');
+            const selectedTestsList = document.getElementById('selected-tests-list');
             
             function updateTotal() {
                 let subtotal = 0;
-                checkboxes.forEach(checkbox => {
-                    if (checkbox.checked) {
-                        const priceText = checkbox.closest('label').querySelector('.font-semibold').textContent;
-                        const price = parseInt(priceText.replace('Rp', '').replace(/\./g, ''));
-                        subtotal += price;
+                const names = [];
+                hiddenTestInputs.forEach(inp => {
+                    const price = parseInt(inp.getAttribute('data-price')) || 0;
+                    subtotal += price;
+                    const row = inp.previousElementSibling;
+                    if (row) {
+                        const nameEl = row.querySelector('p.font-medium');
+                        if (nameEl) names.push(nameEl.textContent);
                     }
                 });
+                if (selectedTestsList) selectedTestsList.textContent = names.length ? names.join(', ') : '-';
                 
                 const serviceFee = 5000;
                 const total = subtotal + serviceFee;
@@ -258,12 +216,11 @@
                 totalElement.textContent = 'Rp' + total.toLocaleString('id-ID');
             }
             
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updateTotal);
-            });
-            
             // Initial calculation
             updateTotal();
+            @if(session('success'))
+                alert(@json(session('success')));
+            @endif
         });
     </script>
 </body>

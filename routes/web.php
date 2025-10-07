@@ -9,6 +9,8 @@ use App\Http\Controllers\MyOrderController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\BranchController;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -36,6 +38,25 @@ Route::put('/booking/{id}', [BookingController::class, 'update'])->name('booking
 Route::get('/myorder', [MyOrderController::class, 'index'])->name('myorder');
 Route::get('/myorder/{id}', [MyOrderController::class, 'show'])->name('myorder.show');
 Route::get('/myorder/search', [MyOrderController::class, 'search'])->name('myorder.search');
+Route::post('/myorder/{bookingId}/upload-proof', function(Request $request, $bookingId) {
+    $validated = $request->validate([
+        'proof' => 'required|file|mimes:jpg,jpeg,png,pdf|max:5120'
+    ]);
+    try {
+        $booking = \App\Models\Booking::with('pembayaran')->findOrFail($bookingId);
+        if (!$booking->pembayaran) {
+            abort(404);
+        }
+        $path = $request->file('proof')->store('payment_proofs', 'public');
+        $booking->pembayaran->update([
+            'bukti_path' => $path,
+            'status' => 'pending',
+        ]);
+        return back()->with('success', 'Payment proof uploaded. Awaiting verification.');
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => 'Failed to upload proof']);
+    }
+})->name('myorder.upload_proof');
 
 // Result routes
 Route::get('/result', [ResultController::class, 'index'])->name('result');

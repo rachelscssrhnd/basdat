@@ -16,16 +16,33 @@ class BookingController extends Controller
     /**
      * Display the booking form
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             // Get available lab tests
             $tests = JenisTes::all();
             
             // Get available branches
+            // Ensure branches include Cabang A/B/C as defaults
             $branches = Cabang::all();
-            
-            return view('booking', compact('tests', 'branches'));
+            if ($branches->isEmpty()) {
+                $branches = collect([
+                    (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A'],
+                    (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B'],
+                    (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C'],
+                ]);
+            }
+            // Preselected test via query param
+            $selectedTests = collect();
+            $testId = $request->get('test_id');
+            if ($testId) {
+                $pre = JenisTes::where('tes_id', $testId)->get();
+                if ($pre->isNotEmpty()) {
+                    $selectedTests = $pre;
+                }
+            }
+
+            return view('booking', compact('tests', 'branches', 'selectedTests'));
         } catch (\Exception $e) {
             // If database is not set up, return view with sample data
             $tests = collect([
@@ -49,30 +66,19 @@ class BookingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nama_depan' => 'required|string|max:255',
-            'nama_belakang' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'no_hp' => 'required|string|max:20',
             'tanggal_booking' => 'required|date|after:today',
-            'cabang_id' => 'required|exists:cabang,cabang_id',
+            'cabang_id' => 'required|integer',
             'tes_ids' => 'required|array',
             'tes_ids.*' => 'exists:jenis_tes,tes_id',
-            'visit_type' => 'required|in:branch,home'
+            'payment_method' => 'required|in:ewallet,transfer'
         ]);
 
         try {
             DB::beginTransaction();
 
-            // Create or find patient
-            $pasien = Pasien::firstOrCreate(
-                ['email' => $validated['email']],
-                [
-                    'nama' => $validated['nama_depan'] . ' ' . $validated['nama_belakang'],
-                    'no_hp' => $validated['no_hp'],
-                    'tgl_lahir' => now()->subYears(25), // Default age
-                    'user_id' => null // No user account for now
-                ]
-            );
+            // Use authenticated session user as patient
+            $userId = session('user_id');
+            $pasien = Pasien::where('user_id', $userId)->firstOrFail();
 
             // Create booking
             $booking = Booking::create([
@@ -90,7 +96,7 @@ class BookingController extends Controller
             $totalHarga = JenisTes::whereIn('tes_id', $validated['tes_ids'])->sum('harga');
             $pembayaran = Pembayaran::create([
                 'booking_id' => $booking->booking_id,
-                'metode_bayar' => 'pending',
+                'metode_bayar' => $validated['payment_method'],
                 'jumlah' => $totalHarga,
                 'status' => 'pending',
                 'tanggal_bayar' => now()
@@ -104,7 +110,7 @@ class BookingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('myorder')->with('success', 'Booking created successfully! Transaction ID: ' . $booking->booking_id);
+            return redirect()->route('myorder')->with('success', 'Booking successful! Transaction ID: ' . $booking->booking_id);
 
         } catch (\Exception $e) {
             DB::rollBack();

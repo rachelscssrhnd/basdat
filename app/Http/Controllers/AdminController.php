@@ -134,6 +134,23 @@ class AdminController extends Controller
     }
 
     /**
+     * Approve (verify) a payment for a booking
+     */
+    public function approvePayment($id)
+    {
+        try {
+            $booking = Booking::with('pembayaran')->findOrFail($id);
+            if (!$booking->pembayaran) {
+                return response()->json(['success' => false, 'message' => 'No payment found']);
+            }
+            $booking->pembayaran->update(['status' => 'verified']);
+            return response()->json(['success' => true, 'message' => 'Payment verified']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Verification failed']);
+        }
+    }
+
+    /**
      * Get lab tests for admin management
      */
     public function getTests()

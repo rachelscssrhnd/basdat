@@ -42,9 +42,29 @@
                     </a>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
-                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
-                        <i data-feather="user" class="mr-2"></i> Sign In
-                    </a>
+                @if(session()->has('user_id'))
+                    <div class="flex items-center space-x-4">
+                        <span class="text-gray-700">Welcome, {{ session('username') }}</span>
+                        <a href="{{ route('myorder') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i data-feather="shopping-bag" class="mr-1"></i> My Orders
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" class="inline">
+                            @csrf
+                            <button type="submit" class="text-white px-4 py-2 rounded-md text-sm font-medium bg-red-500 hover:bg-red-600">
+                                <i data-feather="log-out" class="mr-1"></i> Logout
+                            </button>
+                        </form>
+                    </div>
+                @else
+                    <div class="flex items-center space-x-2">
+                        <a href="{{ route('register') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
+                            <i data-feather="user-plus" class="mr-1"></i> Sign Up
+                        </a>
+                        <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <i data-feather="user" class="mr-2"></i> Sign In
+                        </a>
+                    </div>
+                @endif
                 </div>
             </div>
         </div>
@@ -111,7 +131,7 @@
                                 </div>
                                 <div class="ml-4">
                                     <h3 class="text-lg font-medium text-gray-900">{{ $test->nama_tes }}</h3>
-                                    <p class="mt-1 text-sm text-gray-500">{{ $test->deskripsi }}</p>
+                                    <p class="mt-1 text-sm text-gray-500">{{ $test->deskripsi ?? 'Deskripsi tidak tersedia.' }}</p>
                                 </div>
                             </div>
                             <div class="mt-6 flex items-baseline">
@@ -123,7 +143,7 @@
                                     </span>
                                 @endif
                             </div>
-                            <a href="{{ route('booking') }}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <a href="{{ route('booking', ['test_id' => $test->tes_id]) }}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
                                 Book Now
                             </a>
                         </div>
@@ -138,27 +158,7 @@
                 </div>
             </div>
 
-            <!-- Promotional Banner -->
-            <div class="mt-12">
-                <div class="promo-banner rounded-xl p-8 text-white">
-                    <div class="md:flex md:items-center md:justify-between">
-                        <div class="flex-1 min-w-0">
-                            <h2 class="text-2xl font-bold leading-7 sm:text-3xl sm:truncate">
-                                Summer Health Special
-                            </h2>
-                            <p class="mt-3 text-lg">
-                                Get 30% off on all comprehensive health packages this month!
-                            </p>
-                        </div>
-                        <div class="mt-4 flex md:mt-0 md:ml-4">
-                            <button class="ml-3 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-primary-700 bg-white hover:bg-gray-50">
-                                View All Promotions
-                                <i data-feather="arrow-right" class="ml-2"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            
 
         </div>
     </div>
@@ -170,41 +170,21 @@
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Services</h3>
                     <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Lab Tests</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Health Packages</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Home Collection</a></li>
+                        <li><a href="{{ route('labtest') }}" class="text-base text-gray-500 hover:text-primary-600">Lab Test</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Company</h3>
                     <ul class="mt-4 space-y-4">
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">About Us</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Careers</a></li>
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Legal</h3>
-                    <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Privacy</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Terms</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Cookie Policy</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Connect</h3>
                     <div class="mt-4 flex space-x-6">
                         <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="facebook"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
                             <i data-feather="instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="linkedin"></i>
                         </a>
                     </div>
                 </div>
@@ -316,7 +296,7 @@
                                         </span>
                                     ` : ''}
                                 </div>
-                                <a href="/booking" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                                <a href="/booking?test_id=${test.tes_id}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
                                     Book Now
                                 </a>
                             </div>

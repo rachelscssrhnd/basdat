@@ -15,7 +15,47 @@ class LabTestController extends Controller
     {
         try {
             // Get all available lab tests with their parameters
-            $tests = JenisTes::with('parameterTes')->get();
+            $allowed = [
+                'Tes Rontgen Gigi (Dental I CR)',
+                'Tes Rontgen Gigi (Panoramic)',
+                "Tes Rontgen Gigi (Water's Foto)",
+                'Tes Urine',
+                'Tes Kehamilan (Anti-Rubella lgG)',
+                'Tes Kehamilan (Anti-CMV lgG)',
+                'Tes Kehamilan (Anti-HSV1 lgG)',
+                'Tes Darah (Hemoglobin)',
+                'Tes Darah (Golongan Darah)',
+                'Tes Darah (Agregasi Trombosit)'
+            ];
+            $tests = JenisTes::with('parameterTes')
+                ->whereIn('nama_tes', $allowed)
+                ->orderBy('tes_id')
+                ->get();
+
+            // Fallback: if DB has none, build from catalog in-memory
+            if ($tests->isEmpty()) {
+                $catalog = [
+                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)'],
+                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)'],
+                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water's Foto)"],
+                    ['harga' => 50000,  'nama_tes' => 'Tes Urine'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)'],
+                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)'],
+                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
+                ];
+                $tests = collect(array_map(function($t) {
+                    return (object) [
+                        'tes_id' => 0,
+                        'nama_tes' => $t['nama_tes'],
+                        'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
+                        'harga' => $t['harga'],
+                        'parameter_tes' => collect(),
+                    ];
+                }, $catalog));
+            }
             
             return view('labtest', compact('tests'));
         } catch (\Exception $e) {
@@ -59,9 +99,49 @@ class LabTestController extends Controller
         $query = $request->get('q');
         
         try {
-            $tests = JenisTes::where('nama_tes', 'like', "%{$query}%")
+            $allowed = [
+                'Tes Rontgen Gigi (Dental I CR)',
+                'Tes Rontgen Gigi (Panoramic)',
+                "Tes Rontgen Gigi (Water's Foto)",
+                'Tes Urine',
+                'Tes Kehamilan (Anti-Rubella lgG)',
+                'Tes Kehamilan (Anti-CMV lgG)',
+                'Tes Kehamilan (Anti-HSV1 lgG)',
+                'Tes Darah (Hemoglobin)',
+                'Tes Darah (Golongan Darah)',
+                'Tes Darah (Agregasi Trombosit)'
+            ];
+            $tests = JenisTes::whereIn('nama_tes', $allowed)
+                ->where(function($q) use ($query) {
+                    $q->where('nama_tes', 'like', "%{$query}%")
                 ->orWhere('deskripsi', 'like', "%{$query}%")
+                ;})
+                ->orderBy('tes_id')
                 ->get();
+
+            if ($tests->isEmpty()) {
+                $catalog = [
+                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)'],
+                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)'],
+                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water's Foto)"],
+                    ['harga' => 50000,  'nama_tes' => 'Tes Urine'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)'],
+                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)'],
+                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
+                ];
+                $tests = collect(array_values(array_filter(array_map(function($t) use ($query) {
+                    if ($query && stripos($t['nama_tes'], $query) === false) return null;
+                    return [
+                        'tes_id' => 0,
+                        'nama_tes' => $t['nama_tes'],
+                        'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
+                        'harga' => $t['harga'],
+                    ];
+                }, $catalog))));
+            }
         } catch (\Exception $e) {
             $tests = collect();
         }

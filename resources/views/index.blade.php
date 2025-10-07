@@ -77,9 +77,6 @@
                     <a href="{{ route('myorder') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                         <i data-feather="shopping-bag" class="mr-2"></i> My Order
                     </a>
-                    <a href="{{ route('branches') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                        <i data-feather="map-pin" class="mr-2"></i> Branches
-                    </a>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
                 @if(session()->has('user_id'))
@@ -242,17 +239,10 @@
                 </p>
             </div>
             <div class="mt-12">
+                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
                 <div class="bg-gray-100 rounded-xl overflow-hidden shadow-lg">
-                    <div class="h-96 w-full bg-gradient-to-r from-primary-100 to-secondary-100 flex items-center justify-center">
-                        <div class="text-center">
-                            <i data-feather="map" class="h-16 w-16 mx-auto text-primary-600"></i>
-                            <h3 class="mt-4 text-lg font-medium text-gray-900">Interactive Map</h3>
-                            <p class="mt-2 text-gray-500">This would display an interactive map with clinic locations</p>
-                            <button class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">
-                                View All Locations
-                            </button>
-                        </div>
-                    </div>
+                    <div id="map" class="h-96 w-full"></div>
                 </div>
             </div>
         </div>
@@ -315,6 +305,27 @@
     <script>
         AOS.init();
         feather.replace();
+        document.addEventListener('DOMContentLoaded', function() {
+            var mapEl = document.getElementById('map');
+            if (mapEl && typeof L !== 'undefined') {
+                const map = L.map('map').setView([-6.200000, 106.816666], 11);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '&copy; OpenStreetMap'
+                }).addTo(map);
+
+                const branches = [
+                    { name: 'Cabang A', lat: -6.193, lng: 106.821, address: 'Jl. Sudirman No. 123', phone: '+62 21 1234 5678' },
+                    { name: 'Cabang B', lat: -6.260, lng: 106.781, address: 'Jl. Pondok Indah No. 456', phone: '+62 21 2345 6789' },
+                    { name: 'Cabang C', lat: -6.142, lng: 106.905, address: 'Jl. Kelapa Gading No. 789', phone: '+62 21 3456 7890' },
+                ];
+
+                branches.forEach(function(b) {
+                    L.marker([b.lat, b.lng]).addTo(map)
+                        .bindPopup('<strong>' + b.name + '</strong><br/>' + b.address + '<br/>' + b.phone);
+                });
+            }
+        });
     </script>
 </body>
 </html>

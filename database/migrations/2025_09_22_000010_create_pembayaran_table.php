@@ -14,6 +14,7 @@ return new class extends Migration
             $table->decimal('jumlah', 12, 2)->default(0);
             $table->string('metode_bayar')->nullable();
             $table->string('status')->default('pending');
+            $table->string('bukti_path')->nullable();
             $table->date('tanggal_bayar')->nullable();
 
             $table->foreign('booking_id')->references('booking_id')->on('booking')->cascadeOnDelete();

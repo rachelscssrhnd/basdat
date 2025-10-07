@@ -29,10 +29,20 @@ class ResultController extends Controller
                     return view('result', ['result' => null, 'error' => 'Transaction not found']);
                 }
 
+                // Enforce: only show results if payment verified and results exist
+                $isVerified = optional($booking->pembayaran)->status === 'verified';
+                if (!$isVerified) {
+                    return view('result', ['result' => ['status' => 'pending', 'message' => 'Payment pending verification.'], 'error' => null]);
+                }
+
                 // Get test results for this booking
                 $hasilTes = HasilTesHeader::with(['detailHasil.parameter'])
                     ->where('booking_id', $booking->booking_id)
                     ->get();
+
+                if ($hasilTes->isEmpty()) {
+                    return view('result', ['result' => ['status' => 'pending', 'message' => 'Results not available yet.'], 'error' => null]);
+                }
 
                 $result = [
                     'patient_name' => $booking->pasien->nama,

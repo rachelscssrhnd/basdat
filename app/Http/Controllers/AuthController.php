@@ -50,7 +50,7 @@ class AuthController extends Controller
             ]);
 
             // Redirect based on role
-            if ($user->role->nama_role === 'admin') {
+            if (in_array($user->role->nama_role, ['admin', 'staff'])) {
                 return redirect()->route('admin.dashboard');
             } else {
                 return redirect()->route('home');
@@ -96,14 +96,8 @@ class AuthController extends Controller
                 'tgl_lahir' => $validated['tgl_lahir'],
             ]);
 
-            // Set session
-            session([
-                'user_id' => $user->user_id,
-                'username' => $user->username,
-                'role' => 'user',
-            ]);
-
-            return redirect()->route('home')->with('success', 'Registration successful! Welcome to E-Clinic Lab.');
+            // After registration, redirect to sign-in with success message
+            return redirect()->route('auth')->with('success', 'Registration successful! Please sign in.');
 
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Registration failed. Please try again.'])->withInput();
