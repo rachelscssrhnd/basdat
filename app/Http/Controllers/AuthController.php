@@ -59,8 +59,8 @@ class AuthController extends Controller
             session([
                 'user_id' => $user->user_id,
                 'username' => $user->username,
-                'role' => $user->role->role_name ?? 'user',
-                'role_name' => strtolower($user->role->role_name ?? 'user'),
+                'role' => $user->role->nama_role ?? 'user',
+                'role_name' => strtolower($user->role->nama_role ?? 'user'),
             ]);
 
             // Redirect based on role
@@ -70,7 +70,7 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
 
-            if (strtolower($user->role->role_name) === 'admin') {
+            if (strtolower($user->role->nama_role) === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
             }
             return redirect()->route('user.home')->with('success', 'Login successful!');
@@ -134,7 +134,8 @@ class AuthController extends Controller
 
         } catch (\Exception $e) {
             \DB::rollBack();
-            return back()->with('error', 'Registrasi gagal. Periksa kembali data Anda.')->withInput();
+            \Log::error('Registration failed', ['error' => $e->getMessage()]);
+            return back()->with('error', $e->getMessage() ?: 'Registrasi gagal. Periksa kembali data Anda.')->withInput();
         }
     }
 

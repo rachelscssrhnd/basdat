@@ -137,46 +137,14 @@
                         <i data-feather="user-plus" class="mr-2"></i> Create Account
                     </button>
                 </form>
-
-                
             </div>
-            <p class="mt-6 text-center text-sm text-gray-600">Don't have an account? <a href="#" class="text-primary-600 hover:text-primary-700 font-medium">Create one</a></p>
+            <p id="cta-to-register" class="mt-6 text-center text-sm text-gray-600">Don't have an account? <a href="#" id="go-to-register" class="text-primary-600 hover:text-primary-700 font-medium">Sign up</a></p>
+            <p id="cta-to-login" class="mt-2 text-center text-sm text-gray-600 hidden">Have an account? <a href="#" id="go-to-login" class="text-primary-600 hover:text-primary-700 font-medium">Log in</a></p>
         </div>
+        
+    </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-50">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Services</h3>
-                    <ul class="mt-4 space-y-4">
-                        <li><a href="{{ route('labtest') }}" class="text-base text-gray-500 hover:text-primary-600">Lab Test</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Company</h3>
-                    <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">About Us</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Connect</h3>
-                    <div class="mt-4 flex space-x-6">
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="instagram"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-12 border-t border-gray-200 pt-8">
-                <p class="text-base text-gray-400 text-center">
-                    &copy; 2025 E-Clinic Lab. All rights reserved.
-                </p>
-            </div>
-        </div>
-    </footer>
 
     <script>
         AOS.init();
@@ -194,6 +162,8 @@
                 registerTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-gray-700 bg-gray-100 rounded-r-md hover:bg-gray-200';
                 loginForm.classList.remove('hidden');
                 registerForm.classList.add('hidden');
+                document.getElementById('cta-to-register').classList.remove('hidden');
+                document.getElementById('cta-to-login').classList.add('hidden');
             });
 
             registerTab.addEventListener('click', function() {
@@ -201,6 +171,8 @@
                 loginTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-gray-700 bg-gray-100 rounded-l-md hover:bg-gray-200';
                 registerForm.classList.remove('hidden');
                 loginForm.classList.add('hidden');
+                document.getElementById('cta-to-register').classList.add('hidden');
+                document.getElementById('cta-to-login').classList.remove('hidden');
             });
 
             // Show register form if mode is register
@@ -226,7 +198,15 @@
                 document.getElementById('popup-close').onclick = () => popup.remove();
                 setTimeout(() => popup.remove(), 2500);
             }
+
+            // Switch to login when clicking link under signup
+            const goLogin = document.getElementById('go-to-login');
+            if (goLogin) goLogin.addEventListener('click', e => { e.preventDefault(); loginTab.click(); });
+            const goRegister = document.getElementById('go-to-register');
+            if (goRegister) goRegister.addEventListener('click', e => { e.preventDefault(); registerTab.click(); });
         });
     </script>
 </body>
 </html>
+
+

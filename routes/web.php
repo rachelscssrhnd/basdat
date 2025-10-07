@@ -75,6 +75,7 @@ Route::middleware(['auth.session'])->group(function() {
 
 // Branch routes
 Route::get('/branches', [BranchController::class, 'index'])->name('branches');
+Route::get('/api/branches', [BranchController::class, 'api'])->name('branches.api');
 
 // Admin routes
 Route::middleware('admin')->group(function () {

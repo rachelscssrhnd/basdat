@@ -74,4 +74,26 @@ class BranchController extends Controller
             return view('branches', compact('branches'));
         }
     }
+
+    /**
+     * Return branches as JSON for map consumption on home page
+     */
+    public function api()
+    {
+        try {
+            $branches = Cabang::all()->map(function ($b) {
+                return [
+                    'cabang_id' => $b->cabang_id ?? null,
+                    'nama_cabang' => $b->nama_cabang ?? ($b->nama ?? null),
+                    'alamat' => $b->alamat ?? null,
+                    'no_telepon' => $b->no_telepon ?? null,
+                    'latitude' => $b->latitude ?? null,
+                    'longitude' => $b->longitude ?? null,
+                ];
+            });
+            return response()->json($branches);
+        } catch (\Exception $e) {
+            return response()->json([]);
+        }
+    }
 }

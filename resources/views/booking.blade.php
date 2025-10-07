@@ -48,9 +48,9 @@
                     </div>
                 @else
                     <div class="flex items-center space-x-2">
-                        <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
-                            <i data-feather="user" class="mr-2"></i> Sign In
-                        </a>
+                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                        <i data-feather="user" class="mr-2"></i> Sign In
+                    </a>
                     </div>
                 @endif
                 </div>
@@ -106,27 +106,27 @@
                     </div>
 
                 <!-- Test Details -->
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                     <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-green-600"></i> Test Details</h2>
                     <div class="mt-4 space-y-3" id="test-details">
                         @php($selected = isset($selectedTests) ? $selectedTests : collect())
                         @if($selected->isNotEmpty())
                             @foreach($selected as $test)
                                 <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                                    <div>
-                                        <p class="font-medium text-gray-900">{{ $test->nama_tes }}</p>
-                                        <p class="text-sm text-gray-500">{{ $test->deskripsi }}</p>
-                                    </div>
-                                    <p class="font-semibold text-gray-900">Rp{{ number_format($test->harga, 0, ',', '.') }}</p>
-                                </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">{{ $test->nama_tes }}</p>
+                                                <p class="text-sm text-gray-500">{{ $test->deskripsi }}</p>
+                                            </div>
+                                            <p class="font-semibold text-gray-900">Rp{{ number_format($test->harga, 0, ',', '.') }}</p>
+                                        </div>
                                 <input type="hidden" name="tes_ids[]" value="{{ $test->tes_id }}" data-price="{{ $test->harga }}">
                             @endforeach
                         @else
                             <p class="text-gray-500">No test selected. Please go back to <a href="{{ route('labtest') }}" class="text-primary-600 hover:text-primary-700">Lab Test</a> to choose a test.</p>
                         @endif
+                        </div>
+                        @error('tes_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                     </div>
-                    @error('tes_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
 
                     <!-- Payment Details -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
@@ -197,7 +197,7 @@
                 const names = [];
                 hiddenTestInputs.forEach(inp => {
                     const price = parseInt(inp.getAttribute('data-price')) || 0;
-                    subtotal += price;
+                        subtotal += price;
                     const row = inp.previousElementSibling;
                     if (row) {
                         const nameEl = row.querySelector('p.font-medium');

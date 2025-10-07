@@ -236,10 +236,28 @@
                 </p>
             </div>
             <div class="mt-12">
-                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
                 <div class="bg-gray-100 rounded-xl overflow-hidden shadow-lg">
-                    <div id="map" class="h-96 w-full"></div>
+                    <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-1 space-y-3">
+                            <div class="p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-gray-50" onclick="changeMap('cabangA')">
+                                <h3 class="text-sm font-semibold text-gray-900">Cabang Klinik A</h3>
+                                <p class="text-xs text-gray-600">Jl. Prof. DR. Moestopo No.47, Pacar Kembang, Kec. Tambaksari, Surabaya, Jawa Timur 60132</p>
+                            </div>
+                            <div class="p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-gray-50" onclick="changeMap('cabangB')">
+                                <h3 class="text-sm font-semibold text-gray-900">Cabang Klinik B</h3>
+                                <p class="text-xs text-gray-600">Jl. Airlangga No.4 - 6, Airlangga, Kec. Gubeng, Surabaya, Jawa Timur 60115</p>
+                            </div>
+                            <div class="p-3 bg-white rounded-lg shadow cursor-pointer hover:bg-gray-50" onclick="changeMap('cabangC')">
+                                <h3 class="text-sm font-semibold text-gray-900">Cabang Klinik C</h3>
+                                <p class="text-xs text-gray-600">Jl. Dr. Ir. H. Soekarno, Mulyorejo, Kec. Mulyorejo, Surabaya, Jawa Timur 60115</p>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2">
+                            <iframe id="mapFrame" class="w-full h-96 border-0"
+                                src="https://www.google.com/maps?q=Kampus+A+UNAIR,+Jl.+Prof.+DR.+Moestopo+No.47,+Surabaya&output=embed"
+                                allowfullscreen loading="lazy"></iframe>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -282,27 +300,67 @@
     <script>
         AOS.init();
         feather.replace();
-        document.addEventListener('DOMContentLoaded', function() {
+        let gMap, gInfo, gGeocoder;
+        function initMap() {
             var mapEl = document.getElementById('map');
-            if (mapEl && typeof L !== 'undefined') {
-                const map = L.map('map').setView([-6.200000, 106.816666], 11);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '&copy; OpenStreetMap'
-                }).addTo(map);
+            if (!mapEl) return;
+            gMap = new google.maps.Map(mapEl, { center: { lat: -6.2, lng: 106.8167 }, zoom: 11 });
+            gGeocoder = new google.maps.Geocoder();
+            gInfo = new google.maps.InfoWindow();
+            const cache = {};
 
-                const branches = [
-                    { name: 'Cabang A', lat: -6.193, lng: 106.821, address: 'Jl. Sudirman No. 123', phone: '+62 21 1234 5678' },
-                    { name: 'Cabang B', lat: -6.260, lng: 106.781, address: 'Jl. Pondok Indah No. 456', phone: '+62 21 2345 6789' },
-                    { name: 'Cabang C', lat: -6.142, lng: 106.905, address: 'Jl. Kelapa Gading No. 789', phone: '+62 21 3456 7890' },
-                ];
-
-                branches.forEach(function(b) {
-                    L.marker([b.lat, b.lng]).addTo(map)
-                        .bindPopup('<strong>' + b.name + '</strong><br/>' + b.address + '<br/>' + b.phone);
+            function geocode(address) {
+                if (!address) return Promise.resolve(null);
+                if (cache[address]) return Promise.resolve(cache[address]);
+                return new Promise((resolve) => {
+                    gGeocoder.geocode({ address, componentRestrictions: { country: 'ID' } }, (results, status) => {
+                        if (status === 'OK' && results[0]) {
+                            cache[address] = {
+                                location: results[0].geometry.location,
+                                formatted: results[0].formatted_address
+                            };
+                            resolve(cache[address]);
+                        } else { resolve(null); }
+                    });
                 });
             }
-        });
+
+            fetch('/api/branches')
+                .then(r => r.json())
+                .then(async (branches) => {
+                    if (!Array.isArray(branches) || branches.length === 0) return;
+                    const bounds = new google.maps.LatLngBounds();
+                    for (const b of branches) {
+                        const title = b.nama_cabang || 'Cabang';
+                        const address = b.alamat || title;
+                        const geo = await geocode(address);
+                        if (geo) {
+                            const marker = new google.maps.Marker({ position: geo.location, map: gMap, title });
+                            marker.addListener('click', () => {
+                                const shownAddr = geo.formatted || b.alamat || '';
+                                gInfo.setContent('<strong>' + title + '</strong><br/>' + shownAddr + '<br/>' + (b.no_telepon || ''));
+                                gInfo.open(gMap, marker);
+                            });
+                            bounds.extend(geo.location);
+                        }
+                    }
+                    if (!bounds.isEmpty()) gMap.fitBounds(bounds);
+                })
+                .catch(() => {});
+        }
+
+        function changeMap(branch) {
+            var mapFrame = document.getElementById('mapFrame');
+            if (!mapFrame) return;
+            if (branch === 'cabangA') {
+                mapFrame.src = 'https://www.google.com/maps?q=Kampus+A+UNAIR,+Jl.+Prof.+DR.+Moestopo+No.47,+Surabaya&output=embed';
+            } else if (branch === 'cabangB') {
+                mapFrame.src = 'https://www.google.com/maps?q=Jl.+Airlangga+No.4-6,+Surabaya&output=embed';
+            } else if (branch === 'cabangC') {
+                mapFrame.src = 'https://www.google.com/maps?q=Jl.+Dr.+Ir.+H.+Soekarno,+Mulyorejo,+Surabaya&output=embed';
+            }
+        }
     </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ env('GOOGLE_MAPS_API_KEY') }}&callback=initMap" async defer></script>
 </body>
 </html>
