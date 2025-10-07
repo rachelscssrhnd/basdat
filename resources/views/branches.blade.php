@@ -56,9 +56,6 @@
                         </div>
                     @else
                         <div class="flex items-center space-x-2">
-                            <a href="{{ route('register') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                                <i data-feather="user-plus" class="mr-1"></i> Sign Up
-                            </a>
                             <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
                                 <i data-feather="user" class="mr-2"></i> Sign In
                             </a>
