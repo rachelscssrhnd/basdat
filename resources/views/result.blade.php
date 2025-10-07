@@ -17,8 +17,8 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <i data-feather="activity" class="h-8 w-8 text-primary-600"></i>
-                        <span class="ml-2 text-2xl font-bold text-primary-700">E-Clinic Lab</span>
+                        <i data-feather="activity" class="h-8 w-8 text-green-600"></i>
+                        <span class="ml-2 text-2xl font-bold text-green-700">E-Clinic Lab</span>
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -66,12 +66,14 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-extrabold text-gray-900 flex items-center"><i data-feather="clipboard" class="mr-3 text-green-600"></i> Test Result Summary</h1>
         @if(isset($result) && $result)
-            <p class="mt-2 text-gray-600">Patient: {{ $result['patient_name'] }} · Transaction ID: {{ $result['transaction_id'] }}</p>
-            @if(isset($result['booking_date']))
-                <p class="mt-1 text-sm text-gray-500">Booking Date: {{ \Carbon\Carbon::parse($result['booking_date'])->format('d M Y') }}</p>
+            @php($txnId = data_get($result, 'booking_id'))
+            @php($tanggalTes = data_get($result, 'tanggal_tes'))
+            @if($txnId)
+                <p class="mt-2 text-gray-600">Booking ID: {{ $txnId }}</p>
             @endif
-        @else
-            <p class="mt-2 text-gray-600">Patient: John Doe · Transaction ID: LTNW0033250923000005</p>
+            @if($tanggalTes)
+                <p class="mt-1 text-sm text-gray-500">Tanggal Tes: {{ \Carbon\Carbon::parse($tanggalTes)->format('d M Y') }}</p>
+            @endif
         @endif
         </div>
     </div>
@@ -93,12 +95,14 @@
                             Status: Processing
                         </div>
                     </div>
-                @elseif(isset($result['tests']) && count($result['tests']) > 0)
-                    @foreach($result['tests'] as $test)
+                @elseif(data_get($result, 'tests') && count(data_get($result, 'tests')) > 0)
+                    @foreach(data_get($result, 'tests') as $test)
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
                     <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900">{{ $test['name'] }}</h2>
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ $test['status'] }}</span>
+                        <h2 class="text-lg font-semibold text-gray-900">{{ data_get($test, 'name') }}</h2>
+                        <a href="{{ route('result.download', data_get($result,'transaction_id')) }}" class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium text-white bg-primary-600 hover:bg-primary-700">
+                            <i data-feather="download" class="mr-1"></i> Download
+                        </a>
                     </div>
                     <div class="p-6">
                         <div class="overflow-x-auto">
@@ -112,16 +116,16 @@
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-100">
-                                    @foreach($test['parameters'] as $parameter)
+                                    @foreach(data_get($test, 'parameters', []) as $parameter)
                                     <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $parameter['name'] }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $parameter['value'] }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $parameter['range'] }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ data_get($parameter, 'name') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ data_get($parameter, 'value') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ data_get($parameter, 'range') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm 
-                                            @if($parameter['flag'] == 'Normal') text-green-700
-                                            @elseif($parameter['flag'] == 'Slightly High') text-yellow-700
+                                            @if(data_get($parameter, 'flag') == 'Normal') text-green-700
+                                            @elseif(data_get($parameter, 'flag') == 'Slightly High') text-yellow-700
                                             @else text-red-700
-                                            @endif">{{ $parameter['flag'] }}</td>
+                                            @endif">{{ data_get($parameter, 'flag') }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -130,53 +134,7 @@
                     </div>
                 </div>
                 @endforeach
-            @else
-            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-gray-900">Basic Health Panel</h2>
-                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Completed</span>
-                </div>
-                <div class="p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parameter</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference Range</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flag</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-100">
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Hemoglobin</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">14.1 g/dL</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">13.5 - 17.5</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Normal</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">WBC</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">6.8 ×10^3/µL</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">4.0 - 11.0</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700">Normal</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Fasting Glucose</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">112 mg/dL</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">70 - 99</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-yellow-700">Slightly High</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Cholesterol (Total)</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">185 mg/dL</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">125 - 200</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700">Normal</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            @endif
             @endif
                     <div class="mt-6 flex items-center justify-between">
                         <a href="{{ route('labtest') }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">

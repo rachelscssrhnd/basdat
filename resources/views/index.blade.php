@@ -63,8 +63,8 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <i data-feather="activity" class="h-8 w-8 text-primary-600"></i>
-                        <span class="ml-2 text-2xl font-bold text-primary-700">E-Clinic Lab</span>
+                        <i data-feather="activity" class="h-8 w-8 text-green-600"></i>
+                        <span class="ml-2 text-2xl font-bold text-green-700">E-Clinic Lab</span>
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -72,7 +72,7 @@
                         <i data-feather="home" class="mr-2"></i> Home
                     </a>
                     <a href="{{ route('labtest') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
-                        <i data-feather="activity" class="mr-2"></i> Lab Test
+                        <i data-feather="flask" class="mr-2"></i> Lab Test
                     </a>
                     <a href="{{ route('myorder') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                         <i data-feather="shopping-bag" class="mr-2"></i> My Order
@@ -251,45 +251,25 @@
     <!-- Footer -->
     <footer class="bg-gray-50">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-8">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Services</h3>
                     <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Lab Tests</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Health Packages</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Home Collection</a></li>
+                        <li><a href="{{ route('labtest') }}" class="text-base text-gray-500 hover:text-primary-600">Lab Test</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Company</h3>
                     <ul class="mt-4 space-y-4">
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">About Us</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Careers</a></li>
                         <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Contact</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Legal</h3>
-                    <ul class="mt-4 space-y-4">
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Privacy</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Terms</a></li>
-                        <li><a href="#" class="text-base text-gray-500 hover:text-primary-600">Cookie Policy</a></li>
                     </ul>
                 </div>
                 <div>
                     <h3 class="text-sm font-semibold text-gray-500 tracking-wider uppercase">Connect</h3>
                     <div class="mt-4 flex space-x-6">
                         <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="facebook"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
                             <i data-feather="instagram"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="twitter"></i>
-                        </a>
-                        <a href="#" class="text-gray-400 hover:text-primary-600">
-                            <i data-feather="linkedin"></i>
                         </a>
                     </div>
                 </div>

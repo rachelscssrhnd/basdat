@@ -26,8 +26,8 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <i data-feather="activity" class="h-8 w-8 text-primary-600"></i>
-                        <span class="ml-2 text-2xl font-bold text-primary-700">E-Clinic Lab</span>
+                        <i data-feather="activity" class="h-8 w-8 text-green-600"></i>
+                        <span class="ml-2 text-2xl font-bold text-green-700">E-Clinic Lab</span>
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">

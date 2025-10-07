@@ -32,89 +32,58 @@ class ResultController extends Controller
                 // Enforce: only show results if payment verified and results exist
                 $isVerified = optional($booking->pembayaran)->status === 'verified';
                 if (!$isVerified) {
-                    return view('result', ['result' => ['status' => 'pending', 'message' => 'Payment pending verification.'], 'error' => null]);
+                    return view('result', ['result' => ['tests' => []], 'error' => null]);
                 }
 
-                // Get test results for this booking
-                $hasilTes = HasilTesHeader::with(['detailHasil.parameter'])
+                // Load all headers and their values for this booking
+                $headers = HasilTesHeader::with(['detailHasil.parameter'])
                     ->where('booking_id', $booking->booking_id)
                     ->get();
 
-                if ($hasilTes->isEmpty()) {
-                    return view('result', ['result' => ['status' => 'pending', 'message' => 'Results not available yet.'], 'error' => null]);
+                // Flatten values and group by their parameter's tes_id to derive jenis tes grouping
+                $allValues = collect();
+                foreach ($headers as $h) {
+                    foreach ($h->detailHasil as $v) {
+                        $allValues->push($v);
+                    }
                 }
 
-                $result = [
-                    'patient_name' => $booking->pasien->nama,
-                    'transaction_id' => $transactionId,
-                    'booking_date' => $booking->tanggal_booking,
-                    'tests' => $hasilTes->map(function($header) {
+                // Build tests array grouped by jenis tes
+                $tests = [];
+                $jenisTes = $booking->jenisTes ?? collect();
+                foreach ($jenisTes as $jt) {
+                    $params = $allValues->filter(function($v) use ($jt) {
+                        return optional($v->parameter)->tes_id === $jt->tes_id;
+                    })->map(function($v) {
                         return [
-                            'name' => 'Test Results',
-                            'status' => 'Completed',
-                            'parameters' => $header->detailHasil->map(function($value) {
-                                return [
-                                    'name' => $value->parameter->nama_parameter ?? 'Unknown Parameter',
-                                    'value' => $value->nilai_hasil,
-                                    'range' => $value->parameter->satuan ?? 'N/A',
-                                    'flag' => 'Normal'
-                                ];
-                            })
+                            'name' => optional($v->parameter)->nama_parameter,
+                            'value' => $v->nilai_hasil,
                         ];
-                    })
+                    })->values();
+                    $tests[] = [
+                        'name' => $jt->nama_tes,
+                        'parameters' => $params,
+                    ];
+                }
+
+                // Use first header date if available
+                $tanggalTes = optional($headers->first())->tanggal_input ?? optional($headers->first())->tanggal_tes;
+
+                $result = [
+                    'transaction_id' => $transactionId,
+                    'booking_id' => $booking->booking_id,
+                    'tanggal_tes' => $tanggalTes,
+                    'tests' => $tests,
                 ];
             } else {
-                // Show sample result if no transaction ID provided
-                $result = [
-                    'patient_name' => 'John Doe',
-                    'transaction_id' => 'LTNW0033250923000005',
-                    'booking_date' => '2025-09-23',
-                    'status' => 'completed',
-                    'tests' => collect([
-                        (object) [
-                            'name' => 'Basic Health Panel',
-                            'status' => 'Completed',
-                            'parameters' => collect([
-                                (object) ['name' => 'Hemoglobin', 'value' => '14.1 g/dL', 'range' => '13.5 - 17.5', 'flag' => 'Normal'],
-                                (object) ['name' => 'WBC', 'value' => '6.8 ×10^3/µL', 'range' => '4.0 - 11.0', 'flag' => 'Normal'],
-                                (object) ['name' => 'Fasting Glucose', 'value' => '112 mg/dL', 'range' => '70 - 99', 'flag' => 'Slightly High'],
-                                (object) ['name' => 'Cholesterol (Total)', 'value' => '185 mg/dL', 'range' => '125 - 200', 'flag' => 'Normal']
-                            ])
-                        ],
-                        (object) [
-                            'name' => 'Complete Metabolic Panel',
-                            'status' => 'Completed',
-                            'parameters' => collect([
-                                (object) ['name' => 'Sodium', 'value' => '140 mEq/L', 'range' => '136 - 145', 'flag' => 'Normal'],
-                                (object) ['name' => 'Potassium', 'value' => '4.2 mEq/L', 'range' => '3.5 - 5.0', 'flag' => 'Normal'],
-                                (object) ['name' => 'Chloride', 'value' => '102 mEq/L', 'range' => '98 - 107', 'flag' => 'Normal'],
-                                (object) ['name' => 'BUN', 'value' => '18 mg/dL', 'range' => '7 - 20', 'flag' => 'Normal']
-                            ])
-                        ]
-                    ])
-                ];
+                // No transaction provided → render empty cards
+                $result = ['tests' => []];
             }
 
             return view('result', compact('result'));
         } catch (\Exception $e) {
-            // If database is not set up, return view with sample data
-            $result = [
-                'patient_name' => 'John Doe',
-                'transaction_id' => 'LTNW0033250923000005',
-                'booking_date' => '2025-09-23',
-                'tests' => collect([
-                    (object) [
-                        'name' => 'Basic Health Panel',
-                        'status' => 'Completed',
-                        'parameters' => collect([
-                            (object) ['name' => 'Hemoglobin', 'value' => '14.1 g/dL', 'range' => '13.5 - 17.5', 'flag' => 'Normal'],
-                            (object) ['name' => 'WBC', 'value' => '6.8 ×10^3/µL', 'range' => '4.0 - 11.0', 'flag' => 'Normal'],
-                            (object) ['name' => 'Fasting Glucose', 'value' => '112 mg/dL', 'range' => '70 - 99', 'flag' => 'Slightly High'],
-                            (object) ['name' => 'Cholesterol (Total)', 'value' => '185 mg/dL', 'range' => '125 - 200', 'flag' => 'Normal']
-                        ])
-                    ]
-                ])
-            ];
+            // On exception, render empty cards rather than sample data
+            $result = ['tests' => []];
 
             return view('result', compact('result'));
         }
