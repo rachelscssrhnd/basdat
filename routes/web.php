@@ -34,9 +34,6 @@ Route::get('/labtest', [LabTestController::class, 'index'])->name('labtest');
 Route::get('/labtest/search', [LabTestController::class, 'search'])->name('labtest.search');
 Route::get('/labtest/filter', [LabTestController::class, 'filter'])->name('labtest.filter');
 
-// Direct booking route
-Route::get('/book-now', [BookingController::class, 'directBook'])->name('book.now');
-
 // Booking routes (protected - requires login)
 Route::middleware('auth.session')->group(function () {
     Route::get('/booking', [BookingController::class, 'index'])->name('booking');

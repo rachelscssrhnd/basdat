@@ -93,77 +93,6 @@ class BookingController extends Controller
     }
 
     /**
-     * Direct booking from lab test page
-     */
-    public function directBook(Request $request)
-    {
-        // Check if user is logged in
-        if (!session()->has('user_id')) {
-            return redirect()->route('auth')->withErrors(['error' => 'Please login to book a test.']);
-        }
-
-        $testId = $request->get('test_id');
-        if (!$testId) {
-            return redirect()->route('labtest')->withErrors(['error' => 'Test ID is required.']);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            // Use authenticated session user as patient
-            $userId = session('user_id');
-            $pasien = Pasien::where('user_id', $userId)->firstOrFail();
-
-            // Get test details
-            $test = JenisTes::findOrFail($testId);
-
-            // Create booking with default values
-            $booking = Booking::create([
-                'pasien_id' => $pasien->pasien_id,
-                'tanggal_booking' => Carbon::tomorrow()->format('Y-m-d'),
-                'sesi' => 1, // Default session
-                'cabang_id' => 1, // Default branch
-                'status_tes' => 'scheduled',
-                'status_pembayaran' => 'pending'
-            ]);
-
-            // Attach test to booking
-            $booking->jenisTes()->attach([$testId]);
-
-            // Create payment record
-            $totalHarga = $test->harga;
-            $serviceFee = 5000;
-            $totalAmount = $totalHarga + $serviceFee;
-
-            $pembayaran = Pembayaran::create([
-                'booking_id' => $booking->booking_id,
-                'metode_bayar' => 'transfer', // Default payment method
-                'jumlah' => $totalAmount,
-                'status' => 'pending',
-                'tanggal_bayar' => now()
-            ]);
-
-            // Log activity
-            \App\Models\LogActivity::create([
-                'user_id' => session('user_id'),
-                'action' => 'Direct booking created ID: ' . $booking->booking_id . ' for test: ' . $test->nama_tes,
-                'created_at' => now(),
-            ]);
-
-            DB::commit();
-
-            // Redirect directly to payment page
-            return redirect()->route('payment', ['booking_id' => $booking->booking_id])
-                ->with('success', 'Booking berhasil! Silakan lakukan pembayaran.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            \Log::error('Direct booking creation failed', ['error' => $e->getMessage(), 'user_id' => session('user_id')]);
-            return redirect()->route('labtest')->withErrors(['error' => 'Gagal membuat booking: ' . $e->getMessage()]);
-        }
-    }
-
-    /**
      * Store a new booking
      */
     public function store(Request $request)
@@ -248,7 +177,7 @@ class BookingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Booking creation failed', ['error' => $e->getMessage(), 'user_id' => session('user_id')]);
+            \Log::error('Booking creation failed', ['error' => $e->getMessage(), 'user_id' => session('user_id'), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => 'Gagal membuat booking: ' . $e->getMessage()])->withInput();
         }
     }
