@@ -73,25 +73,7 @@ class AdminController extends Controller
         }
     }
 
-    /**
-     * Get bookings for admin management
-     */
-    public function getBookings()
-    {
-        try {
-            $bookings = Booking::with(['pasien', 'cabang', 'jenisTes', 'pembayaran'])
-                ->orderBy('tanggal_booking', 'desc')
-                ->get();
-
-            return response()->json($bookings);
-        } catch (\Exception $e) {
-            return response()->json([]);
-        }
-    }
-
-    /**
-     * Update booking status
-     */
+  
     public function updateBooking(Request $request, $id)
     {
         $validated = $request->validate([
