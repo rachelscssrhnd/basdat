@@ -29,21 +29,6 @@ Route::middleware('role:user')->group(function () {
     Route::get('/user/home', [HomeController::class, 'index'])->name('user.home');
 });
 
-Route::middleware('role:admin')->group(function () {
-    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
-    
-    // Admin booking management
-    Route::get('/admin/bookings', [AdminController::class, 'getBookings'])->name('admin.bookings');
-    Route::post('/admin/bookings/{id}/approve', [AdminController::class, 'approveBooking'])->name('admin.bookings.approve');
-    Route::post('/admin/bookings/{id}/reject', [AdminController::class, 'rejectBooking'])->name('admin.bookings.reject');
-    
-    // Admin payment management
-    Route::get('/admin/payments', [AdminController::class, 'getPayments'])->name('admin.payments');
-    Route::get('/admin/payments/{id}/proof', [AdminController::class, 'viewPaymentProof'])->name('admin.payments.proof');
-    Route::post('/admin/payments/{id}/confirm', [AdminController::class, 'confirmPayment'])->name('admin.payments.confirm');
-    Route::post('/admin/payments/{id}/reject', [AdminController::class, 'rejectPayment'])->name('admin.payments.reject');
-});
-
 // Lab test routes (temporarily public for demo)
 Route::get('/labtest', [LabTestController::class, 'index'])->name('labtest');
 Route::get('/labtest/search', [LabTestController::class, 'search'])->name('labtest.search');
@@ -96,13 +81,21 @@ Route::get('/api/branches', [BranchController::class, 'api'])->name('branches.ap
 // Admin routes
 Route::middleware('admin')->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     
     // Admin booking management
     Route::get('/admin/bookings', [AdminController::class, 'getBookings'])->name('admin.bookings');
     Route::put('/admin/bookings/{id}', [AdminController::class, 'updateBooking'])->name('admin.bookings.update');
     Route::delete('/admin/bookings/{id}', [AdminController::class, 'deleteBooking'])->name('admin.bookings.delete');
     Route::post('/admin/bookings/{id}/approve', [AdminController::class, 'approveBooking'])->name('admin.bookings.approve');
+    Route::post('/admin/bookings/{id}/reject', [AdminController::class, 'rejectBooking'])->name('admin.bookings.reject');
     Route::post('/admin/bookings/{id}/approve-payment', [AdminController::class, 'approvePayment'])->name('admin.bookings.approve_payment');
+    
+    // Admin payment management
+    Route::get('/admin/payments', [AdminController::class, 'getPayments'])->name('admin.payments');
+    Route::get('/admin/payments/{id}/proof', [AdminController::class, 'viewPaymentProof'])->name('admin.payments.proof');
+    Route::post('/admin/payments/{id}/confirm', [AdminController::class, 'confirmPayment'])->name('admin.payments.confirm');
+    Route::post('/admin/payments/{id}/reject', [AdminController::class, 'rejectPayment'])->name('admin.payments.reject');
     
     // Admin test management
     Route::get('/admin/tests', [AdminController::class, 'getTests'])->name('admin.tests');

@@ -10,9 +10,14 @@ class EnsureAdmin
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (session('role') !== 'admin') {
-            return redirect()->route('dashboard');
+        if (!session()->has('user_id')) {
+            return redirect()->route('auth')->withErrors(['error' => 'Please login to continue.']);
         }
+        
+        if (session('role') !== 'admin') {
+            return redirect()->route('home')->withErrors(['error' => 'Unauthorized. Admin access required.']);
+        }
+        
         return $next($request);
     }
 }
