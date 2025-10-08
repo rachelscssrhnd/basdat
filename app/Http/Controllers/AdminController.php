@@ -122,14 +122,31 @@ class AdminController extends Controller
     public function approvePayment($id)
     {
         try {
+            DB::beginTransaction();
+            
             $booking = Booking::with('pembayaran')->findOrFail($id);
             if (!$booking->pembayaran) {
                 return response()->json(['success' => false, 'message' => 'No payment found']);
             }
+            
+            // Update payment status
             $booking->pembayaran->update(['status' => 'verified']);
-            return response()->json(['success' => true, 'message' => 'Payment verified']);
+            
+            // Update booking payment status
+            $booking->update(['status_pembayaran' => 'paid']);
+            
+            // Log activity
+            \App\Models\LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Payment verified for booking ID: ' . $booking->booking_id,
+                'created_at' => now(),
+            ]);
+            
+            DB::commit();
+            return response()->json(['success' => true, 'message' => 'Payment verified successfully']);
         } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Verification failed']);
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Verification failed: ' . $e->getMessage()]);
         }
     }
 
@@ -143,6 +160,19 @@ class AdminController extends Controller
             return response()->json($tests);
         } catch (\Exception $e) {
             return response()->json([]);
+        }
+    }
+
+    /**
+     * Get single test for editing
+     */
+    public function getTest($id)
+    {
+        try {
+            $test = JenisTes::findOrFail($id);
+            return response()->json(['success' => true, 'data' => $test]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Test not found']);
         }
     }
 

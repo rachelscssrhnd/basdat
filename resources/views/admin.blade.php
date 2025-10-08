@@ -89,7 +89,10 @@
                                         @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                        <button onclick="verifyPayment({{ $booking->booking_id }})" class="px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700">Verify Payment</button>
+                                        @if($booking->pembayaran && $booking->pembayaran->bukti_pembayaran)
+                                            <button onclick="viewPaymentProof({{ $booking->pembayaran->pembayaran_id }})" class="px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700">View Proof</button>
+                                        @endif
+                                        <button onclick="verifyPayment({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700">Verify Payment</button>
                                         <button onclick="editBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Edit</button>
                                         <button onclick="deleteBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
                                     </td>
@@ -208,10 +211,68 @@
             el('modal-submit').onclick = (e) => { e.preventDefault(); onSubmit(); };
         }
 
+        function closeModal() {
+            el('modal').classList.add('hidden');
+        }
+
         // Test CRUD functions
         function editTest(id) {
-            // Implementation for editing test
-            console.log('Edit test:', id);
+            // Fetch test data first
+            fetch(`/admin/tests/${id}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    const test = data.data;
+                    openModal('Edit Test', `
+                        <input id="t-name" class="w-full px-3 py-2 border rounded-md" placeholder="Test Name" value="${test.nama_tes}" required />
+                        <textarea id="t-description" class="w-full px-3 py-2 border rounded-md" placeholder="Description">${test.deskripsi || ''}</textarea>
+                        <input id="t-price" class="w-full px-3 py-2 border rounded-md" placeholder="Price" type="number" value="${test.harga}" required />
+                        <textarea id="t-preparation" class="w-full px-3 py-2 border rounded-md" placeholder="Special Preparation">${test.persiapan_khusus || ''}</textarea>
+                        <div class="flex gap-2">
+                            <button onclick="updateTest(${id})" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Update Test</button>
+                            <button onclick="closeModal()" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancel</button>
+                        </div>
+                    `);
+                } else {
+                    alert('Failed to load test data');
+                }
+            })
+            .catch(() => alert('Failed to load test data'));
+        }
+
+        function updateTest(id) {
+            const name = el('t-name').value;
+            const description = el('t-description').value;
+            const price = el('t-price').value;
+            const preparation = el('t-preparation').value;
+
+            if (!name || !price) {
+                alert('Name and price are required');
+                return;
+            }
+
+            fetch(`/admin/tests/${id}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
+                },
+                body: JSON.stringify({
+                    nama_tes: name,
+                    deskripsi: description,
+                    harga: price,
+                    persiapan_khusus: preparation
+                })
+            })
+            .then(r => r.json())
+            .then(data => {
+                alert(data.message || (data.success ? 'Test updated' : 'Update failed'));
+                if (data.success) {
+                    closeModal();
+                    loadTests();
+                }
+            })
+            .catch(() => alert('Update failed'));
         }
 
         function deleteTest(id) {
@@ -264,6 +325,20 @@
                     alert('Failed to delete booking');
                 });
             }
+        }
+
+        function viewPaymentProof(id) {
+            fetch(`/admin/payments/${id}/proof`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.success && data.data.proof_url) {
+                    // Open payment proof in new window
+                    window.open(data.data.proof_url, '_blank');
+                } else {
+                    alert('Payment proof not found');
+                }
+            })
+            .catch(() => alert('Failed to load payment proof'));
         }
 
         function verifyPayment(id) {

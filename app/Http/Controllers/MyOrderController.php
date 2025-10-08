@@ -33,7 +33,7 @@ class MyOrderController extends Controller
                 });
             } else {
                 $bookings = $allBookings->filter(function($booking) {
-                    return $booking->status_pembayaran === 'pending' || 
+                    return in_array($booking->status_pembayaran, ['pending', 'waiting_confirmation']) || 
                            $booking->status_tes === 'scheduled';
                 });
             }

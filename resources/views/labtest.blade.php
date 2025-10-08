@@ -140,7 +140,7 @@
                                     </span>
                                 @endif
                             </div>
-                            <a href="{{ route('booking', ['test_id' => $test->tes_id]) }}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <a href="{{ route('book.now', ['test_id' => $test->tes_id]) }}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
                                 Book Now
                             </a>
                         </div>

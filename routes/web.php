@@ -34,6 +34,9 @@ Route::get('/labtest', [LabTestController::class, 'index'])->name('labtest');
 Route::get('/labtest/search', [LabTestController::class, 'search'])->name('labtest.search');
 Route::get('/labtest/filter', [LabTestController::class, 'filter'])->name('labtest.filter');
 
+// Direct booking route
+Route::get('/book-now', [BookingController::class, 'directBook'])->name('book.now');
+
 // Booking routes (protected - requires login)
 Route::middleware('auth.session')->group(function () {
     Route::get('/booking', [BookingController::class, 'index'])->name('booking');
@@ -99,6 +102,7 @@ Route::middleware('role:admin')->group(function () {
     
     // Admin test management
     Route::get('/admin/tests', [AdminController::class, 'getTests'])->name('admin.tests');
+    Route::get('/admin/tests/{id}', [AdminController::class, 'getTest'])->name('admin.tests.show');
     Route::post('/admin/tests', [AdminController::class, 'createTest'])->name('admin.tests.create');
     Route::put('/admin/tests/{id}', [AdminController::class, 'updateTest'])->name('admin.tests.update');
     Route::delete('/admin/tests/{id}', [AdminController::class, 'deleteTest'])->name('admin.tests.delete');

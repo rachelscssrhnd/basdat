@@ -67,12 +67,12 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Username</label>
                         <input type="text" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Enter your username" value="{{ old('username') }}">
-                        @error('username') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('username')) <span class="text-red-500 text-sm">{{ $errors->first('username') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Password</label>
                         <input type="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="••••••••">
-                        @error('password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('password')) <span class="text-red-500 text-sm">{{ $errors->first('password') }}</span> @endif
                     </div>
                     <div class="flex items-center justify-between">
                         <label class="flex items-center text-sm text-gray-600">
@@ -98,37 +98,37 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Username</label>
                         <input type="text" name="username" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Choose a username" value="{{ old('username') }}">
-                        @error('username') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('username')) <span class="text-red-500 text-sm">{{ $errors->first('username') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Full Name</label>
                         <input type="text" name="nama" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Enter your full name" value="{{ old('nama') }}">
-                        @error('nama') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('nama')) <span class="text-red-500 text-sm">{{ $errors->first('nama') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Email</label>
                         <input type="email" name="email" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="you@example.com" value="{{ old('email') }}">
-                        @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('email')) <span class="text-red-500 text-sm">{{ $errors->first('email') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Phone Number</label>
                         <input type="tel" name="no_hp" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="08123456789" value="{{ old('no_hp') }}">
-                        @error('no_hp') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('no_hp')) <span class="text-red-500 text-sm">{{ $errors->first('no_hp') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Date of Birth</label>
                         <input type="date" name="tgl_lahir" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('tgl_lahir') }}">
-                        @error('tgl_lahir') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('tgl_lahir')) <span class="text-red-500 text-sm">{{ $errors->first('tgl_lahir') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Password</label>
                         <input type="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="••••••••">
-                        @error('password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('password')) <span class="text-red-500 text-sm">{{ $errors->first('password') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
                         <input type="password" name="password_confirmation" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="••••••••">
-                        @error('password_confirmation') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('password_confirmation')) <span class="text-red-500 text-sm">{{ $errors->first('password_confirmation') }}</span> @endif
                     </div>
                     @if(session('error'))
                         <div class="text-red-500 text-sm">{{ session('error') }}</div>
