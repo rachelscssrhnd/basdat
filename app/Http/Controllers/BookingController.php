@@ -167,7 +167,7 @@ class BookingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Booking creation failed', ['error' => $e->getMessage(), 'user_id' => session('user_id')]);
+            \Log::error('Booking creation failed', ['error' => $e->getMessage(), 'user_id' => session('user_id'), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => 'Gagal membuat booking: ' . $e->getMessage()])->withInput();
         }
     }

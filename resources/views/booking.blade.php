@@ -76,7 +76,26 @@
                 <form id="booking-form" method="POST" action="{{ route('booking.store') }}" class="space-y-6">
                     @csrf
                     
-                    
+                    <!-- Error Messages -->
+                    @if($errors->any())
+                        <div class="bg-red-50 border border-red-200 rounded-md p-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <i data-feather="alert-circle" class="h-5 w-5 text-red-400"></i>
+                                </div>
+                                <div class="ml-3">
+                                    <h3 class="text-sm font-medium text-red-800">Please fix the following errors:</h3>
+                                    <div class="mt-2 text-sm text-red-700">
+                                        <ul class="list-disc list-inside space-y-1">
+                                            @foreach($errors->all() as $error)
+                                                <li>{{ $error }}</li>
+                                            @endforeach
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Schedule -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
@@ -150,34 +169,57 @@
                             <div class="flex justify-between border-t pt-2 text-base font-semibold text-gray-900"><dt>Total</dt><dd id="total">Rp5.000</dd></div>
                         </dl>
                     </div>
+
+                    <!-- Payment Options -->
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="credit-card" class="mr-2 text-green-600"></i> Payment Options</h2>
+                        <div class="mt-4 space-y-3">
+                            <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <div class="flex items-center">
+                                    <input name="payment_method" type="radio" value="transfer" class="h-4 w-4 text-primary-600" {{ old('payment_method') == 'transfer' ? 'checked' : '' }}>
+                                    <span class="ml-3 text-sm text-gray-800">Bank Transfer</span>
+                                </div>
+                                <i data-feather="repeat" class="text-gray-400"></i>
+                            </label>
+                            <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                <div class="flex items-center">
+                                    <input name="payment_method" type="radio" value="ewallet" class="h-4 w-4 text-primary-600" {{ old('payment_method') == 'ewallet' ? 'checked' : '' }}>
+                                    <span class="ml-3 text-sm text-gray-800">E-Wallet</span>
+                                </div>
+                                <i data-feather="smartphone" class="text-gray-400"></i>
+                            </label>
+                        </div>
+                        @error('payment_method') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <i data-feather="check-circle" class="mr-2"></i> Book Now
+                        </button>
+                    </div>
                 </form>
             </div>
 
-            <!-- Right: Payment Options -->
+            <!-- Right: Additional Info -->
             <div class="space-y-6">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="credit-card" class="mr-2 text-green-600"></i> Payment Options</h2>
-                    <div class="mt-4 space-y-3">
-                        <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <div class="flex items-center">
-                                <input name="payment_method" type="radio" value="transfer" class="h-4 w-4 text-primary-600">
-                                <span class="ml-3 text-sm text-gray-800">Bank Transfer</span>
-                            </div>
-                            <i data-feather="repeat" class="text-gray-400"></i>
-                        </label>
-                        <label class="flex items-center justify-between p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
-                            <div class="flex items-center">
-                                <input name="payment_method" type="radio" value="ewallet" class="h-4 w-4 text-primary-600">
-                                <span class="ml-3 text-sm text-gray-800">E-Wallet</span>
-                            </div>
-                            <i data-feather="smartphone" class="text-gray-400"></i>
-                        </label>
+                    <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="info" class="mr-2 text-green-600"></i> Booking Information</h2>
+                    <div class="mt-4 space-y-3 text-sm text-gray-600">
+                        <div class="flex items-start">
+                            <i data-feather="clock" class="h-4 w-4 mr-2 mt-0.5 text-green-500"></i>
+                            <span>Booking will be processed within 24 hours</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i data-feather="shield" class="h-4 w-4 mr-2 mt-0.5 text-green-500"></i>
+                            <span>Your data is secure and encrypted</span>
+                        </div>
+                        <div class="flex items-start">
+                            <i data-feather="phone" class="h-4 w-4 mr-2 mt-0.5 text-green-500"></i>
+                            <span>We'll notify you via SMS/Email</span>
+                        </div>
                     </div>
-                    <button type="submit" form="booking-form" class="mt-6 w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
-                        <i data-feather="check-circle" class="mr-2"></i> Book Now
-                    </button>
                 </div>
-                
             </div>
         </div>
     </div>
