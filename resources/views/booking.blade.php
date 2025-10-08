@@ -90,7 +90,7 @@
                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
                                        value="{{ old('tanggal_booking') }}">
                                 <p class="text-xs text-gray-500 mt-1">Minimal H+1, maksimal 30 hari ke depan</p>
-                                @error('tanggal_booking') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @if(isset($errors) && $errors->has('tanggal_booking')) <span class="text-red-500 text-sm">{{ $errors->first('tanggal_booking') }}</span> @endif
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Session</label>
@@ -102,7 +102,7 @@
                                         @endforeach
                                     @endif
                                 </select>
-                                @error('sesi') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @if(isset($errors) && $errors->has('sesi')) <span class="text-red-500 text-sm">{{ $errors->first('sesi') }}</span> @endif
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Branch</label>
@@ -112,7 +112,7 @@
                                         <option value="{{ $branch->cabang_id }}" {{ old('cabang_id') == $branch->cabang_id ? 'selected' : '' }}>{{ $branch->nama_cabang }}</option>
                                     @endforeach
                                 </select>
-                                @error('cabang_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                                @if(isset($errors) && $errors->has('cabang_id')) <span class="text-red-500 text-sm">{{ $errors->first('cabang_id') }}</span> @endif
                             </div>
                         </div>
                     </div>
@@ -137,7 +137,7 @@
                             <p class="text-gray-500">No test selected. Please go back to <a href="{{ route('labtest') }}" class="text-primary-600 hover:text-primary-700">Lab Test</a> to choose a test.</p>
                         @endif
                         </div>
-                        @error('tes_ids') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        @if(isset($errors) && $errors->has('tes_ids')) <span class="text-red-500 text-sm">{{ $errors->first('tes_ids') }}</span> @endif
                     </div>
 
                     <!-- Payment Details -->

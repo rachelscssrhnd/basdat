@@ -17,8 +17,14 @@ class SampleDataSeeder extends Seeder
     public function run(): void
     {
         // Create roles
-        $adminRole = Role::firstOrCreate(['nama_role' => 'admin']);
-        $userRole = Role::firstOrCreate(['nama_role' => 'user']);
+        $adminRole = Role::firstOrCreate(
+            ['slug' => 'admin'],
+            ['name' => 'Administrator']
+        );
+        $userRole = Role::firstOrCreate(
+            ['slug' => 'pasien'],
+            ['name' => 'Pasien']
+        );
 
         // Create admin user
         User::firstOrCreate(

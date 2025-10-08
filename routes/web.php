@@ -25,7 +25,7 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.su
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Role-based dashboards
-Route::middleware('role:user')->group(function () {
+Route::middleware('role:pasien')->group(function () {
     Route::get('/user/home', [HomeController::class, 'index'])->name('user.home');
 });
 
@@ -79,7 +79,7 @@ Route::get('/branches', [BranchController::class, 'index'])->name('branches');
 Route::get('/api/branches', [BranchController::class, 'api'])->name('branches.api');
 
 // Admin routes
-Route::middleware('admin')->group(function () {
+Route::middleware('role:admin')->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     Route::get('/admin/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
     

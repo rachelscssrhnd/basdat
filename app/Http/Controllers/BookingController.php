@@ -71,6 +71,16 @@ class BookingController extends Controller
                 (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
             ]);
 
+            // Preselected test via query param (fallback)
+            $selectedTests = collect();
+            $testId = $request->get('test_id');
+            if ($testId) {
+                $pre = $tests->where('tes_id', $testId);
+                if ($pre->isNotEmpty()) {
+                    $selectedTests = $pre;
+                }
+            }
+
             $sessions = [
                 '1' => 'Sesi 1 (08:00-10:00)',
                 '2' => 'Sesi 2 (10:00-12:00)',
@@ -78,7 +88,7 @@ class BookingController extends Controller
                 '4' => 'Sesi 4 (15:00-17:00)',
             ];
             
-            return view('booking', compact('tests', 'branches', 'sessions'));
+            return view('booking', compact('tests', 'branches', 'selectedTests', 'sessions'));
         }
     }
 

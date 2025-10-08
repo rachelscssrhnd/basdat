@@ -23,6 +23,10 @@ class RoleMiddleware
             return redirect()->route('user.home')->withErrors(['error' => 'Unauthorized. Admin only.']);
         }
 
+        if ($role === 'pasien' && strtolower($sessionRole) !== 'pasien') {
+            return redirect()->route('admin.dashboard')->withErrors(['error' => 'Unauthorized. Patients only.']);
+        }
+
         if ($role === 'user' && strtolower($sessionRole) !== 'user') {
             return redirect()->route('admin.dashboard')->withErrors(['error' => 'Unauthorized. Users only.']);
         }
