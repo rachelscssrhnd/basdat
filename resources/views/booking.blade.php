@@ -81,17 +81,30 @@
                     <!-- Schedule -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                         <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="calendar" class="mr-2 text-green-600"></i> Set Schedule</h2>
-                        <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Date</label>
-                                <input type="date" name="tanggal_booking" required min="{{ date('Y-m-d', strtotime('+1 day')) }}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('tanggal_booking') }}">
+                                <input type="date" name="tanggal_booking" required 
+                                       min="{{ date('Y-m-d', strtotime('+1 day')) }}" 
+                                       max="{{ date('Y-m-d', strtotime('+30 days')) }}"
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" 
+                                       value="{{ old('tanggal_booking') }}">
+                                <p class="text-xs text-gray-500 mt-1">Minimal H+1, maksimal 30 hari ke depan</p>
                                 @error('tanggal_booking') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700">Time</label>
-                                <input type="time" name="waktu_booking" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" value="{{ old('waktu_booking', '09:00') }}">
+                                <label class="block text-sm font-medium text-gray-700">Session</label>
+                                <select name="sesi" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
+                                    <option value="">Select Session</option>
+                                    @if(isset($sessions))
+                                        @foreach($sessions as $key => $session)
+                                            <option value="{{ $key }}" {{ old('sesi') == $key ? 'selected' : '' }}>{{ $session }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                                @error('sesi') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
-                            <div class="md:col-span-2">
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700">Branch</label>
                                 <select name="cabang_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                     <option value="">Select Branch</option>
@@ -101,7 +114,6 @@
                                 </select>
                                 @error('cabang_id') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                             </div>
-                            
                         </div>
                     </div>
 

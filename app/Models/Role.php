@@ -28,8 +28,8 @@ class Role extends Model
      * Atribut yang bisa diisi secara massal.
      */
     protected $fillable = [
-        'nama_role',
-        'description',
+        'name',
+        'slug',
     ];
 
     /**

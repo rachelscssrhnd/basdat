@@ -32,6 +32,7 @@ class Booking extends Model
         'pasien_id',
         'cabang_id',
         'tanggal_booking',
+        'sesi',
         'status_pembayaran',
         'status_tes',
     ];

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\JenisTes;
 use App\Models\Pasien;
+use App\Models\Pembayaran;
 use App\Models\LogActivity;
 use App\Models\HasilTesHeader;
 use App\Models\HasilTesValue;
@@ -318,6 +319,205 @@ class AdminController extends Controller
             return response()->json(['success' => true, 'message' => 'Test deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => 'Failed to delete test']);
+        }
+    }
+
+    /**
+     * Get all bookings for admin
+     */
+    public function getBookings(Request $request)
+    {
+        try {
+            $status = $request->get('status', 'all');
+            
+            $query = Booking::with(['pasien', 'cabang', 'jenisTes', 'pembayaran']);
+            
+            if ($status !== 'all') {
+                $query->where('status_tes', $status);
+            }
+            
+            $bookings = $query->orderBy('tanggal_booking', 'desc')->get();
+            
+            return response()->json(['success' => true, 'data' => $bookings]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to fetch bookings']);
+        }
+    }
+
+    /**
+     * Approve booking
+     */
+    public function approveBooking($id)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $booking = Booking::findOrFail($id);
+            $booking->update([
+                'status_tes' => 'approved'
+            ]);
+
+            LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Approved booking ID: ' . $id,
+                'created_at' => now(),
+            ]);
+
+            DB::commit();
+            
+            return response()->json(['success' => true, 'message' => 'Booking approved successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to approve booking']);
+        }
+    }
+
+    /**
+     * Reject booking
+     */
+    public function rejectBooking(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'reason' => 'required|string|max:500'
+            ]);
+
+            DB::beginTransaction();
+            
+            $booking = Booking::findOrFail($id);
+            $booking->update([
+                'status_tes' => 'rejected',
+                'alasan_reject' => $validated['reason']
+            ]);
+
+            LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Rejected booking ID: ' . $id . ' - Reason: ' . $validated['reason'],
+                'created_at' => now(),
+            ]);
+
+            DB::commit();
+            
+            return response()->json(['success' => true, 'message' => 'Booking rejected successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to reject booking']);
+        }
+    }
+
+    /**
+     * Get all payments for admin
+     */
+    public function getPayments(Request $request)
+    {
+        try {
+            $status = $request->get('status', 'all');
+            
+            $query = Pembayaran::with(['booking.pasien', 'booking.cabang', 'booking.jenisTes']);
+            
+            if ($status !== 'all') {
+                $query->where('status', $status);
+            }
+            
+            $payments = $query->orderBy('tanggal_bayar', 'desc')->get();
+            
+            return response()->json(['success' => true, 'data' => $payments]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to fetch payments']);
+        }
+    }
+
+    /**
+     * View payment proof
+     */
+    public function viewPaymentProof($id)
+    {
+        try {
+            $payment = Pembayaran::with(['booking.pasien'])->findOrFail($id);
+            
+            return response()->json([
+                'success' => true, 
+                'data' => [
+                    'payment' => $payment,
+                    'proof_url' => $payment->bukti_pembayaran ? asset('storage/' . $payment->bukti_pembayaran) : null
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to fetch payment proof']);
+        }
+    }
+
+    /**
+     * Confirm payment
+     */
+    public function confirmPayment($id)
+    {
+        try {
+            DB::beginTransaction();
+            
+            $payment = Pembayaran::with('booking')->findOrFail($id);
+            
+            $payment->update([
+                'status' => 'confirmed',
+                'tanggal_konfirmasi' => now()
+            ]);
+
+            $payment->booking->update([
+                'status_pembayaran' => 'confirmed',
+                'status_tes' => 'confirmed'
+            ]);
+
+            LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Confirmed payment for booking ID: ' . $payment->booking_id,
+                'created_at' => now(),
+            ]);
+
+            DB::commit();
+            
+            return response()->json(['success' => true, 'message' => 'Payment confirmed successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to confirm payment']);
+        }
+    }
+
+    /**
+     * Reject payment
+     */
+    public function rejectPayment(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'reason' => 'required|string|max:500'
+            ]);
+
+            DB::beginTransaction();
+            
+            $payment = Pembayaran::with('booking')->findOrFail($id);
+            
+            $payment->update([
+                'status' => 'rejected',
+                'alasan_reject' => $validated['reason'],
+                'tanggal_konfirmasi' => now()
+            ]);
+
+            $payment->booking->update([
+                'status_pembayaran' => 'rejected'
+            ]);
+
+            LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Rejected payment for booking ID: ' . $payment->booking_id . ' - Reason: ' . $validated['reason'],
+                'created_at' => now(),
+            ]);
+
+            DB::commit();
+            
+            return response()->json(['success' => true, 'message' => 'Payment rejected successfully']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['success' => false, 'message' => 'Failed to reject payment']);
         }
     }
 }

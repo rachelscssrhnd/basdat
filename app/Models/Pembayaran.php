@@ -33,7 +33,10 @@ class Pembayaran extends Model
         'metode_bayar',
         'status',
         'tanggal_bayar',
-        'bukti_path',
+        'bukti_pembayaran',
+        'tanggal_upload',
+        'tanggal_konfirmasi',
+        'alasan_reject',
     ];
 
     /**

@@ -10,6 +10,7 @@ use App\Models\Pasien;
 use App\Models\Pembayaran;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class BookingController extends Controller
 {
@@ -18,20 +19,25 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
+        // Check if user is logged in
+        if (!session()->has('user_id')) {
+            return redirect()->route('auth')->withErrors(['error' => 'Please login to book a test.']);
+        }
+
         try {
             // Get available lab tests
             $tests = JenisTes::all();
             
-            // Get available branches
-            // Ensure branches include Cabang A/B/C as defaults
+            // Get available branches (Cabang A, B, C)
             $branches = Cabang::all();
             if ($branches->isEmpty()) {
                 $branches = collect([
-                    (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A'],
-                    (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B'],
-                    (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C'],
+                    (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A', 'alamat' => 'Jl. Sudirman No. 1'],
+                    (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B', 'alamat' => 'Jl. Thamrin No. 2'],
+                    (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
                 ]);
             }
+            
             // Preselected test via query param
             $selectedTests = collect();
             $testId = $request->get('test_id');
@@ -42,21 +48,37 @@ class BookingController extends Controller
                 }
             }
 
-            return view('booking', compact('tests', 'branches', 'selectedTests'));
+            // Session options for dropdown
+            $sessions = [
+                '1' => 'Sesi 1 (08:00-10:00)',
+                '2' => 'Sesi 2 (10:00-12:00)',
+                '3' => 'Sesi 3 (13:00-15:00)',
+                '4' => 'Sesi 4 (15:00-17:00)',
+            ];
+
+            return view('booking', compact('tests', 'branches', 'selectedTests', 'sessions'));
         } catch (\Exception $e) {
             // If database is not set up, return view with sample data
             $tests = collect([
-                (object) ['tes_id' => 1, 'nama_tes' => 'Basic Health Panel', 'harga' => 89000],
-                (object) ['tes_id' => 2, 'nama_tes' => 'Complete Metabolic Panel', 'harga' => 129000],
-                (object) ['tes_id' => 3, 'nama_tes' => 'Immunity Checkup', 'harga' => 75000]
+                (object) ['tes_id' => 1, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'harga' => 100000, 'deskripsi' => 'Pemeriksaan rontgen gigi dengan teknologi CR'],
+                (object) ['tes_id' => 2, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'harga' => 150000, 'deskripsi' => 'Pemeriksaan rontgen menyeluruh area mulut dan rahang'],
+                (object) ['tes_id' => 3, 'nama_tes' => 'Tes Darah (Hemoglobin)', 'harga' => 75000, 'deskripsi' => 'Pemeriksaan kadar hemoglobin dalam darah']
             ]);
             
             $branches = collect([
-                (object) ['cabang_id' => 1, 'nama_cabang' => 'Jakarta Central', 'alamat' => 'Jl. Sudirman No. 123'],
-                (object) ['cabang_id' => 2, 'nama_cabang' => 'Jakarta Selatan', 'alamat' => 'Jl. Pondok Indah No. 456']
+                (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A', 'alamat' => 'Jl. Sudirman No. 1'],
+                (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B', 'alamat' => 'Jl. Thamrin No. 2'],
+                (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
             ]);
+
+            $sessions = [
+                '1' => 'Sesi 1 (08:00-10:00)',
+                '2' => 'Sesi 2 (10:00-12:00)',
+                '3' => 'Sesi 3 (13:00-15:00)',
+                '4' => 'Sesi 4 (15:00-17:00)',
+            ];
             
-            return view('booking', compact('tests', 'branches'));
+            return view('booking', compact('tests', 'branches', 'sessions'));
         }
     }
 
@@ -65,8 +87,18 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
+        // Check if user is logged in
+        if (!session()->has('user_id')) {
+            return redirect()->route('auth')->withErrors(['error' => 'Please login to book a test.']);
+        }
+
+        // Date validation: H+1 to +30 days
+        $minDate = Carbon::tomorrow()->format('Y-m-d');
+        $maxDate = Carbon::now()->addDays(30)->format('Y-m-d');
+
         $validated = $request->validate([
-            'tanggal_booking' => 'required|date|after:today',
+            'tanggal_booking' => "required|date|after_or_equal:{$minDate}|before_or_equal:{$maxDate}",
+            'sesi' => 'required|in:1,2,3,4',
             'cabang_id' => 'required|integer',
             'tes_ids' => 'required|array',
             'tes_ids.*' => 'exists:jenis_tes,tes_id',
@@ -80,11 +112,26 @@ class BookingController extends Controller
             $userId = session('user_id');
             $pasien = Pasien::where('user_id', $userId)->firstOrFail();
 
-            // Create booking
+            // Anti-collision rule: Check if session is full
+            $existingBookings = Booking::where('tanggal_booking', $validated['tanggal_booking'])
+                ->where('cabang_id', $validated['cabang_id'])
+                ->where('sesi', $validated['sesi'])
+                ->whereIn('status_tes', ['pending_approval', 'approved', 'confirmed'])
+                ->count();
+
+            // Assuming max 5 bookings per session (adjust as needed)
+            $maxBookingsPerSession = 5;
+            if ($existingBookings >= $maxBookingsPerSession) {
+                DB::rollBack();
+                return back()->withErrors(['error' => 'Jadwal sudah penuh, silakan pilih sesi lain.'])->withInput();
+            }
+
+            // Create booking with session
             $booking = Booking::create([
                 'pasien_id' => $pasien->pasien_id,
                 'cabang_id' => $validated['cabang_id'],
                 'tanggal_booking' => $validated['tanggal_booking'],
+                'sesi' => $validated['sesi'],
                 'status_pembayaran' => 'pending',
                 'status_tes' => 'pending_approval'
             ]);
@@ -94,27 +141,34 @@ class BookingController extends Controller
 
             // Create payment record
             $totalHarga = JenisTes::whereIn('tes_id', $validated['tes_ids'])->sum('harga');
+            $serviceFee = 5000;
+            $totalAmount = $totalHarga + $serviceFee;
+
             $pembayaran = Pembayaran::create([
                 'booking_id' => $booking->booking_id,
                 'metode_bayar' => $validated['payment_method'],
-                'jumlah' => $totalHarga,
+                'jumlah' => $totalAmount,
                 'status' => 'pending',
                 'tanggal_bayar' => now()
             ]);
 
+            // Log activity
             \App\Models\LogActivity::create([
                 'user_id' => session('user_id'),
-                'action' => 'Created booking ID: ' . $booking->booking_id,
+                'action' => 'Created booking ID: ' . $booking->booking_id . ' for session ' . $validated['sesi'],
                 'created_at' => now(),
             ]);
 
             DB::commit();
 
-            return redirect()->route('myorder')->with('success', 'Booking successful! Transaction ID: ' . $booking->booking_id);
+            // Redirect to payment page
+            return redirect()->route('payment', ['booking_id' => $booking->booking_id])
+                ->with('success', 'Booking berhasil! Silakan lakukan pembayaran.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Failed to create booking: ' . $e->getMessage()])->withInput();
+            \Log::error('Booking creation failed', ['error' => $e->getMessage(), 'user_id' => session('user_id')]);
+            return back()->withErrors(['error' => 'Gagal membuat booking: ' . $e->getMessage()])->withInput();
         }
     }
 

@@ -137,12 +137,12 @@
                         <i data-feather="user-plus" class="mr-2"></i> Create Account
                     </button>
                 </form>
-            </div>
+                        </div>
             <p id="cta-to-register" class="mt-6 text-center text-sm text-gray-600">Don't have an account? <a href="#" id="go-to-register" class="text-primary-600 hover:text-primary-700 font-medium">Sign up</a></p>
             <p id="cta-to-login" class="mt-2 text-center text-sm text-gray-600 hidden">Have an account? <a href="#" id="go-to-login" class="text-primary-600 hover:text-primary-700 font-medium">Log in</a></p>
-        </div>
+                        </div>
         
-    </div>
+        </div>
     </div>
 
 

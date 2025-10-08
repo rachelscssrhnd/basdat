@@ -45,11 +45,17 @@ class AuthController extends Controller
         ]);
 
         try {
-            // Find user by username or email
+            // Find user by username or email (email is in pasien table)
             $input = $validated['username'];
-            $user = User::where('username', $input)
-                ->orWhere('email', $input)
-                ->first();
+            $user = User::where('username', $input)->first();
+            
+            // If not found by username, try to find by email in pasien table
+            if (!$user) {
+                $pasien = Pasien::where('email', $input)->first();
+                if ($pasien) {
+                    $user = $pasien->user;
+                }
+            }
             
             if (!$user || !Hash::check($validated['password'], $user->password_hash)) {
                 return back()->withErrors(['error' => 'Invalid credentials'])->withInput();
@@ -59,8 +65,8 @@ class AuthController extends Controller
             session([
                 'user_id' => $user->user_id,
                 'username' => $user->username,
-                'role' => $user->role->nama_role ?? 'user',
-                'role_name' => strtolower($user->role->nama_role ?? 'user'),
+                'role' => $user->role->name ?? 'User',
+                'role_name' => strtolower($user->role->slug ?? 'user'),
             ]);
 
             // Redirect based on role
@@ -70,7 +76,7 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
 
-            if (strtolower($user->role->nama_role) === 'admin') {
+            if (strtolower($user->role->slug) === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
             }
             return redirect()->route('user.home')->with('success', 'Login successful!');
@@ -94,12 +100,12 @@ class AuthController extends Controller
 
         try {
             \DB::beginTransaction();
-            // Get or create default 'user' role
-            $userRole = Role::where('role_name', 'pasien')->first();
+            // Get or create default 'pasien' role
+            $userRole = Role::where('slug', 'pasien')->first();
             if (!$userRole) {
                 $userRole = Role::create([
-                    'role_name' => 'pasien',
-                    'description' => 'Default patient role',
+                    'name' => 'Pasien',
+                    'slug' => 'pasien',
                 ]);
             }
 
@@ -108,7 +114,6 @@ class AuthController extends Controller
                 'username' => $validated['username'],
                 'password_hash' => Hash::make($validated['password']),
                 'role_id' => $userRole->role_id,
-                'email' => $validated['email'],
             ]);
 
             // Create patient profile
