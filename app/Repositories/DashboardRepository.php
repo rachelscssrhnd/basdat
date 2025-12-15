@@ -24,11 +24,11 @@ class DashboardRepository
     {
         return DB::connection('warehouse')->select("
             SELECT 
-                c.nama_cabang,
+                REPLACE(c.nama_cabang, 'Kampus', 'Cabang') AS nama_cabang,
                 COUNT(f.sk_booking) AS total_booking
             FROM fact_booking f
             JOIN dim_cabang c ON f.sk_cabang = c.sk_cabang
-            GROUP BY c.nama_cabang
+            GROUP BY nama_cabang
         ");
     }
 
@@ -50,11 +50,11 @@ class DashboardRepository
     {
         return DB::connection('warehouse')->select("
             SELECT 
-                c.nama_cabang,
+                REPLACE(c.nama_cabang, 'Kampus', 'Cabang') AS nama_cabang,
                 SUM(f.jumlah) AS total_pemasukan
             FROM fact_pembayaran f
             JOIN dim_cabang c ON f.sk_cabang = c.sk_cabang
-            GROUP BY c.nama_cabang
+            GROUP BY nama_cabang
         ");
     }
 

@@ -32,6 +32,11 @@ class Cabang extends Model
         'alamat',
     ];
 
+    public function getNamaCabangAttribute($value)
+    {
+        return str_replace('Kampus', 'Cabang', (string) $value);
+    }
+
     /**
      * Relasi "hasMany": Satu cabang bisa memiliki banyak Booking.
      */

@@ -129,10 +129,10 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
                                         @if($booking->pembayaran && $booking->pembayaran->bukti_pembayaran)
-                                            <button onclick="viewPaymentProof({{ $booking->pembayaran->pembayaran_id }})" class="px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700">View Proof</button>
+                                            <button onclick="viewPaymentProof({{ $booking->pembayaran->pembayaran_id }})" class="px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">View Proof</button>
                                         @endif
-                                        <button onclick="verifyPayment({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700">Verify Payment</button>
-                                        <button onclick='editBooking({{ $booking->booking_id }}, @json($booking->status_pembayaran), @json($booking->status_tes))' class="ml-2 px-3 py-1 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
+                                        <button onclick="verifyPayment({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Verify Payment</button>
+                                        <button onclick='editBooking({{ $booking->booking_id }}, @json($booking->status_pembayaran), @json($booking->status_tes))' class="ml-2 px-3 py-1 rounded-md text-white bg-secondary-500 hover:bg-secondary-600">Edit</button>
                                         <button onclick="deleteBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
                                     </td>
                                 </tr>
@@ -227,7 +227,7 @@
                     <div class="mt-6 space-y-8">
                         <div>
                             <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-sm font-semibold text-gray-900">FACT Booking</h3>
+                                <h3 class="text-sm font-semibold text-gray-900">Booking Analytics</h3>
                                 <span class="text-xs text-gray-500">Booking volume & distribution</span>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -244,7 +244,7 @@
 
                         <div>
                             <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-sm font-semibold text-gray-900">FACT Pembayaran</h3>
+                                <h3 class="text-sm font-semibold text-gray-900">Payment Analytics</h3>
                                 <span class="text-xs text-gray-500">Revenue analytics</span>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -261,7 +261,7 @@
 
                         <div>
                             <div class="flex items-center justify-between mb-3">
-                                <h3 class="text-sm font-semibold text-gray-900">FACT Layanan</h3>
+                                <h3 class="text-sm font-semibold text-gray-900">Test Analytics</h3>
                                 <span class="text-xs text-gray-500">Test/service insights</span>
                             </div>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -375,7 +375,7 @@
                         const testStatus = b.status_tes || '-';
                         const date = b.tanggal_booking || '';
                         const sesi = b.sesi || '';
-                        const viewBtn = b.pembayaran?.pembayaran_id ? `<button onclick=\"viewPaymentProof(${b.pembayaran.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700\">View Proof</button>` : '';
+                        const viewBtn = b.pembayaran?.pembayaran_id ? `<button onclick=\"viewPaymentProof(${b.pembayaran.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">View Proof</button>` : '';
                         return `
                             <tr>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${b.booking_id}</td>
@@ -386,8 +386,8 @@
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(proof)}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-right text-sm\">
                                     ${viewBtn}
-                                    <button onclick=\"verifyPayment(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700\">Verify Payment</button>
-                                    <button onclick=\"editBooking(${b.booking_id}, '${escapeHtml(payStatus)}', '${escapeHtml(testStatus)}', '${escapeHtml(date)}', '${escapeHtml(sesi)}')\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700\">Edit</button>
+                                    <button onclick=\"verifyPayment(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Verify Payment</button>
+                                    <button onclick=\"editBooking(${b.booking_id}, '${escapeHtml(payStatus)}', '${escapeHtml(testStatus)}', '${escapeHtml(date)}', '${escapeHtml(sesi)}')\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-secondary-500 hover:bg-secondary-600\">Edit</button>
                                     <button onclick=\"deleteBooking(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700\">Delete</button>
                                 </td>
                             </tr>
@@ -408,7 +408,7 @@
                     const rows = res.data.map(p => {
                         const patient = p.booking?.pasien?.nama || 'Unknown';
                         const proof = p.bukti_pembayaran || p.bukti_path;
-                        const proofBtn = proof ? `<button onclick=\"viewPaymentProof(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700\">Proof</button>` : '-';
+                        const proofBtn = proof ? `<button onclick=\"viewPaymentProof(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Proof</button>` : '-';
                         return `
                             <tr>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${p.pembayaran_id}</td>
@@ -418,9 +418,9 @@
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(p.status)}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm\">${proofBtn}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-right text-sm\">
-                                    <button onclick=\"confirmPayment(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700\">Confirm</button>
-                                    <button onclick=\"rejectPayment(${p.pembayaran_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-yellow-600 hover:bg-yellow-700\">Reject</button>
-                                    <button onclick="editPayment(${p.pembayaran_id}, '${escapeHtml(p.status)}', '${escapeHtml(p.metode_bayar)}', '${escapeHtml(p.jumlah)}')" class="ml-2 px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700">Edit</button>
+                                    <button onclick=\"confirmPayment(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Confirm</button>
+                                    <button onclick=\"rejectPayment(${p.pembayaran_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-yellow-500 hover:bg-yellow-600\">Reject</button>
+                                    <button onclick=\"editPayment(${p.pembayaran_id}, '${escapeHtml(p.status)}', '${escapeHtml(p.metode_bayar)}', '${escapeHtml(p.jumlah)}')\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-yellow-500 hover:bg-yellow-600\">Edit</button>
                                     <button onclick=\"deletePayment(${p.pembayaran_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700\">Delete</button>
                                 </td>
                             </tr>
@@ -505,7 +505,7 @@
                             datasets: [{
                                 label: 'Bookings',
                                 data: bookingPerCabang.map(x => x.value),
-                                backgroundColor: '#2563eb',
+                                backgroundColor: '#16a34a',
                             }]
                         },
                         options: { responsive: true, plugins: { legend: { display: false } } }
@@ -544,7 +544,7 @@
                             datasets: [{
                                 label: 'Pemasukan',
                                 data: revPerCabang.map(x => x.value),
-                                backgroundColor: '#7c3aed',
+                                backgroundColor: '#f59e0b',
                             }]
                         },
                         options: { responsive: true, plugins: { legend: { display: false } } }
@@ -561,7 +561,7 @@
                             labels: distribusiTes.map(x => x.label),
                             datasets: [{
                                 data: distribusiTes.map(x => x.value),
-                                backgroundColor: ['#16a34a','#2563eb','#f59e0b','#ef4444','#7c3aed','#0ea5e9','#f97316','#10b981'],
+                                backgroundColor: ['#16a34a','#22c55e','#4ade80','#f59e0b','#eab308','#facc15','#fde047','#f97316'],
                             }]
                         },
                         options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
@@ -579,8 +579,8 @@
                             datasets: [{
                                 label: 'Jumlah Tes',
                                 data: trenTes.map(x => x.value),
-                                borderColor: '#0ea5e9',
-                                backgroundColor: 'rgba(14,165,233,0.15)',
+                                borderColor: '#16a34a',
+                                backgroundColor: 'rgba(22,163,74,0.15)',
                                 tension: 0.3,
                                 fill: true,
                             }]
@@ -606,7 +606,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${test.deskripsi || 'No description'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp${parseInt(test.harga).toLocaleString('id-ID')}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                <button onclick="editTest(${test.tes_id})" class="px-3 py-1 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
+                                <button onclick="editTest(${test.tes_id})" class="px-3 py-1 rounded-md text-white bg-secondary-500 hover:bg-secondary-600">Edit</button>
                                 <button onclick="deleteTest(${test.tes_id})" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
                             </td>
                         </tr>
@@ -641,7 +641,7 @@
                         <input id="t-price" class="w-full px-3 py-2 border rounded-md" placeholder="Price" type="number" value="${test.harga}" required />
                         <textarea id="t-preparation" class="w-full px-3 py-2 border rounded-md" placeholder="Special Preparation">${test.persiapan_khusus || ''}</textarea>
                         <div class="flex gap-2">
-                            <button onclick="updateTest(${id})" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Update Test</button>
+                            <button onclick="updateTest(${id})" class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700">Update Test</button>
                             <button onclick="closeModal()" class="flex-1 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">Cancel</button>
                         </div>
                     `);
