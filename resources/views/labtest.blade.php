@@ -140,9 +140,12 @@
                                     </span>
                                 @endif
                             </div>
-                            <a href="{{ route('booking', ['test_id' => $test->tes_id]) }}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
-                                Book Now
-                            </a>
+                            <form action="{{ route('booking') }}" method="GET" class="w-full">
+                                <input type="hidden" name="test_id" value="{{ $test->tes_id }}">
+                                <button type="submit" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                                    Book Now
+                                </button>
+                            </form>
                         </div>
                     </div>
                     @empty
@@ -293,9 +296,12 @@
                                         </span>
                                     ` : ''}
                                 </div>
-                                <a href="/booking?test_id=${test.tes_id}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
-                                    Book Now
-                                </a>
+                                <form action="{{ route('booking') }}" method="GET" class="w-full">
+                                    <input type="hidden" name="test_id" value="${test.tes_id ?? test.id}">
+                                    <button type="submit" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
+                                        Book Now
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     `).join('');

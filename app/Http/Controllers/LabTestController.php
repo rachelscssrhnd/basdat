@@ -46,15 +46,15 @@ class LabTestController extends Controller
                     ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
                     ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
                 ];
-                $tests = collect(array_map(function($t) {
+                $tests = collect(array_map(function($t, $idx) {
                     return (object) [
-                        'tes_id' => 0,
+                        'tes_id' => $idx + 1,
                         'nama_tes' => $t['nama_tes'],
                         'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
                         'harga' => $t['harga'],
                         'parameter_tes' => collect(),
                     ];
-                }, $catalog));
+                }, $catalog, array_keys($catalog)));
             }
             
             return view('labtest', compact('tests'));
@@ -132,15 +132,15 @@ class LabTestController extends Controller
                     ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
                     ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
                 ];
-                $tests = collect(array_values(array_filter(array_map(function($t) use ($query) {
+                $tests = collect(array_values(array_filter(array_map(function($t, $idx) use ($query) {
                     if ($query && stripos($t['nama_tes'], $query) === false) return null;
                     return [
-                        'tes_id' => 0,
+                        'tes_id' => $idx + 1,
                         'nama_tes' => $t['nama_tes'],
                         'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
                         'harga' => $t['harga'],
                     ];
-                }, $catalog))));
+                }, $catalog, array_keys($catalog)))));
             }
         } catch (\Exception $e) {
             $tests = collect();
@@ -160,6 +160,30 @@ class LabTestController extends Controller
         try {
             $tests = JenisTes::whereBetween('harga', [$minPrice, $maxPrice])
                 ->get();
+
+            if ($tests->isEmpty()) {
+                $catalog = [
+                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)'],
+                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)'],
+                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water's Foto)"],
+                    ['harga' => 50000,  'nama_tes' => 'Tes Urine'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)'],
+                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)'],
+                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
+                ];
+                $tests = collect(array_values(array_filter(array_map(function($t, $idx) use ($minPrice, $maxPrice) {
+                    if ($t['harga'] < $minPrice || $t['harga'] > $maxPrice) return null;
+                    return [
+                        'tes_id' => $idx + 1,
+                        'nama_tes' => $t['nama_tes'],
+                        'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
+                        'harga' => $t['harga'],
+                    ];
+                }, $catalog, array_keys($catalog)))));
+            }
         } catch (\Exception $e) {
             $tests = collect();
         }

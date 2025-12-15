@@ -138,43 +138,86 @@
 
                 <!-- Test Details -->
                     @php
-                        $selected = isset($selectedTests) ? $selectedTests : collect();
-                        $selectedNames = $selected->pluck('nama_tes')->filter()->implode(', ');
-                        $selectedSubtotal = $selected->sum('harga');
+                        $selectedTest = $selectedTest ?? null;
                         $serviceFee = 5000;
-                        $serverTotal = $selectedSubtotal + $serviceFee;
+                        $subtotal = $selectedTest ? $selectedTest->harga : 0;
+                        $total = $subtotal + $serviceFee;
                     @endphp
 
+                    <!-- Test Details -->
+                    <!-- Test Details -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-green-600"></i> Test Details</h2>
-                    <div class="mt-4 space-y-3" id="test-details">
-                        @if($selected->isNotEmpty())
-                            @foreach($selected as $test)
-                                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-                                            <div>
-                                                <p class="font-medium text-gray-900">{{ $test->nama_tes }}</p>
-                                                <p class="text-sm text-gray-500">{{ $test->deskripsi }}</p>
-                                            </div>
-                                            <p class="font-semibold text-gray-900">Rp{{ number_format($test->harga, 0, ',', '.') }}</p>
-                                        </div>
-                                <input type="hidden" name="tes_ids[]" value="{{ $test->tes_id }}" data-price="{{ $test->harga }}">
-                            @endforeach
-                        @else
-                            <p class="text-gray-500">No test selected. Please go back to <a href="{{ route('labtest') }}" class="text-primary-600 hover:text-primary-700">Lab Test</a> to choose a test.</p>
-                        @endif
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i data-feather="flask" class="mr-2 text-green-600"></i> Test Details
+                        </h2>
+                        <div class="mt-4 space-y-3" id="test-details">
+                            @if($selectedTest)
+                                <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                                    <div class="flex-1">
+                                        <p class="font-medium text-gray-900">{{ $selectedTest->nama_tes }}</p>
+                                        <p class="text-sm text-gray-500 mt-1">{{ $selectedTest->deskripsi ?? 'No description available' }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="font-semibold text-gray-900">Rp{{ number_format($selectedTest->harga, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="tes_ids[]" value="{{ $selectedTest->tes_id }}">
+                            @else
+                                <div class="text-center py-4">
+                                    <i data-feather="alert-circle" class="h-8 w-8 mx-auto text-gray-400"></i>
+                                    <p class="mt-2 text-gray-500">No test selected. Please go back to 
+                                        <a href="{{ route('labtest') }}" class="text-primary-600 hover:text-primary-700 font-medium">Lab Test</a> 
+                                        to choose a test.
+                                    </p>
+                                </div>
+                            @endif
                         </div>
-                        @if(isset($errors) && $errors->has('tes_ids')) <span class="text-red-500 text-sm">{{ $errors->first('tes_ids') }}</span> @endif
+                        @if(isset($errors) && $errors->has('tes_ids'))
+                            <div class="mt-2 text-red-500 text-sm">
+                                <i data-feather="alert-circle" class="inline-block w-4 h-4 mr-1"></i>
+                                {{ $errors->first('tes_ids') }}
+                            </div>
+                        @endif
                     </div>
 
                     <!-- Payment Details -->
+                    <!-- Payment Details -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="list" class="mr-2 text-green-600"></i> Payment Details</h2>
-                        <dl class="mt-4 space-y-2 text-sm text-gray-700" id="payment-summary">
-                            <div class="flex justify-between"><dt>Selected Test(s)</dt><dd class="font-medium" id="selected-tests-list">{{ $selectedNames ?: '-' }}</dd></div>
-                            <div class="flex justify-between"><dt>Subtotal</dt><dd class="font-medium" id="subtotal">Rp{{ number_format($selectedSubtotal, 0, ',', '.') }}</dd></div>
-                            <div class="flex justify-between"><dt>Service Fee</dt><dd class="font-medium">Rp{{ number_format($serviceFee, 0, ',', '.') }}</dd></div>
-                            <div class="flex justify-between border-t pt-2 text-base font-semibold text-gray-900"><dt>Total</dt><dd id="total">Rp{{ number_format($serverTotal, 0, ',', '.') }}</dd></div>
-                        </dl>
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <i data-feather="credit-card" class="mr-2 text-green-600"></i> Payment Details
+                        </h2>
+                        <div class="mt-4 space-y-2 text-sm text-gray-700" id="payment-summary">
+                            @if($selectedTest)
+                                <div class="space-y-3">
+                                    <div class="flex justify-between py-2">
+                                        <span class="text-gray-600">{{ $selectedTest->nama_tes }}</span>
+                                        <span class="font-medium">Rp{{ number_format($selectedTest->harga, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="border-t border-gray-200 my-3"></div>
+                                
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span>Subtotal</span>
+                                        <span class="font-medium">Rp{{ number_format($subtotal, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Biaya Layanan</span>
+                                        <span class="font-medium">Rp{{ number_format($serviceFee, 0, ',', '.') }}</span>
+                                    </div>
+                                    <div class="flex justify-between pt-2 mt-2 border-t border-gray-200 font-semibold text-gray-900">
+                                        <span>Total</span>
+                                        <span>Rp{{ number_format($total, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="text-center py-4">
+                                    <i data-feather="shopping-cart" class="h-8 w-8 mx-auto text-gray-400"></i>
+                                    <p class="mt-2 text-gray-500">Tidak ada test yang dipilih</p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Payment Options -->

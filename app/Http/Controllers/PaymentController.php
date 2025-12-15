@@ -7,6 +7,7 @@ use App\Models\Booking;
 use App\Models\Pembayaran;
 use App\Models\Pasien;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -18,12 +19,12 @@ class PaymentController extends Controller
     {
         // Check if user is logged in
         if (!session()->has('user_id')) {
-            return redirect()->route('auth')->withErrors(['error' => 'Please login to access payment page.']);
+            return redirect()->route('auth')->with('error', 'Please login to access payment page.');
         }
 
         $bookingId = $request->get('booking_id');
         if (!$bookingId) {
-            return redirect()->route('myorder')->withErrors(['error' => 'Booking ID is required.']);
+            return redirect()->route('myorder')->with('error', 'Booking ID is required.');
         }
 
         try {
@@ -36,12 +37,12 @@ class PaymentController extends Controller
             $userId = session('user_id');
             $pasien = Pasien::where('user_id', $userId)->first();
             if (!$pasien || $booking->pasien_id !== $pasien->pasien_id) {
-                return redirect()->route('myorder')->withErrors(['error' => 'Unauthorized access to booking.']);
+                return redirect()->route('myorder')->with('error', 'Unauthorized access to booking.');
             }
 
             // Check if payment already exists
             if (!$booking->pembayaran) {
-                return redirect()->route('myorder')->withErrors(['error' => 'Payment record not found.']);
+                return redirect()->route('myorder')->with('error', 'Payment record not found.');
             }
 
             // Generate payment details based on method
@@ -51,7 +52,7 @@ class PaymentController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Payment page error', ['error' => $e->getMessage(), 'booking_id' => $bookingId]);
-            return redirect()->route('myorder')->withErrors(['error' => 'Payment page not found.']);
+            return redirect()->route('myorder')->with('error', 'Payment page not found.');
         }
     }
 
@@ -112,7 +113,7 @@ class PaymentController extends Controller
     {
         // Check if user is logged in
         if (!session()->has('user_id')) {
-            return redirect()->route('auth')->withErrors(['error' => 'Please login to upload payment proof.']);
+            return redirect()->route('auth')->with('error', 'Please login to upload payment proof.');
         }
 
         $validated = $request->validate([
@@ -131,12 +132,12 @@ class PaymentController extends Controller
             $userId = session('user_id');
             $pasien = Pasien::where('user_id', $userId)->first();
             if (!$pasien || $booking->pasien_id !== $pasien->pasien_id) {
-                return redirect()->route('myorder')->withErrors(['error' => 'Unauthorized access to booking.']);
+                return redirect()->route('myorder', ['tab' => 'current'])->with('error', 'Unauthorized access to booking.');
             }
 
             // Check if payment exists
             if (!$booking->pembayaran) {
-                return redirect()->route('myorder')->withErrors(['error' => 'Payment record not found.']);
+                return redirect()->route('myorder', ['tab' => 'current'])->with('error', 'Payment record not found.');
             }
 
             // Store payment proof
@@ -145,11 +146,21 @@ class PaymentController extends Controller
             $filePath = $file->storeAs('payment_proofs', $fileName, 'public');
 
             // Update payment record
-            $booking->pembayaran->update([
-                'bukti_pembayaran' => $filePath,
+            $paymentUpdates = [
                 'status' => 'waiting_confirmation',
-                'tanggal_upload' => now(),
-            ]);
+            ];
+
+            if (Schema::hasColumn('pembayaran', 'bukti_pembayaran')) {
+                $paymentUpdates['bukti_pembayaran'] = $filePath;
+            }
+            if (Schema::hasColumn('pembayaran', 'bukti_path')) {
+                $paymentUpdates['bukti_path'] = $filePath;
+            }
+            if (Schema::hasColumn('pembayaran', 'tanggal_upload')) {
+                $paymentUpdates['tanggal_upload'] = now();
+            }
+
+            $booking->pembayaran->update($paymentUpdates);
 
             // Update booking status
             $booking->update([
@@ -165,12 +176,12 @@ class PaymentController extends Controller
 
             DB::commit();
 
-            return redirect()->route('myorder')->with('success', 'Bukti pembayaran berhasil diupload! Menunggu konfirmasi admin.');
+            return redirect()->route('myorder', ['tab' => 'current'])->with('success', 'Bukti pembayaran berhasil diupload! Menunggu konfirmasi admin.');
 
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Payment proof upload failed', ['error' => $e->getMessage(), 'booking_id' => $bookingId]);
-            return back()->withErrors(['error' => 'Gagal mengupload bukti pembayaran: ' . $e->getMessage()]);
+            return back()->with('error', 'Gagal mengupload bukti pembayaran: ' . $e->getMessage());
         }
     }
 

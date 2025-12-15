@@ -186,6 +186,18 @@
     <script>
         AOS.init();
         feather.replace();
+
+        @if(session('success'))
+            alert('{{ session('success') }}');
+        @endif
+
+        @if(session('error'))
+            alert('{{ session('error') }}');
+        @endif
+
+        @if($errors->any())
+            alert('{{ $errors->first() }}');
+        @endif
     </script>
 </body>
 </html>
