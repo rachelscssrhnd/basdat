@@ -103,12 +103,21 @@ class MyOrderController extends Controller
     public function show($id)
     {
         try {
+            $userId = session('user_id');
+            if (!$userId) {
+                return redirect()->route('auth')->with('error', 'Please login to view order details.');
+            }
+
             $booking = Booking::with(['pasien', 'cabang', 'jenisTes', 'pembayaran'])
-                ->findOrFail($id);
-            
+                ->where('booking_id', $id)
+                ->whereHas('pasien', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })
+                ->firstOrFail();
+
             return view('myorder.show', compact('booking'));
         } catch (\Exception $e) {
-            return redirect()->route('myorder')->withErrors(['error' => 'Order not found']);
+            return redirect()->route('myorder', ['tab' => 'current'])->with('error', 'Order not found');
         }
     }
 

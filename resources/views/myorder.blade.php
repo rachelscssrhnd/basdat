@@ -28,6 +28,9 @@
                     <a href="{{ route('labtest') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                         <i data-feather="flask" class="mr-2"></i> Lab Test
                     </a>
+                    <a href="{{ route('result') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <i data-feather="clipboard" class="mr-2"></i> Test Result
+                    </a>
                     <a href="{{ route('myorder') }}" class="border-primary-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                         <i data-feather="shopping-bag" class="mr-2"></i> My Order
                     </a>
@@ -129,7 +132,7 @@
                         <p class="text-lg font-bold text-gray-900">Rp{{ number_format($booking->pembayaran->jumlah ?? 0, 0, ',', '.') }}</p>
                     </div>
                     <div class="mt-4 flex justify-end">
-                        <a href="{{ route('booking.show', $booking->booking_id) }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                        <a href="{{ route('myorder.show', $booking->booking_id) }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
                             View Details
                             <i data-feather="arrow-right" class="ml-2"></i>
                         </a>

@@ -28,6 +28,9 @@
                     <a href="{{ route('labtest') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                         <i data-feather="flask" class="mr-2"></i> Lab Test
                     </a>
+                    <a href="{{ route('result') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                        <i data-feather="clipboard" class="mr-2"></i> Test Result
+                    </a>
                     <a href="{{ route('myorder') }}" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
                         <i data-feather="shopping-bag" class="mr-2"></i> My Order
                     </a>
@@ -244,7 +247,7 @@
 
                     <!-- Submit Button -->
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                        <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                             <i data-feather="check-circle" class="mr-2"></i> Book Now
                         </button>
                     </div>

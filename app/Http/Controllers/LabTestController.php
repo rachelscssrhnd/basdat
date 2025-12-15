@@ -35,22 +35,23 @@ class LabTestController extends Controller
             // Fallback: if DB has none, build from catalog in-memory
             if ($tests->isEmpty()) {
                 $catalog = [
-                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)'],
-                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)'],
-                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water's Foto)"],
-                    ['harga' => 50000,  'nama_tes' => 'Tes Urine'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)'],
-                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)'],
-                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
-                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'deskripsi' => 'Pemeriksaan rontgen gigi untuk membantu mendeteksi kondisi gigi dan rahang.'],
+                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'deskripsi' => 'Pemeriksaan rontgen menyeluruh area mulut dan rahang (panoramik).'],
+                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water's Foto)", 'deskripsi' => 'Pemeriksaan rontgen untuk membantu evaluasi area sinus dan tulang wajah.'],
+                    ['harga' => 50000,  'nama_tes' => 'Tes Urine', 'deskripsi' => 'Pemeriksaan urine untuk membantu deteksi infeksi, metabolisme, dan kondisi kesehatan umum.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)', 'deskripsi' => 'Pemeriksaan antibodi Rubella IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)', 'deskripsi' => 'Pemeriksaan antibodi CMV IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)', 'deskripsi' => 'Pemeriksaan antibodi HSV-1 IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)', 'deskripsi' => 'Pemeriksaan kadar hemoglobin untuk membantu evaluasi anemia dan kondisi darah.'],
+                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)', 'deskripsi' => 'Pemeriksaan golongan darah ABO dan Rhesus.'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)', 'deskripsi' => 'Pemeriksaan fungsi trombosit untuk membantu evaluasi pembekuan darah.'],
                 ];
+
                 $tests = collect(array_map(function($t, $idx) {
                     return (object) [
                         'tes_id' => $idx + 1,
                         'nama_tes' => $t['nama_tes'],
-                        'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
+                        'deskripsi' => $t['deskripsi'] ?? ('Deskripsi ' . $t['nama_tes']),
                         'harga' => $t['harga'],
                         'parameter_tes' => collect(),
                     ];
@@ -121,23 +122,23 @@ class LabTestController extends Controller
 
             if ($tests->isEmpty()) {
                 $catalog = [
-                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)'],
-                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)'],
-                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water's Foto)"],
-                    ['harga' => 50000,  'nama_tes' => 'Tes Urine'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)'],
-                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)'],
-                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
-                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'deskripsi' => 'Pemeriksaan rontgen gigi untuk membantu mendeteksi kondisi gigi dan rahang.'],
+                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'deskripsi' => 'Pemeriksaan rontgen menyeluruh area mulut dan rahang (panoramik).'],
+                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water\'s Foto)", 'deskripsi' => 'Pemeriksaan rontgen untuk membantu evaluasi area sinus dan tulang wajah.'],
+                    ['harga' => 50000,  'nama_tes' => 'Tes Urine', 'deskripsi' => 'Pemeriksaan urine untuk membantu deteksi infeksi, metabolisme, dan kondisi kesehatan umum.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)', 'deskripsi' => 'Pemeriksaan antibodi Rubella IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)', 'deskripsi' => 'Pemeriksaan antibodi CMV IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)', 'deskripsi' => 'Pemeriksaan antibodi HSV-1 IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)', 'deskripsi' => 'Pemeriksaan kadar hemoglobin untuk membantu evaluasi anemia dan kondisi darah.'],
+                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)', 'deskripsi' => 'Pemeriksaan golongan darah ABO dan Rhesus.'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)', 'deskripsi' => 'Pemeriksaan fungsi trombosit untuk membantu evaluasi pembekuan darah.'],
                 ];
                 $tests = collect(array_values(array_filter(array_map(function($t, $idx) use ($query) {
                     if ($query && stripos($t['nama_tes'], $query) === false) return null;
                     return [
                         'tes_id' => $idx + 1,
                         'nama_tes' => $t['nama_tes'],
-                        'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
+                        'deskripsi' => $t['deskripsi'] ?? ('Deskripsi ' . $t['nama_tes']),
                         'harga' => $t['harga'],
                     ];
                 }, $catalog, array_keys($catalog)))));
@@ -163,23 +164,23 @@ class LabTestController extends Controller
 
             if ($tests->isEmpty()) {
                 $catalog = [
-                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)'],
-                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)'],
-                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water's Foto)"],
-                    ['harga' => 50000,  'nama_tes' => 'Tes Urine'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)'],
-                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)'],
-                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)'],
-                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'deskripsi' => 'Pemeriksaan rontgen gigi untuk membantu mendeteksi kondisi gigi dan rahang.'],
+                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'deskripsi' => 'Pemeriksaan rontgen menyeluruh area mulut dan rahang (panoramik).'],
+                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water\'s Foto)", 'deskripsi' => 'Pemeriksaan rontgen untuk membantu evaluasi area sinus dan tulang wajah.'],
+                    ['harga' => 50000,  'nama_tes' => 'Tes Urine', 'deskripsi' => 'Pemeriksaan urine untuk membantu deteksi infeksi, metabolisme, dan kondisi kesehatan umum.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)', 'deskripsi' => 'Pemeriksaan antibodi Rubella IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)', 'deskripsi' => 'Pemeriksaan antibodi CMV IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)', 'deskripsi' => 'Pemeriksaan antibodi HSV-1 IgG untuk melihat riwayat paparan/imunitas.'],
+                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)', 'deskripsi' => 'Pemeriksaan kadar hemoglobin untuk membantu evaluasi anemia dan kondisi darah.'],
+                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)', 'deskripsi' => 'Pemeriksaan golongan darah ABO dan Rhesus.'],
+                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)', 'deskripsi' => 'Pemeriksaan fungsi trombosit untuk membantu evaluasi pembekuan darah.'],
                 ];
                 $tests = collect(array_values(array_filter(array_map(function($t, $idx) use ($minPrice, $maxPrice) {
                     if ($t['harga'] < $minPrice || $t['harga'] > $maxPrice) return null;
                     return [
                         'tes_id' => $idx + 1,
                         'nama_tes' => $t['nama_tes'],
-                        'deskripsi' => 'Deskripsi ' . $t['nama_tes'],
+                        'deskripsi' => $t['deskripsi'] ?? ('Deskripsi ' . $t['nama_tes']),
                         'harga' => $t['harga'],
                     ];
                 }, $catalog, array_keys($catalog)))));

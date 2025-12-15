@@ -44,6 +44,10 @@ Route::middleware('auth.session')->group(function () {
     // Payment routes
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment');
     Route::post('/payment/{bookingId}/upload', [PaymentController::class, 'uploadProof'])->name('payment.upload');
+
+    // Result routes
+    Route::get('/result', [ResultController::class, 'index'])->name('result');
+    Route::get('/result/download/{transactionId}', [ResultController::class, 'download'])->name('result.download');
 });
 
 // My order routes (temporarily public for demo)
@@ -69,10 +73,6 @@ Route::post('/myorder/{bookingId}/upload-proof', function(Request $request, $boo
         return back()->withErrors(['error' => 'Failed to upload proof']);
     }
 })->name('myorder.upload_proof');
-
-// Result routes (temporarily public for demo)
-Route::get('/result', [ResultController::class, 'index'])->name('result');
-Route::get('/result/download/{transactionId}', [ResultController::class, 'download'])->name('result.download');
 
 // Branch routes
 Route::get('/branches', [BranchController::class, 'index'])->name('branches');
