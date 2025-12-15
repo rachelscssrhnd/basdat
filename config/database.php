@@ -16,7 +16,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    'default' => env('DB_CONNECTION', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -113,6 +113,16 @@ return [
             // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
         ],
 
+        'warehouse' => [
+            'driver' => 'mysql',
+            'host' => env('DB_WAREHOUSE_HOST'),
+            'port' => env('DB_WAREHOUSE_PORT'),
+            'database' => env('DB_WAREHOUSE_DATABASE'),
+            'username' => env('DB_WAREHOUSE_USERNAME'),
+            'password' => env('DB_WAREHOUSE_PASSWORD'),
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+        ],
     ],
 
     /*
