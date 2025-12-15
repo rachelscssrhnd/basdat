@@ -9,6 +9,7 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MyOrderController;
 use App\Http\Controllers\ResultController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AdminAnalyticsController;
 use App\Http\Controllers\BranchController;
 use Illuminate\Http\Request;
 
@@ -77,6 +78,8 @@ Route::middleware(['auth.session', 'isAdmin'])->group(function () {
     Route::post('/admin/payments/{id}/reject', [AdminController::class, 'rejectPayment'])->name('admin.payments.reject');
     Route::put('/admin/payments/{id}', [AdminController::class, 'updatePayment'])->name('admin.payments.update');
     Route::delete('/admin/payments/{id}', [AdminController::class, 'deletePayment'])->name('admin.payments.delete');
+
+    Route::get('/admin/analytics', [AdminAnalyticsController::class, 'index'])->name('admin.analytics');
 
     // Admin test management
     Route::get('/admin/tests', [AdminController::class, 'getTests'])->name('admin.tests');

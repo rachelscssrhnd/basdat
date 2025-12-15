@@ -2,39 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Booking;
-use App\Models\HasilTesHeader;
+use App\Repositories\DashboardRepository;
 
 class DashboardController extends Controller
 {
+    protected $repo;
+
+    public function __construct(DashboardRepository $repo)
+    {
+        $this->repo = $repo;
+    }
+
     public function index()
     {
-        if (!session()->has('user_id')) {
-            return redirect()->route('login');
-        }
-
-        $role = session('role');
-        $userName = session('user_name');
-
-        try {
-            $recentBookings = Booking::query()->orderByDesc('booking_id')->limit(5)->get();
-        } catch (\Throwable $e) {
-            $recentBookings = collect();
-        }
-
-        try {
-            $recentHasil = HasilTesHeader::query()->orderByDesc('hasil_id')->limit(5)->get();
-        } catch (\Throwable $e) {
-            $recentHasil = collect();
-        }
-
-        if ($role === 'admin') {
-            return view('admin', compact('userName', 'recentBookings', 'recentHasil'));
-        }
-
-        return view('dashboard', compact('userName', 'recentBookings', 'recentHasil'));
+        return view('dashboard.index', [
+            'bookingPerBulan'   => $this->repo->bookingPerBulan(),
+            'bookingPerCabang'  => $this->repo->bookingPerCabang(),
+            'revenueKuartal'    => $this->repo->revenuePerKuartal(),
+            'revenueCabang'     => $this->repo->revenuePerCabang(),
+            'distribusiTes'     => $this->repo->distribusiTes(),
+            'trenTes'           => $this->repo->trenTesPerBulan(),
+        ]);
     }
 }
-
-

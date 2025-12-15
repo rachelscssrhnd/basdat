@@ -6,6 +6,7 @@
     <title>E-Clinic Lab - Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
@@ -38,6 +39,7 @@
                 <button id="tab-bookings" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400">Booking Management</button>
                 <button id="tab-payments" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Payment Management</button>
                 <button id="tab-tests" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Test Management</button>
+                <button id="tab-analytics" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Dashboard Analytics</button>
             </div>
         </div>
     </div>
@@ -173,6 +175,49 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Dashboard Analytics -->
+            <section id="panel-analytics" class="space-y-6 hidden">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="bar-chart-2" class="mr-2 text-green-600"></i> Dashboard Analytics (Data Warehouse)</h2>
+                        <div class="flex space-x-2">
+                            <button id="refresh-analytics" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
+                                <i data-feather="refresh-cw" class="mr-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="analytics-error" class="mt-4 hidden rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"></div>
+
+                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Booking Trend (Monthly)</h3>
+                            <canvas id="chart-booking-bulanan" height="140"></canvas>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Bookings by Branch</h3>
+                            <canvas id="chart-booking-cabang" height="140"></canvas>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Revenue by Quarter</h3>
+                            <canvas id="chart-revenue-kuartal" height="140"></canvas>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Revenue by Branch</h3>
+                            <canvas id="chart-revenue-cabang" height="140"></canvas>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Test Distribution</h3>
+                            <canvas id="chart-distribusi-tes" height="140"></canvas>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Test Trend (Monthly)</h3>
+                            <canvas id="chart-tren-tes" height="140"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -195,39 +240,59 @@
         const panelBookings = el('panel-bookings');
         const panelPayments = el('panel-payments');
         const panelTests = el('panel-tests');
+        const panelAnalytics = el('panel-analytics');
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        const charts = {};
 
         function setActive(tab) {
             const b = el('tab-bookings');
             const p = el('tab-payments');
             const t = el('tab-tests');
+            const a = el('tab-analytics');
             if (tab === 'bookings') {
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelBookings.classList.remove('hidden');
                 panelPayments.classList.add('hidden');
                 panelTests.classList.add('hidden');
+                panelAnalytics.classList.add('hidden');
             } else if (tab === 'payments') {
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelPayments.classList.remove('hidden');
                 panelBookings.classList.add('hidden');
+                panelTests.classList.add('hidden');
+                panelAnalytics.classList.add('hidden');
+            } else if (tab === 'analytics') {
+                a.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
+                b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                panelAnalytics.classList.remove('hidden');
+                panelBookings.classList.add('hidden');
+                panelPayments.classList.add('hidden');
                 panelTests.classList.add('hidden');
             } else {
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelTests.classList.remove('hidden');
                 panelBookings.classList.add('hidden');
                 panelPayments.classList.add('hidden');
+                panelAnalytics.classList.add('hidden');
             }
         }
 
         el('tab-bookings').addEventListener('click', () => setActive('bookings'));
         el('tab-payments').addEventListener('click', () => { setActive('payments'); loadPayments(); });
         el('tab-tests').addEventListener('click', () => setActive('tests'));
+        el('tab-analytics').addEventListener('click', () => { setActive('analytics'); loadAnalytics(); });
 
         function escapeHtml(s) {
             return String(s ?? '')
@@ -305,6 +370,166 @@
                 })
                 .catch(() => {
                     el('payment-rows').innerHTML = `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">Failed to load payments</td></tr>`;
+                });
+        }
+
+        function destroyChart(key) {
+            if (charts[key]) {
+                charts[key].destroy();
+                delete charts[key];
+            }
+        }
+
+        function showAnalyticsError(message) {
+            const box = el('analytics-error');
+            if (!box) return;
+            box.textContent = message || 'Failed to load analytics.';
+            box.classList.remove('hidden');
+        }
+
+        function clearAnalyticsError() {
+            const box = el('analytics-error');
+            if (!box) return;
+            box.textContent = '';
+            box.classList.add('hidden');
+        }
+
+        function monthLabel(tahun, bulan) {
+            const b = String(bulan).padStart(2, '0');
+            return `${tahun}-${b}`;
+        }
+
+        function loadAnalytics() {
+            clearAnalyticsError();
+
+            fetch('/admin/analytics')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) {
+                        showAnalyticsError(res.message || 'Analytics not available.');
+                        return;
+                    }
+
+                    const data = res.data || {};
+
+                    const bookingPerBulan = (data.bookingPerBulan || []).map(x => ({
+                        label: monthLabel(x.tahun, x.bulan),
+                        value: Number(x.total_booking || 0),
+                    }));
+                    destroyChart('bookingBulanan');
+                    charts.bookingBulanan = new Chart(el('chart-booking-bulanan'), {
+                        type: 'line',
+                        data: {
+                            labels: bookingPerBulan.map(x => x.label),
+                            datasets: [{
+                                label: 'Total Booking',
+                                data: bookingPerBulan.map(x => x.value),
+                                borderColor: '#16a34a',
+                                backgroundColor: 'rgba(22,163,74,0.15)',
+                                tension: 0.3,
+                                fill: true,
+                            }]
+                        },
+                        options: { responsive: true, plugins: { legend: { display: false } } }
+                    });
+
+                    const bookingPerCabang = (data.bookingPerCabang || []).map(x => ({
+                        label: x.nama_cabang,
+                        value: Number(x.total_booking || 0),
+                    }));
+                    destroyChart('bookingCabang');
+                    charts.bookingCabang = new Chart(el('chart-booking-cabang'), {
+                        type: 'bar',
+                        data: {
+                            labels: bookingPerCabang.map(x => x.label),
+                            datasets: [{
+                                label: 'Bookings',
+                                data: bookingPerCabang.map(x => x.value),
+                                backgroundColor: '#2563eb',
+                            }]
+                        },
+                        options: { responsive: true, plugins: { legend: { display: false } } }
+                    });
+
+                    const revPerKuartal = (data.revenuePerKuartal || []).map(x => ({
+                        label: `${x.tahun}-Q${x.kuartal}`,
+                        value: Number(x.total_pemasukan || 0),
+                    }));
+                    destroyChart('revenueKuartal');
+                    charts.revenueKuartal = new Chart(el('chart-revenue-kuartal'), {
+                        type: 'line',
+                        data: {
+                            labels: revPerKuartal.map(x => x.label),
+                            datasets: [{
+                                label: 'Total Pemasukan',
+                                data: revPerKuartal.map(x => x.value),
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245,158,11,0.15)',
+                                tension: 0.3,
+                                fill: true,
+                            }]
+                        },
+                        options: { responsive: true, plugins: { legend: { display: false } } }
+                    });
+
+                    const revPerCabang = (data.revenuePerCabang || []).map(x => ({
+                        label: x.nama_cabang,
+                        value: Number(x.total_pemasukan || 0),
+                    }));
+                    destroyChart('revenueCabang');
+                    charts.revenueCabang = new Chart(el('chart-revenue-cabang'), {
+                        type: 'bar',
+                        data: {
+                            labels: revPerCabang.map(x => x.label),
+                            datasets: [{
+                                label: 'Pemasukan',
+                                data: revPerCabang.map(x => x.value),
+                                backgroundColor: '#7c3aed',
+                            }]
+                        },
+                        options: { responsive: true, plugins: { legend: { display: false } } }
+                    });
+
+                    const distribusiTes = (data.distribusiTes || []).map(x => ({
+                        label: x.nama_tes,
+                        value: Number(x.jumlah_tes || 0),
+                    }));
+                    destroyChart('distribusiTes');
+                    charts.distribusiTes = new Chart(el('chart-distribusi-tes'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: distribusiTes.map(x => x.label),
+                            datasets: [{
+                                data: distribusiTes.map(x => x.value),
+                                backgroundColor: ['#16a34a','#2563eb','#f59e0b','#ef4444','#7c3aed','#0ea5e9','#f97316','#10b981'],
+                            }]
+                        },
+                        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                    });
+
+                    const trenTes = (data.trenTesPerBulan || []).map(x => ({
+                        label: monthLabel(x.tahun, x.bulan),
+                        value: Number(x.jumlah_tes || 0),
+                    }));
+                    destroyChart('trenTes');
+                    charts.trenTes = new Chart(el('chart-tren-tes'), {
+                        type: 'line',
+                        data: {
+                            labels: trenTes.map(x => x.label),
+                            datasets: [{
+                                label: 'Jumlah Tes',
+                                data: trenTes.map(x => x.value),
+                                borderColor: '#0ea5e9',
+                                backgroundColor: 'rgba(14,165,233,0.15)',
+                                tension: 0.3,
+                                fill: true,
+                            }]
+                        },
+                        options: { responsive: true, plugins: { legend: { display: false } } }
+                    });
+                })
+                .catch(() => {
+                    showAnalyticsError('Failed to load analytics. Check warehouse DB connection.');
                 });
         }
 
@@ -661,6 +886,7 @@
         el('refresh-bookings').addEventListener('click', () => loadBookings());
         el('refresh-payments').addEventListener('click', () => loadPayments());
         el('refresh-tests').addEventListener('click', () => loadTests());
+        el('refresh-analytics').addEventListener('click', () => loadAnalytics());
 
         // Load tests when tests tab is clicked
         el('tab-tests').addEventListener('click', () => {
