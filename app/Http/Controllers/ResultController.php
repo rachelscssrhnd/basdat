@@ -76,8 +76,49 @@ class ResultController extends Controller
                     'tests' => $tests,
                 ];
             } else {
-                // No transaction provided → render empty cards
-                $result = ['tests' => []];
+                // No transaction provided → render demo results
+                $result = [
+                    'transaction_id' => 'DEMO',
+                    'booking_id' => 'DEMO',
+                    'tanggal_tes' => now()->toDateString(),
+                    'tests' => [
+                        [
+                            'name' => 'Tes Darah (Hemoglobin)',
+                            'parameters' => [
+                                ['name' => 'Hemoglobin', 'value' => '13.6 g/dL', 'range' => '12.0 - 16.0', 'flag' => 'Normal'],
+                                ['name' => 'Hematokrit', 'value' => '40 %', 'range' => '36 - 46', 'flag' => 'Normal'],
+                            ],
+                        ],
+                        [
+                            'name' => 'Tes Urine',
+                            'parameters' => [
+                                ['name' => 'pH', 'value' => '6.0', 'range' => '5.0 - 8.0', 'flag' => 'Normal'],
+                                ['name' => 'Protein', 'value' => 'Negative', 'range' => 'Negative', 'flag' => 'Normal'],
+                            ],
+                        ],
+                        [
+                            'name' => 'Tes Darah (Golongan Darah)',
+                            'parameters' => [
+                                ['name' => 'ABO', 'value' => 'O', 'range' => 'A/B/AB/O', 'flag' => 'Normal'],
+                                ['name' => 'Rhesus', 'value' => '+', 'range' => '+ / -', 'flag' => 'Normal'],
+                            ],
+                        ],
+                        [
+                            'name' => 'Tes Kehamilan (Anti-CMV IgG)',
+                            'parameters' => [
+                                ['name' => 'CMV IgG', 'value' => '180 AU/mL', 'range' => '< 10', 'flag' => 'Slightly High'],
+                                ['name' => 'Interpretasi', 'value' => 'Reaktif', 'range' => 'Non-reaktif', 'flag' => 'Slightly High'],
+                            ],
+                        ],
+                        [
+                            'name' => 'Tes Darah (Agregasi Trombosit)',
+                            'parameters' => [
+                                ['name' => 'Agregasi ADP', 'value' => '55 %', 'range' => '50 - 80', 'flag' => 'Normal'],
+                                ['name' => 'Agregasi Epinefrin', 'value' => '45 %', 'range' => '50 - 80', 'flag' => 'High'],
+                            ],
+                        ],
+                    ],
+                ];
             }
 
             return view('result', compact('result'));
