@@ -94,9 +94,8 @@ class MyOrderController extends Controller
                 }
 
                 $bookings->each(function ($booking) use ($sesiByBooking) {
-                    if (!isset($booking->sesi) || $booking->sesi === null) {
-                        $booking->sesi_fallback = $sesiByBooking[(string) $booking->booking_id] ?? null;
-                    }
+                    // Always attach sesi_fallback from logs if available, regardless of existing sesi
+                    $booking->sesi_fallback = $sesiByBooking[(string) $booking->booking_id] ?? null;
                 });
             }
 

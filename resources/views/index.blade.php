@@ -147,9 +147,9 @@
                             <p class="mt-5 text-base text-gray-500">
                                 Our AI analyzes your symptoms and recommends the most appropriate tests for your condition.
                             </p>
-                            <a href="{{ route('labtest') }}" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700">
-                                Try Now
-                                <i data-feather="arrow-right" class="ml-2"></i>
+                            <button onclick="showComingSoon()" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-400 hover:bg-gray-500 cursor-not-allowed">
+                                Coming Soon
+                                <i data-feather="clock" class="ml-2"></i>
                             </a>
                         </div>
                     </div>
@@ -296,6 +296,16 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+
+        function showComingSoon() {
+            alert('Coming Soon! Our AI recommendation feature will be available soon.');
+        }
+    </script>
 
     <script>
         AOS.init();
