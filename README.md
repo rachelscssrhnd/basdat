@@ -1,4 +1,4 @@
-# Basdat - Sistem Informasi Laboratorium (Laravel) Kelompok E
+# Basis Data - Sistem Informasi Laboratorium Klinik (Laravel) Kelompok E
 
 Repository GitHub: https://github.com/rachelscssrhnd/basdat
 
