@@ -87,7 +87,7 @@
                         <p class="text-sm text-gray-600">Date & Session</p>
                         <p class="font-semibold text-gray-900">
                             {{ \Carbon\Carbon::parse($booking->tanggal_booking)->format('d M Y') }} - 
-                            Sesi {{ $booking->sesi }}
+                            {{ $sesiLabel ?? ('Sesi ' . ($sesiNumber ?? $booking->sesi ?? '-')) }}
                         </p>
                     </div>
                     <div>
@@ -140,14 +140,8 @@
                     <div class="bg-green-50 border border-green-200 rounded-lg p-6">
                         <div class="text-center">
                             <h3 class="text-lg font-semibold text-green-900 mb-4">{{ $paymentDetails['ewallet_name'] }}</h3>
-                            <div class="bg-white border-2 border-dashed border-green-300 rounded-lg p-4 mb-4">
-                                <div class="flex justify-center mb-2">
-                                    {!! $paymentDetails['qr_code'] !!}
-                                </div>
-                                <p class="text-sm text-green-600">Scan QR Code</p>
-                            </div>
-                            <p class="text-sm text-gray-600 mb-2">Or transfer to:</p>
-                            <p class="text-lg font-mono font-bold text-green-900">{{ $paymentDetails['ewallet_number'] }}</p>
+                            <p class="text-sm text-gray-600 mb-2">Transfer to:</p>
+                            <p class="text-xl font-mono font-bold text-green-900">{{ $paymentDetails['ewallet_number'] }}</p>
                             <p class="text-lg font-semibold text-gray-900 mt-2">
                                 Amount: <span class="text-green-600">Rp{{ number_format($paymentDetails['amount'], 0, ',', '.') }}</span>
                             </p>
@@ -177,6 +171,7 @@
                 
                 <form method="POST" action="{{ route('payment.upload', $booking->booking_id) }}" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="sesi" value="{{ $sesiNumber ?? '' }}">
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Payment Proof</label>

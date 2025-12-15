@@ -78,6 +78,16 @@
                 <h2 class="text-lg font-semibold text-gray-900 flex items-center mb-4">
                     <i data-feather="calendar" class="mr-2 text-green-600"></i> Schedule
                 </h2>
+                @php
+                    $sesiNumber = $booking->sesi ?? ($booking->sesi_fallback ?? null) ?? session('booking_sesi_' . $booking->booking_id);
+                    $sesiMap = [
+                        1 => 'Sesi 1 (08:00-10:00)',
+                        2 => 'Sesi 2 (10:00-12:00)',
+                        3 => 'Sesi 3 (13:00-15:00)',
+                        4 => 'Sesi 4 (15:00-17:00)',
+                    ];
+                    $sesiLabel = $sesiNumber && isset($sesiMap[(int) $sesiNumber]) ? $sesiMap[(int) $sesiNumber] : null;
+                @endphp
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
                         <div class="text-gray-500">Date</div>
@@ -85,11 +95,11 @@
                     </div>
                     <div>
                         <div class="text-gray-500">Session</div>
-                        <div class="font-semibold text-gray-900">{{ $booking->sesi ?? '-' }}</div>
+                        <div class="font-semibold text-gray-900">{{ $sesiLabel ?? ('Sesi ' . ($sesiNumber ?? '-')) }}</div>
                     </div>
                     <div>
                         <div class="text-gray-500">Branch</div>
-                        <div class="font-semibold text-gray-900">{{ $booking->cabang->nama_cabang ?? '-' }}</div>
+                        <div class="font-semibold text-gray-900">{{ $booking->cabang->display_name ?? $booking->cabang->nama_cabang ?? '-' }}</div>
                     </div>
                     <div>
                         <div class="text-gray-500">Patient</div>
@@ -162,18 +172,6 @@
                         <div>Total</div>
                         <div>Rp{{ number_format($total, 0, ',', '.') }}</div>
                     </div>
-                </div>
-
-                <div class="mt-4">
-                    <div class="text-gray-500 text-sm mb-1">Payment Proof</div>
-                    @if($proofPath)
-                        <a href="{{ asset('storage/' . $proofPath) }}" target="_blank" class="text-sm text-green-700 hover:text-green-800 font-medium">
-                            View uploaded proof
-                            <i data-feather="external-link" class="inline ml-1 h-4 w-4"></i>
-                        </a>
-                    @else
-                        <div class="text-sm text-gray-500">No proof uploaded.</div>
-                    @endif
                 </div>
             </div>
 

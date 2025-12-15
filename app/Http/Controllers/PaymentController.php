@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Pembayaran;
 use App\Models\Pasien;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -48,7 +49,38 @@ class PaymentController extends Controller
             // Generate payment details based on method
             $paymentDetails = $this->generatePaymentDetails($booking->pembayaran);
 
-            return view('payment', compact('booking', 'paymentDetails'));
+            $sesiNumber = $booking->sesi ?? $request->query('sesi') ?? $request->get('sesi') ?? session('booking_sesi_' . $bookingId);
+            if ($sesiNumber) {
+                session(['booking_sesi_' . $bookingId => $sesiNumber]);
+
+                try {
+                    \App\Models\LogActivity::create([
+                        'user_id' => session('user_id'),
+                        'action' => 'booking_sesi:' . $sesiNumber . ';booking_id:' . $bookingId,
+                        'resource_type' => 'booking',
+                        'created_at' => now(),
+                    ]);
+                } catch (\Exception $e) {
+                    \App\Models\LogActivity::create([
+                        'user_id' => session('user_id'),
+                        'action' => 'booking_sesi:' . $sesiNumber . ';booking_id:' . $bookingId,
+                        'created_at' => now(),
+                    ]);
+                }
+            }
+
+            $sesiLabel = null;
+            $sesiMap = [
+                1 => 'Sesi 1 (08:00-10:00)',
+                2 => 'Sesi 2 (10:00-12:00)',
+                3 => 'Sesi 3 (13:00-15:00)',
+                4 => 'Sesi 4 (15:00-17:00)',
+            ];
+            if ($sesiNumber && isset($sesiMap[(int) $sesiNumber])) {
+                $sesiLabel = $sesiMap[(int) $sesiNumber];
+            }
+
+            return view('payment', compact('booking', 'paymentDetails', 'sesiLabel', 'sesiNumber'));
 
         } catch (\Exception $e) {
             \Log::error('Payment page error', ['error' => $e->getMessage(), 'booking_id' => $bookingId]);
@@ -84,7 +116,7 @@ class PaymentController extends Controller
             $details['qr_code'] = 'data:image/svg+xml;base64,' . base64_encode($this->generateQRCode($pembayaran->jumlah));
             $details['instructions'] = [
                 '1. Buka aplikasi ' . $details['ewallet_name'],
-                '2. Scan QR code di atas atau transfer ke nomor: ' . $details['ewallet_number'],
+                '2. Transfer ke nomor: ' . $details['ewallet_number'],
                 '3. Jumlah yang harus ditransfer: Rp ' . number_format($pembayaran->jumlah, 0, ',', '.'),
                 '4. Upload bukti transfer setelah melakukan pembayaran'
             ];
@@ -146,26 +178,94 @@ class PaymentController extends Controller
             $filePath = $file->storeAs('payment_proofs', $fileName, 'public');
 
             // Update payment record
-            $paymentUpdates = [
-                'status' => 'waiting_confirmation',
-            ];
+            $pembayaran = $booking->pembayaran;
+            $paymentId = $pembayaran->getKey();
+            $updated = false;
 
-            if (Schema::hasColumn('pembayaran', 'bukti_pembayaran')) {
-                $paymentUpdates['bukti_pembayaran'] = $filePath;
-            }
-            if (Schema::hasColumn('pembayaran', 'bukti_path')) {
-                $paymentUpdates['bukti_path'] = $filePath;
-            }
-            if (Schema::hasColumn('pembayaran', 'tanggal_upload')) {
-                $paymentUpdates['tanggal_upload'] = now();
+            try {
+                Pembayaran::where('pembayaran_id', $paymentId)->update([
+                    'bukti_pembayaran' => $filePath,
+                    'status' => 'waiting_confirmation',
+                    'tanggal_upload' => now(),
+                ]);
+                $updated = true;
+            } catch (QueryException $qe) {
+                if (stripos($qe->getMessage(), 'Unknown column') === false) {
+                    throw $qe;
+                }
             }
 
-            $booking->pembayaran->update($paymentUpdates);
+            if (!$updated) {
+                try {
+                    Pembayaran::where('pembayaran_id', $paymentId)->update([
+                        'bukti_pembayaran' => $filePath,
+                        'status' => 'waiting_confirmation',
+                    ]);
+                    $updated = true;
+                } catch (QueryException $qe) {
+                    if (stripos($qe->getMessage(), 'Unknown column') === false) {
+                        throw $qe;
+                    }
+                }
+            }
+
+            if (!$updated) {
+                try {
+                    Pembayaran::where('pembayaran_id', $paymentId)->update([
+                        'bukti_path' => $filePath,
+                        'status' => 'waiting_confirmation',
+                        'tanggal_upload' => now(),
+                    ]);
+                    $updated = true;
+                } catch (QueryException $qe) {
+                    if (stripos($qe->getMessage(), 'Unknown column') === false) {
+                        throw $qe;
+                    }
+                }
+            }
+
+            if (!$updated) {
+                try {
+                    Pembayaran::where('pembayaran_id', $paymentId)->update([
+                        'bukti_path' => $filePath,
+                        'status' => 'waiting_confirmation',
+                    ]);
+                    $updated = true;
+                } catch (QueryException $qe) {
+                    if (stripos($qe->getMessage(), 'Unknown column') === false) {
+                        throw $qe;
+                    }
+                }
+            }
+
+            if (!$updated) {
+                Pembayaran::where('pembayaran_id', $paymentId)->update([
+                    'status' => 'waiting_confirmation',
+                ]);
+            }
 
             // Update booking status
             $booking->update([
                 'status_pembayaran' => 'waiting_confirmation'
             ]);
+
+            $sesiNumber = $request->get('sesi');
+            if ($sesiNumber) {
+                try {
+                    \App\Models\LogActivity::create([
+                        'user_id' => session('user_id'),
+                        'action' => 'booking_sesi:' . $sesiNumber . ';booking_id:' . $bookingId,
+                        'resource_type' => 'booking',
+                        'created_at' => now(),
+                    ]);
+                } catch (\Exception $e) {
+                    \App\Models\LogActivity::create([
+                        'user_id' => session('user_id'),
+                        'action' => 'booking_sesi:' . $sesiNumber . ';booking_id:' . $bookingId,
+                        'created_at' => now(),
+                    ]);
+                }
+            }
 
             // Log activity
             \App\Models\LogActivity::create([

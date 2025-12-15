@@ -17,6 +17,7 @@ class LogActivity extends Model
         'user_id',
         'action',
         'resource_type',
+        'resource_id',
         'created_at',
     ];
 

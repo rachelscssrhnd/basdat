@@ -8,6 +8,7 @@ use App\Models\JenisTes;
 use App\Models\Cabang;
 use App\Models\Pasien;
 use App\Models\Pembayaran;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -37,33 +38,33 @@ class BookingController extends Controller
             }
 
             // Get available lab tests
+            $canonicalCatalog = [
+                ['tes_id' => 1, 'harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'deskripsi' => 'Pemeriksaan rontgen gigi untuk membantu mendeteksi kondisi gigi dan rahang.'],
+                ['tes_id' => 2, 'harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'deskripsi' => 'Pemeriksaan rontgen menyeluruh area mulut dan rahang (panoramik).'],
+                ['tes_id' => 3, 'harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water\'s Foto)", 'deskripsi' => 'Pemeriksaan rontgen untuk membantu evaluasi area sinus dan tulang wajah.'],
+                ['tes_id' => 4, 'harga' => 50000,  'nama_tes' => 'Tes Urine', 'deskripsi' => 'Pemeriksaan urine untuk membantu deteksi infeksi, metabolisme, dan kondisi kesehatan umum.'],
+                ['tes_id' => 5, 'harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)', 'deskripsi' => 'Pemeriksaan antibodi Rubella IgG untuk melihat riwayat paparan/imunitas.'],
+                ['tes_id' => 6, 'harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)', 'deskripsi' => 'Pemeriksaan antibodi CMV IgG untuk melihat riwayat paparan/imunitas.'],
+                ['tes_id' => 7, 'harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)', 'deskripsi' => 'Pemeriksaan antibodi HSV-1 IgG untuk melihat riwayat paparan/imunitas.'],
+                ['tes_id' => 8, 'harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)', 'deskripsi' => 'Pemeriksaan kadar hemoglobin untuk membantu evaluasi anemia dan kondisi darah.'],
+                ['tes_id' => 9, 'harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)', 'deskripsi' => 'Pemeriksaan golongan darah ABO dan Rhesus.'],
+                ['tes_id' => 10, 'harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)', 'deskripsi' => 'Pemeriksaan fungsi trombosit untuk membantu evaluasi pembekuan darah.'],
+            ];
+
             $tests = JenisTes::all();
             if ($tests->isEmpty()) {
-                $catalog = [
-                    ['harga' => 100000, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'deskripsi' => 'Pemeriksaan rontgen gigi untuk membantu mendeteksi kondisi gigi dan rahang.'],
-                    ['harga' => 150000, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'deskripsi' => 'Pemeriksaan rontgen menyeluruh area mulut dan rahang (panoramik).'],
-                    ['harga' => 200000, 'nama_tes' => "Tes Rontgen Gigi (Water\'s Foto)", 'deskripsi' => 'Pemeriksaan rontgen untuk membantu evaluasi area sinus dan tulang wajah.'],
-                    ['harga' => 50000,  'nama_tes' => 'Tes Urine', 'deskripsi' => 'Pemeriksaan urine untuk membantu deteksi infeksi, metabolisme, dan kondisi kesehatan umum.'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)', 'deskripsi' => 'Pemeriksaan antibodi Rubella IgG untuk melihat riwayat paparan/imunitas.'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)', 'deskripsi' => 'Pemeriksaan antibodi CMV IgG untuk melihat riwayat paparan/imunitas.'],
-                    ['harga' => 120000, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)', 'deskripsi' => 'Pemeriksaan antibodi HSV-1 IgG untuk melihat riwayat paparan/imunitas.'],
-                    ['harga' => 75000,  'nama_tes' => 'Tes Darah (Hemoglobin)', 'deskripsi' => 'Pemeriksaan kadar hemoglobin untuk membantu evaluasi anemia dan kondisi darah.'],
-                    ['harga' => 90000,  'nama_tes' => 'Tes Darah (Golongan Darah)', 'deskripsi' => 'Pemeriksaan golongan darah ABO dan Rhesus.'],
-                    ['harga' => 100000, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)', 'deskripsi' => 'Pemeriksaan fungsi trombosit untuk membantu evaluasi pembekuan darah.'],
-                ];
-
-                $tests = collect(array_map(function ($t, $idx) {
+                $tests = collect(array_map(function ($t) {
                     return (object) [
-                        'tes_id' => $idx + 1,
+                        'tes_id' => $t['tes_id'],
                         'nama_tes' => $t['nama_tes'],
                         'deskripsi' => $t['deskripsi'] ?? ('Deskripsi ' . $t['nama_tes']),
                         'harga' => $t['harga'],
                     ];
-                }, $catalog, array_keys($catalog)));
+                }, $canonicalCatalog));
             }
 
             // Get available branches
-            $branches = Cabang::all();
+            $branches = Cabang::orderBy('cabang_id')->get();
             if ($branches->isEmpty()) {
                 $branches = collect([
                     (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A', 'display_name' => 'Cabang A', 'alamat' => 'Jl. Sudirman No. 1'],
@@ -106,6 +107,19 @@ class BookingController extends Controller
                     $selectedTest = $tests->firstWhere('tes_id', $testId);
                 }
 
+                if ($selectedTest) {
+                    $canon = collect($canonicalCatalog)->firstWhere('tes_id', $testId);
+                    if ($canon) {
+                        $selectedTest->nama_tes = $canon['nama_tes'];
+                        if (empty($selectedTest->deskripsi)) {
+                            $selectedTest->deskripsi = $canon['deskripsi'];
+                        }
+                        if (empty($selectedTest->harga) || (int) $selectedTest->harga <= 0) {
+                            $selectedTest->harga = $canon['harga'];
+                        }
+                    }
+                }
+
                 \Log::info('Selected test:', [
                     'test_id' => $testId,
                     'found' => (bool) $selectedTest
@@ -132,16 +146,16 @@ class BookingController extends Controller
             \Log::error('BookingController@index error: ' . $e->getMessage());
 
             $tests = collect([
-                (object) ['tes_id' => 1, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'harga' => 100000, 'deskripsi' => 'Deskripsi Tes Rontgen Gigi (Dental I CR)'],
-                (object) ['tes_id' => 2, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'harga' => 150000, 'deskripsi' => 'Deskripsi Tes Rontgen Gigi (Panoramic)'],
-                (object) ['tes_id' => 3, 'nama_tes' => "Tes Rontgen Gigi (Water\'s Foto)", 'harga' => 200000, 'deskripsi' => "Deskripsi Tes Rontgen Gigi (Water\'s Foto)"],
-                (object) ['tes_id' => 4, 'nama_tes' => 'Tes Urine', 'harga' => 50000, 'deskripsi' => 'Deskripsi Tes Urine'],
-                (object) ['tes_id' => 5, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)', 'harga' => 120000, 'deskripsi' => 'Deskripsi Tes Kehamilan (Anti-Rubella lgG)'],
-                (object) ['tes_id' => 6, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)', 'harga' => 120000, 'deskripsi' => 'Deskripsi Tes Kehamilan (Anti-CMV lgG)'],
-                (object) ['tes_id' => 7, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)', 'harga' => 120000, 'deskripsi' => 'Deskripsi Tes Kehamilan (Anti-HSV1 lgG)'],
-                (object) ['tes_id' => 8, 'nama_tes' => 'Tes Darah (Hemoglobin)', 'harga' => 75000, 'deskripsi' => 'Deskripsi Tes Darah (Hemoglobin)'],
-                (object) ['tes_id' => 9, 'nama_tes' => 'Tes Darah (Golongan Darah)', 'harga' => 90000, 'deskripsi' => 'Deskripsi Tes Darah (Golongan Darah)'],
-                (object) ['tes_id' => 10, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)', 'harga' => 100000, 'deskripsi' => 'Deskripsi Tes Darah (Agregasi Trombosit)'],
+                (object) ['tes_id' => 1, 'nama_tes' => 'Tes Rontgen Gigi (Dental I CR)', 'harga' => 100000, 'deskripsi' => 'Pemeriksaan rontgen gigi untuk membantu mendeteksi kondisi gigi dan rahang.'],
+                (object) ['tes_id' => 2, 'nama_tes' => 'Tes Rontgen Gigi (Panoramic)', 'harga' => 150000, 'deskripsi' => 'Pemeriksaan rontgen menyeluruh area mulut dan rahang (panoramik).'],
+                (object) ['tes_id' => 3, 'nama_tes' => "Tes Rontgen Gigi (Water\'s Foto)", 'harga' => 200000, 'deskripsi' => 'Pemeriksaan rontgen untuk membantu evaluasi area sinus dan tulang wajah.'],
+                (object) ['tes_id' => 4, 'nama_tes' => 'Tes Urine', 'harga' => 50000, 'deskripsi' => 'Pemeriksaan urine untuk membantu deteksi infeksi, metabolisme, dan kondisi kesehatan umum.'],
+                (object) ['tes_id' => 5, 'nama_tes' => 'Tes Kehamilan (Anti-Rubella lgG)', 'harga' => 120000, 'deskripsi' => 'Pemeriksaan antibodi Rubella IgG untuk melihat riwayat paparan/imunitas.'],
+                (object) ['tes_id' => 6, 'nama_tes' => 'Tes Kehamilan (Anti-CMV lgG)', 'harga' => 120000, 'deskripsi' => 'Pemeriksaan antibodi CMV IgG untuk melihat riwayat paparan/imunitas.'],
+                (object) ['tes_id' => 7, 'nama_tes' => 'Tes Kehamilan (Anti-HSV1 lgG)', 'harga' => 120000, 'deskripsi' => 'Pemeriksaan antibodi HSV-1 IgG untuk melihat riwayat paparan/imunitas.'],
+                (object) ['tes_id' => 8, 'nama_tes' => 'Tes Darah (Hemoglobin)', 'harga' => 75000, 'deskripsi' => 'Pemeriksaan kadar hemoglobin untuk membantu evaluasi anemia dan kondisi darah.'],
+                (object) ['tes_id' => 9, 'nama_tes' => 'Tes Darah (Golongan Darah)', 'harga' => 90000, 'deskripsi' => 'Pemeriksaan golongan darah ABO dan Rhesus.'],
+                (object) ['tes_id' => 10, 'nama_tes' => 'Tes Darah (Agregasi Trombosit)', 'harga' => 100000, 'deskripsi' => 'Pemeriksaan fungsi trombosit untuk membantu evaluasi pembekuan darah.'],
             ]);
 
             $branches = collect([
@@ -264,10 +278,30 @@ class BookingController extends Controller
                 'created_at' => now(),
             ]);
 
+            try {
+                \App\Models\LogActivity::create([
+                    'user_id' => session('user_id'),
+                    'action' => 'booking_sesi:' . $validated['sesi'] . ';booking_id:' . $booking->booking_id,
+                    'resource_type' => 'booking',
+                    'created_at' => now(),
+                ]);
+            } catch (QueryException $qe) {
+                if (stripos($qe->getMessage(), 'Unknown column') === false) {
+                    throw $qe;
+                }
+                \App\Models\LogActivity::create([
+                    'user_id' => session('user_id'),
+                    'action' => 'booking_sesi:' . $validated['sesi'] . ';booking_id:' . $booking->booking_id,
+                    'created_at' => now(),
+                ]);
+            }
+
             DB::commit();
 
             // Redirect to payment page
-            return redirect()->route('payment', ['booking_id' => $booking->booking_id])
+            session(['booking_sesi_' . $booking->booking_id => $validated['sesi']]);
+
+            return redirect()->route('payment', ['booking_id' => $booking->booking_id, 'sesi' => $validated['sesi']])
                 ->with('success', 'Booking berhasil! Silakan lakukan pembayaran.');
 
         } catch (\Exception $e) {

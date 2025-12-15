@@ -446,12 +446,14 @@ class AdminController extends Controller
     {
         try {
             $payment = Pembayaran::with(['booking.pasien'])->findOrFail($id);
+
+            $proofPath = $payment->bukti_pembayaran ?? ($payment->bukti_path ?? null);
             
             return response()->json([
                 'success' => true, 
                 'data' => [
                     'payment' => $payment,
-                    'proof_url' => $payment->bukti_pembayaran ? asset('storage/' . $payment->bukti_pembayaran) : null
+                    'proof_url' => $proofPath ? asset('storage/' . $proofPath) : null
                 ]
             ]);
         } catch (\Exception $e) {

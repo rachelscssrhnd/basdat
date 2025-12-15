@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Pasien;
+use App\Models\LogActivity;
+use App\Models\Cabang;
 use Illuminate\Support\Facades\Auth;
 
 class MyOrderController extends Controller
@@ -35,6 +37,66 @@ class MyOrderController extends Controller
                 $bookings = $allBookings->filter(function($booking) {
                     return in_array($booking->status_pembayaran, ['pending', 'waiting_confirmation']) || 
                            $booking->status_tes === 'scheduled';
+                });
+            }
+
+            $bookingIds = $bookings->pluck('booking_id')->filter()->values();
+            $bookingIdStrings = $bookingIds->map(function ($id) {
+                return (string) $id;
+            });
+
+            $branchLabelById = Cabang::orderBy('cabang_id')
+                ->pluck('cabang_id')
+                ->values()
+                ->mapWithKeys(function ($cabangId, $idx) {
+                    return [$cabangId => 'Cabang ' . chr(65 + $idx)];
+                });
+
+            $bookings->each(function ($booking) use ($branchLabelById) {
+                if (isset($booking->cabang) && $booking->cabang) {
+                    $label = $branchLabelById[$booking->cabang_id] ?? null;
+                    if ($label) {
+                        $booking->cabang->display_name = $label;
+                    }
+                }
+            });
+
+            if ($bookingIds->isNotEmpty()) {
+                $logs = LogActivity::where('action', 'like', 'booking_sesi:%')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                $sesiByBooking = collect();
+                foreach ($logs as $log) {
+                    $action = (string) $log->action;
+                    $sesi = null;
+                    $bookingId = null;
+
+                    if (preg_match('/booking_sesi\s*:\s*(\d+)/i', $action, $m)) {
+                        $sesi = (int) $m[1];
+                    }
+                    if (preg_match('/booking_id\s*:\s*([0-9]+)/i', $action, $m2)) {
+                        $bookingId = (string) $m2[1];
+                    }
+
+                    if ($bookingId === null) {
+                        continue;
+                    }
+
+                    if (!$bookingIdStrings->contains($bookingId)) {
+                        continue;
+                    }
+
+                    // Keep first (newest) log per booking id
+                    if (!$sesiByBooking->has($bookingId)) {
+                        $sesiByBooking->put($bookingId, $sesi);
+                    }
+                }
+
+                $bookings->each(function ($booking) use ($sesiByBooking) {
+                    if (!isset($booking->sesi) || $booking->sesi === null) {
+                        $booking->sesi_fallback = $sesiByBooking[(string) $booking->booking_id] ?? null;
+                    }
                 });
             }
 
@@ -114,6 +176,44 @@ class MyOrderController extends Controller
                     $q->where('user_id', $userId);
                 })
                 ->firstOrFail();
+
+            if (isset($booking->cabang) && $booking->cabang) {
+                $branchLabelById = Cabang::orderBy('cabang_id')
+                    ->pluck('cabang_id')
+                    ->values()
+                    ->mapWithKeys(function ($cabangId, $idx) {
+                        return [$cabangId => 'Cabang ' . chr(65 + $idx)];
+                    });
+                $label = $branchLabelById[$booking->cabang_id] ?? null;
+                if ($label) {
+                    $booking->cabang->display_name = $label;
+                }
+            }
+
+            if (!isset($booking->sesi) || $booking->sesi === null) {
+                $targetId = (string) $booking->booking_id;
+                $logs = LogActivity::where('action', 'like', 'booking_sesi:%')
+                    ->orderBy('created_at', 'desc')
+                    ->get();
+
+                foreach ($logs as $log) {
+                    $action = (string) $log->action;
+                    $sesi = null;
+                    $bookingId = null;
+
+                    if (preg_match('/booking_sesi\s*:\s*(\d+)/i', $action, $m)) {
+                        $sesi = (int) $m[1];
+                    }
+                    if (preg_match('/booking_id\s*:\s*([0-9]+)/i', $action, $m2)) {
+                        $bookingId = (string) $m2[1];
+                    }
+
+                    if ($bookingId === $targetId) {
+                        $booking->sesi_fallback = $sesi;
+                        break;
+                    }
+                }
+            }
 
             return view('myorder.show', compact('booking'));
         } catch (\Exception $e) {
