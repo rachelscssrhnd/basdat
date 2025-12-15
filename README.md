@@ -1,8 +1,8 @@
-# Basdat - Sistem Informasi Laboratorium (Laravel)
+# Basdat - Sistem Informasi Laboratorium (Laravel) Kelompok E
 
 Repository GitHub: https://github.com/rachelscssrhnd/basdat
 
-## Prasyarat
+## Nama Anggota
 - Miska Chirzia (164231008)
 - Rachel Sunarko (164231025)
 - I Made Adi Karunia Putra (164231057)
