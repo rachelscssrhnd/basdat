@@ -77,10 +77,7 @@ class AuthController extends Controller
             }
 
             // Set session with graceful fallback for role columns (name / role_name / slug)
-            $roleName = $user->role->slug
-                ?? $user->role->name
-                ?? $user->role->role_name
-                ?? 'User';
+            $roleName = $user->role->slug ?? $user->role->name ?? 'Administrator';
             $roleSlug = strtolower($roleName);
 
             session([
@@ -103,10 +100,8 @@ class AuthController extends Controller
                 return redirect()->route('booking', ['test_id' => $tid])->with('success', 'Login successful!');
             }
 
-            if ($roleSlug === 'admin') {
-                return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
-            }
-            return redirect()->route('user.home')->with('success', 'Login successful!');
+            // Use Laravel's redirectTo method approach
+            return $this->redirectTo();
 
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Login failed. Please try again.'])->withInput();
@@ -210,6 +205,23 @@ class AuthController extends Controller
         }
         session()->flush();
         return redirect()->route('auth')->with('success', 'Logged out successfully');
+    }
+
+    /**
+     * Redirect users based on their role after login
+     */
+    protected function redirectTo()
+    {
+        // Get current user role from session
+        $roleName = session('role');
+        $roleSlug = session('role_name');
+
+        // Redirect based on role using intended() like Breeze/Fortify
+        if (strtolower($roleSlug) === 'admin' || strpos(strtolower($roleName), 'admin') !== false) {
+            return redirect()->intended('/admin')->with('success', 'Login successful!');
+        }
+        
+        return redirect()->intended('/')->with('success', 'Login successful!');
     }
 }
 

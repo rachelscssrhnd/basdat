@@ -19,16 +19,17 @@ class RoleMiddleware
             return redirect()->route('auth')->withErrors(['error' => 'Please login to continue.']);
         }
 
+        // Check role properly
         if ($role === 'admin' && strtolower($sessionRole) !== 'admin') {
-            return redirect()->route('user.home')->withErrors(['error' => 'Unauthorized. Admin only.']);
+            return redirect()->route('auth')->withErrors(['error' => 'Unauthorized. Admin access required.']);
         }
 
         if ($role === 'pasien' && strtolower($sessionRole) !== 'pasien') {
-            return redirect()->route('admin.dashboard')->withErrors(['error' => 'Unauthorized. Patients only.']);
+            return redirect()->route('home')->withErrors(['error' => 'Unauthorized. Patient access required.']);
         }
 
         if ($role === 'user' && strtolower($sessionRole) !== 'user') {
-            return redirect()->route('admin.dashboard')->withErrors(['error' => 'Unauthorized. Users only.']);
+            return redirect()->route('home')->withErrors(['error' => 'Unauthorized. User access required.']);
         }
 
         return $next($request);

@@ -15,10 +15,12 @@ class DatabaseSeeder extends Seeder
     {
         // Roles
         $adminRoleId = DB::table('role')->insertGetId([
-            'nama_role' => 'Administrator',
+            'name' => 'Administrator',
+            'slug' => 'admin',
         ]);
         $userRoleId = DB::table('role')->insertGetId([
-            'nama_role' => 'User',
+            'name' => 'User',
+            'slug' => 'user',
         ]);
 
         // Users

@@ -12,6 +12,7 @@ use App\Models\HasilTesHeader;
 use App\Models\HasilTesValue;
 use App\Models\ParameterTes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
@@ -77,12 +78,18 @@ class AdminController extends Controller
     public function updateBooking(Request $request, $id)
     {
         $validated = $request->validate([
-            'status_pembayaran' => 'in:pending,paid,failed',
-            'status_tes' => 'in:scheduled,in_progress,completed,cancelled'
+            'tanggal_booking' => 'sometimes|nullable|date',
+            'sesi' => 'sometimes|nullable|string|max:50',
+            'status_pembayaran' => 'sometimes|nullable|in:belum_bayar,pending,waiting_confirmation,paid,confirmed,rejected,failed',
+            'status_tes' => 'sometimes|nullable|in:menunggu,pending_approval,scheduled,approved,in_progress,completed,cancelled,confirmed,rejected'
         ]);
 
         try {
             $booking = Booking::findOrFail($id);
+
+            if (!Schema::hasColumn('booking', 'sesi')) {
+                unset($validated['sesi']);
+            }
             $booking->update($validated);
             
             return response()->json(['success' => true, 'message' => 'Booking updated successfully']);
@@ -130,10 +137,13 @@ class AdminController extends Controller
             }
             
             // Update payment status
-            $booking->pembayaran->update(['status' => 'verified']);
+            $booking->pembayaran->update([
+                'status' => 'confirmed',
+                'tanggal_konfirmasi' => now(),
+            ]);
             
             // Update booking payment status
-            $booking->update(['status_pembayaran' => 'paid']);
+            $booking->update(['status_pembayaran' => 'confirmed']);
             
             // Log activity
             \App\Models\LogActivity::create([
@@ -532,6 +542,52 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['success' => false, 'message' => 'Failed to reject payment']);
+        }
+    }
+
+    public function updatePayment(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'sometimes|nullable|string',
+            'metode_bayar' => 'sometimes|nullable|string',
+            'jumlah' => 'sometimes|numeric|min:0',
+            'tanggal_bayar' => 'sometimes|nullable|date',
+            'alasan_reject' => 'sometimes|nullable|string|max:500',
+        ]);
+
+        try {
+            $payment = Pembayaran::findOrFail($id);
+            $payment->update($validated);
+
+            LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Updated payment ID: ' . $id,
+                'created_at' => now(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Payment updated successfully']);
+        } catch (
+            \Exception $e
+        ) {
+            return response()->json(['success' => false, 'message' => 'Failed to update payment']);
+        }
+    }
+
+    public function deletePayment($id)
+    {
+        try {
+            $payment = Pembayaran::findOrFail($id);
+            $payment->delete();
+
+            LogActivity::create([
+                'user_id' => session('user_id'),
+                'action' => 'Deleted payment ID: ' . $id,
+                'created_at' => now(),
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Payment deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to delete payment']);
         }
     }
 }
