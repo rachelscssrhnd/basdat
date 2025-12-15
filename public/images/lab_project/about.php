@@ -292,7 +292,7 @@
       </div>
       <div class="branch-map">
         <iframe id="mapFrame"
-          src="https://www.google.com/maps?q=Kampus+A+UNAIR,+Jl.+Prof.+DR.+Moestopo+No.47,+Surabaya&output=embed"
+          src="https://www.google.com/maps?q=Cabang+A,+Jl.+Prof.+DR.+Moestopo+No.47,+Surabaya&output=embed"
           allowfullscreen="" loading="lazy">
         </iframe>
       </div>
@@ -303,7 +303,7 @@
     function changeMap(branch) {
       let mapFrame = document.getElementById("mapFrame");
       if (branch === "cabangA") {
-        mapFrame.src = "https://www.google.com/maps?q=Kampus+A+UNAIR,+Jl.+Prof.+DR.+Moestopo+No.47,+Surabaya&output=embed";
+        mapFrame.src = "https://www.google.com/maps?q=Cabang+A,+Jl.+Prof.+DR.+Moestopo+No.47,+Surabaya&output=embed";
       } else if (branch === "cabangB") {
         mapFrame.src = "https://www.google.com/maps?q=Jl.+Airlangga+No.4-6,+Surabaya&output=embed";
       } else if (branch === "cabangC") {

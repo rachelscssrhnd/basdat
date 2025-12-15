@@ -6,6 +6,40 @@
     <title>E-Clinic Lab - Admin</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        secondary: {
+                            50: '#fefce8',
+                            100: '#fef9c3',
+                            200: '#fef08a',
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                            600: '#ca8a04',
+                            700: '#a16207',
+                            800: '#854d0e',
+                            900: '#713f12',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
@@ -17,8 +51,8 @@
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <div class="flex-shrink-0 flex items-center">
-                        <i data-feather="activity" class="h-8 w-8 text-green-600"></i>
-                        <span class="ml-2 text-2xl font-bold text-green-700">E-Clinic Lab</span>
+                        <i data-feather="activity" class="h-8 w-8 text-primary-600"></i>
+                        <span class="ml-2 text-2xl font-bold text-primary-700">E-Clinic Lab</span>
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
@@ -36,7 +70,7 @@
             <h1 class="text-3xl font-extrabold text-gray-900">Admin Dashboard</h1>
             <p class="mt-2 text-gray-600">Manage bookings and lab tests</p>
             <div class="mt-4 flex space-x-3">
-                <button id="tab-bookings" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400">Booking Management</button>
+                <button id="tab-bookings" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500">Booking Management</button>
                 <button id="tab-payments" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Payment Management</button>
                 <button id="tab-tests" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Test Management</button>
                 <button id="tab-analytics" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Dashboard Analytics</button>
@@ -50,7 +84,7 @@
             <section id="panel-bookings" class="space-y-6">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="clipboard" class="mr-2 text-green-600"></i> Bookings</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="clipboard" class="mr-2 text-primary-600"></i> Bookings</h2>
                         <div class="flex space-x-2">
                             <button id="refresh-bookings" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
                                 <i data-feather="refresh-cw" class="mr-2"></i>Refresh
@@ -117,7 +151,7 @@
             <section id="panel-payments" class="space-y-6 hidden">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="credit-card" class="mr-2 text-green-600"></i> Payments</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="credit-card" class="mr-2 text-primary-600"></i> Payments</h2>
                         <div class="flex space-x-2">
                             <button id="refresh-payments" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
                                 <i data-feather="refresh-cw" class="mr-2"></i>Refresh
@@ -147,9 +181,9 @@
             <section id="panel-tests" class="space-y-6 hidden">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-green-600"></i> Lab Tests</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-primary-600"></i> Lab Tests</h2>
                         <div class="flex space-x-2">
-                            <button id="add-test" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400">
+                            <button id="add-test" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500">
                                 <i data-feather="plus" class="mr-2"></i>Add Test
                             </button>
                             <button id="refresh-tests" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
@@ -180,7 +214,7 @@
             <section id="panel-analytics" class="space-y-6 hidden">
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="bar-chart-2" class="mr-2 text-green-600"></i> Dashboard Analytics (Data Warehouse)</h2>
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="bar-chart-2" class="mr-2 text-primary-600"></i> Dashboard Analytics (Data Warehouse)</h2>
                         <div class="flex space-x-2">
                             <button id="refresh-analytics" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
                                 <i data-feather="refresh-cw" class="mr-2"></i>Refresh
@@ -190,30 +224,56 @@
 
                     <div id="analytics-error" class="mt-4 hidden rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800"></div>
 
-                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Booking Trend (Monthly)</h3>
-                            <canvas id="chart-booking-bulanan" height="140"></canvas>
+                    <div class="mt-6 space-y-8">
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-semibold text-gray-900">FACT Booking</h3>
+                                <span class="text-xs text-gray-500">Booking volume & distribution</span>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Booking Trend (Monthly)</h4>
+                                    <canvas id="chart-booking-bulanan" height="140"></canvas>
+                                </div>
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Bookings by Branch</h4>
+                                    <canvas id="chart-booking-cabang" height="140"></canvas>
+                                </div>
+                            </div>
                         </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Bookings by Branch</h3>
-                            <canvas id="chart-booking-cabang" height="140"></canvas>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-semibold text-gray-900">FACT Pembayaran</h3>
+                                <span class="text-xs text-gray-500">Revenue analytics</span>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Revenue by Quarter</h4>
+                                    <canvas id="chart-revenue-kuartal" height="140"></canvas>
+                                </div>
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Revenue by Branch</h4>
+                                    <canvas id="chart-revenue-cabang" height="140"></canvas>
+                                </div>
+                            </div>
                         </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Revenue by Quarter</h3>
-                            <canvas id="chart-revenue-kuartal" height="140"></canvas>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Revenue by Branch</h3>
-                            <canvas id="chart-revenue-cabang" height="140"></canvas>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Test Distribution</h3>
-                            <canvas id="chart-distribusi-tes" height="140"></canvas>
-                        </div>
-                        <div class="border border-gray-200 rounded-lg p-4">
-                            <h3 class="text-sm font-semibold text-gray-800 mb-2">Test Trend (Monthly)</h3>
-                            <canvas id="chart-tren-tes" height="140"></canvas>
+
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-sm font-semibold text-gray-900">FACT Layanan</h3>
+                                <span class="text-xs text-gray-500">Test/service insights</span>
+                            </div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Test Distribution</h4>
+                                    <canvas id="chart-distribusi-tes" height="140"></canvas>
+                                </div>
+                                <div class="border border-gray-200 rounded-lg p-4">
+                                    <h4 class="text-sm font-semibold text-gray-800 mb-2">Test Trend (Monthly)</h4>
+                                    <canvas id="chart-tren-tes" height="140"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -228,7 +288,7 @@
             <form id="modal-form" class="mt-4 space-y-3"></form>
             <div class="mt-6 flex justify-end space-x-3">
                 <button id="modal-cancel" class="px-4 py-2 rounded-md border border-gray-200 text-gray-700">Cancel</button>
-                <button id="modal-submit" class="px-4 py-2 rounded-md text-white bg-gradient-to-r from-green-500 to-yellow-400">Save</button>
+                <button id="modal-submit" class="px-4 py-2 rounded-md text-white bg-gradient-to-r from-primary-600 to-secondary-500">Save</button>
             </div>
         </div>
     </div>
@@ -251,7 +311,7 @@
             const t = el('tab-tests');
             const a = el('tab-analytics');
             if (tab === 'bookings') {
-                b.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
+                b.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
@@ -260,7 +320,7 @@
                 panelTests.classList.add('hidden');
                 panelAnalytics.classList.add('hidden');
             } else if (tab === 'payments') {
-                p.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
+                p.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
@@ -269,7 +329,7 @@
                 panelTests.classList.add('hidden');
                 panelAnalytics.classList.add('hidden');
             } else if (tab === 'analytics') {
-                a.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
+                a.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
@@ -278,7 +338,7 @@
                 panelPayments.classList.add('hidden');
                 panelTests.classList.add('hidden');
             } else {
-                t.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
+                t.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
