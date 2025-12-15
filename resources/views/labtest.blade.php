@@ -48,9 +48,6 @@
                 @if(session()->has('user_id'))
                     <div class="flex items-center space-x-4">
                         <span class="text-gray-700">Welcome, {{ session('username') }}</span>
-                        <a href="{{ route('myorder') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            <i data-feather="shopping-bag" class="mr-1"></i> My Orders
-                        </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="text-white px-4 py-2 rounded-md text-sm font-medium bg-red-500 hover:bg-red-600">

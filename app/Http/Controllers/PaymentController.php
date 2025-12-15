@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\Pembayaran;
 use App\Models\Pasien;
+use App\Models\Cabang;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -48,6 +49,19 @@ class PaymentController extends Controller
 
             // Generate payment details based on method
             $paymentDetails = $this->generatePaymentDetails($booking->pembayaran);
+
+            if (isset($booking->cabang) && $booking->cabang) {
+                $branchLabelById = Cabang::orderBy('cabang_id')
+                    ->pluck('cabang_id')
+                    ->values()
+                    ->mapWithKeys(function ($cabangId, $idx) {
+                        return [$cabangId => 'Cabang ' . chr(65 + $idx)];
+                    });
+                $label = $branchLabelById[$booking->cabang_id] ?? null;
+                if ($label) {
+                    $booking->cabang->display_name = $label;
+                }
+            }
 
             $sesiNumber = $booking->sesi ?? $request->query('sesi') ?? $request->get('sesi') ?? session('booking_sesi_' . $bookingId);
             if ($sesiNumber) {
@@ -251,6 +265,7 @@ class PaymentController extends Controller
 
             $sesiNumber = $request->get('sesi');
             if ($sesiNumber) {
+                session(['booking_sesi_' . $bookingId => $sesiNumber]);
                 try {
                     \App\Models\LogActivity::create([
                         'user_id' => session('user_id'),

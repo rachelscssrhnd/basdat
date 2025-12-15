@@ -155,7 +155,20 @@
                     </div>
                     <div>
                         <div class="text-gray-500">Payment Status</div>
-                        <div class="font-semibold text-gray-900">{{ strtoupper($payStatus) }}</div>
+                        @php
+                            $payBadgeClass = 'text-gray-700 bg-gray-50 border border-gray-200';
+                            $payStatusLower = strtolower((string) $payStatus);
+                            if (in_array($payStatusLower, ['waiting_confirmation', 'pending', 'failed'])) {
+                                $payBadgeClass = 'text-red-700 bg-red-50 border border-red-200';
+                            } elseif (in_array($payStatusLower, ['verified', 'paid', 'completed'])) {
+                                $payBadgeClass = 'text-green-700 bg-green-50 border border-green-200';
+                            }
+                        @endphp
+                        <div>
+                            <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold {{ $payBadgeClass }}">
+                                {{ strtoupper($payStatus) }}
+                            </span>
+                        </div>
                     </div>
                 </div>
 

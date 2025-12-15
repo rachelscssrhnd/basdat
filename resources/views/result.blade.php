@@ -39,9 +39,6 @@
                 @if(session()->has('user_id'))
                     <div class="flex items-center space-x-4">
                         <span class="text-gray-700">Welcome, {{ session('username') }}</span>
-                        <a href="{{ route('myorder') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            <i data-feather="shopping-bag" class="mr-1"></i> My Orders
-                        </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="text-white px-4 py-2 rounded-md text-sm font-medium bg-red-500 hover:bg-red-600">
@@ -62,24 +59,15 @@
     </nav>
 
     <!-- Header -->
-    <div class="bg-gradient-to-r from-primary-50 to-secondary-50 py-8">
+    <div class="bg-white py-5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-extrabold text-gray-900 flex items-center"><i data-feather="clipboard" class="mr-3 text-green-600"></i> Test Result Summary</h1>
-        @if(isset($result) && $result)
-            @php($txnId = data_get($result, 'booking_id'))
-            @php($tanggalTes = data_get($result, 'tanggal_tes'))
-            @if($txnId)
-                <p class="mt-2 text-gray-600">Booking ID: {{ $txnId }}</p>
-            @endif
-            @if($tanggalTes)
-                <p class="mt-1 text-sm text-gray-500">Tanggal Tes: {{ \Carbon\Carbon::parse($tanggalTes)->format('d M Y') }}</p>
-            @endif
-        @endif
+            <p class="mt-2 text-gray-600">Patient: <span class="font-semibold">{{ session('username') ?? 'Patient' }}</span></p>
         </div>
     </div>
 
     <!-- Results -->
-    <div class="bg-white py-10">
+    <div class="bg-white py-6">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             @if(isset($result) && $result)
                 @if(isset($result['status']) && $result['status'] === 'pending')
@@ -97,10 +85,22 @@
                     </div>
                 @elseif(data_get($result, 'tests') && count(data_get($result, 'tests')) > 0)
                     @foreach(data_get($result, 'tests') as $test)
+                @php
+                    $cardTxnId = data_get($test, 'transaction_id') ?? data_get($result, 'transaction_id');
+                    $cardTanggalTes = data_get($test, 'tanggal_tes') ?? data_get($result, 'tanggal_tes');
+                @endphp
                 <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900">{{ data_get($test, 'name') }}</h2>
-                        <a href="{{ route('result.download', data_get($result,'transaction_id')) }}" class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium text-white bg-primary-600 hover:bg-primary-700">
+                    <div class="px-6 py-4 border-b bg-green-600 flex items-start justify-between">
+                        <div>
+                            <h2 class="text-lg font-semibold text-white">{{ data_get($test, 'name') }}</h2>
+                            @if($cardTanggalTes)
+                                <div class="mt-1 text-xs text-green-50">Tanggal Tes: {{ \Carbon\Carbon::parse($cardTanggalTes)->format('d M Y') }}</div>
+                            @endif
+                            @if($cardTxnId)
+                                <div class="mt-1 text-xs text-green-50">Transaction ID: <span class="font-semibold text-white">{{ $cardTxnId }}</span></div>
+                            @endif
+                        </div>
+                        <a href="{{ route('result.download', data_get($result,'transaction_id')) }}" class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium text-white bg-green-700 hover:bg-green-800">
                             <i data-feather="download" class="mr-1"></i> Download
                         </a>
                     </div>
@@ -137,11 +137,11 @@
             @endif
             @endif
                     <div class="mt-6 flex items-center justify-between">
-                        <a href="{{ route('labtest') }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
+                        <a href="{{ route('labtest') }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                             <i data-feather="arrow-left" class="mr-2"></i> Back to Tests
                         </a>
                         <div class="space-x-3">
-                            <button id="download-result" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <button id="download-result" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                                 <i data-feather="download" class="mr-2"></i> Download Result
                             </button>
                             <button class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
