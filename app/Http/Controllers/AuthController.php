@@ -8,6 +8,8 @@ use App\Models\Pasien;
 use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Schema;
 
 class AuthController extends Controller
 {
@@ -39,6 +41,11 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
+        // Normalize input to prevent trailing-space login failures
+        $request->merge([
+            'username' => trim($request->input('username', '')),
+        ]);
+
         $validated = $request->validate([
             'username' => ['required', 'string'],
             'password' => ['required', 'string'],
@@ -46,27 +53,41 @@ class AuthController extends Controller
 
         try {
             // Find user by username or email (email is in pasien table)
-            $input = $validated['username'];
-            $user = User::where('username', $input)->first();
+            $input = strtolower($validated['username']);
+            $user = User::whereRaw('LOWER(username) = ?', [$input])->first();
             
             // If not found by username, try to find by email in pasien table
             if (!$user) {
-                $pasien = Pasien::where('email', $input)->first();
+                $pasien = Pasien::whereRaw('LOWER(email) = ?', [$input])->first();
                 if ($pasien) {
                     $user = $pasien->user;
                 }
             }
             
             if (!$user || !Hash::check($validated['password'], $user->password_hash)) {
-                return back()->withErrors(['error' => 'Invalid credentials'])->withInput();
+                return back()
+                    ->withErrors(['error' => 'Username atau password salah'])
+                    ->withInput();
             }
 
-            // Set session
+            if (!$user->role) {
+                return back()
+                    ->withErrors(['error' => 'Akun belum memiliki role. Hubungi admin.'])
+                    ->withInput();
+            }
+
+            // Set session with graceful fallback for role columns (name / role_name / slug)
+            $roleName = $user->role->slug
+                ?? $user->role->name
+                ?? $user->role->role_name
+                ?? 'User';
+            $roleSlug = strtolower($roleName);
+
             session([
                 'user_id' => $user->user_id,
                 'username' => $user->username,
-                'role' => $user->role->name ?? 'User',
-                'role_name' => strtolower($user->role->slug ?? 'user'),
+                'role' => $roleName,
+                'role_name' => $roleSlug,
             ]);
 
             // Redirect based on role
@@ -76,7 +97,13 @@ class AuthController extends Controller
                 'created_at' => now(),
             ]);
 
-            if (strtolower($user->role->slug) === 'admin') {
+            // If user intended to book a specific test before login, send them there
+            if (session()->has('intended_test_id')) {
+                $tid = session()->pull('intended_test_id');
+                return redirect()->route('booking', ['test_id' => $tid])->with('success', 'Login successful!');
+            }
+
+            if ($roleSlug === 'admin') {
                 return redirect()->route('admin.dashboard')->with('success', 'Login successful!');
             }
             return redirect()->route('user.home')->with('success', 'Login successful!');
@@ -88,10 +115,16 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Trim inputs to avoid hidden whitespace causing login failures
+        $request->merge([
+            'username' => trim($request->input('username', '')),
+            'email' => trim($request->input('email', '')),
+        ]);
+
         $validated = $request->validate([
-            'username' => ['required', 'string', 'unique:user,username'],
+            'username' => ['required', 'string', 'min:3', 'max:50', 'unique:user,username'],
             'email' => ['required', 'email', 'unique:pasien,email'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', Password::min(8)],
             'password_confirmation' => ['required', 'same:password'],
             'nama' => ['required', 'string'],
             'no_hp' => ['required', 'string'],
@@ -100,13 +133,35 @@ class AuthController extends Controller
 
         try {
             \DB::beginTransaction();
-            // Get or create default 'pasien' role
-            $userRole = Role::where('slug', 'pasien')->first();
+
+            // Determine available role columns
+            $hasSlug = Schema::hasColumn('role', 'slug');
+            $hasName = Schema::hasColumn('role', 'name');
+            $hasRoleName = Schema::hasColumn('role', 'role_name');
+
+            // Find pasien role using whichever column exists
+            $userRole = null;
+            if ($hasSlug) {
+                $userRole = Role::where('slug', 'pasien')->first();
+            } elseif ($hasRoleName) {
+                $userRole = Role::whereRaw('LOWER(role_name) = ?', ['pasien'])->first();
+            } elseif ($hasName) {
+                $userRole = Role::whereRaw('LOWER(name) = ?', ['pasien'])->first();
+            }
+
+            // Build create payload only with existing columns
             if (!$userRole) {
-                $userRole = Role::create([
-                    'name' => 'Pasien',
-                    'slug' => 'pasien',
-                ]);
+                $payload = [];
+                if ($hasName) {
+                    $payload['name'] = 'Pasien';
+                }
+                if ($hasRoleName) {
+                    $payload['role_name'] = 'Pasien';
+                }
+                if ($hasSlug) {
+                    $payload['slug'] = 'pasien';
+                }
+                $userRole = Role::create($payload);
             }
 
             // Create user account

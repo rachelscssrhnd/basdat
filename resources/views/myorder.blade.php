@@ -48,7 +48,7 @@
                     </div>
                 @else
                     <div class="flex items-center space-x-2">
-                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-green-600 hover:bg-green-700">
                         <i data-feather="user" class="mr-2"></i> Sign In
                     </a>
                     </div>
@@ -141,7 +141,7 @@
                 <i data-feather="shopping-bag" class="h-12 w-12 mx-auto text-gray-400"></i>
                 <h3 class="mt-4 text-lg font-medium text-gray-900">No orders found</h3>
                 <p class="mt-2 text-gray-500">You haven't made any bookings yet.</p>
-                <a href="{{ route('labtest') }}" class="mt-4 inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                <a href="{{ route('labtest') }}" class="mt-4 inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
                     Browse Tests
                 </a>
             </div>

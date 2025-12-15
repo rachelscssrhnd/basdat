@@ -19,12 +19,15 @@ class BookingController extends Controller
      */
     public function index(Request $request)
     {
-        // Check if user is logged in
-        if (!session()->has('user_id')) {
-            return redirect()->route('auth')->withErrors(['error' => 'Please login to book a test.']);
-        }
-
         try {
+            // If not logged in, remember intended test and send to login
+            if (!session()->has('user_id')) {
+                if ($request->has('test_id')) {
+                    session(['intended_test_id' => $request->get('test_id')]);
+                }
+                return redirect()->route('auth')->withErrors(['error' => 'Please login to book a test.']);
+            }
+
             // Get available lab tests
             $tests = JenisTes::all();
             
@@ -32,19 +35,48 @@ class BookingController extends Controller
             $branches = Cabang::all();
             if ($branches->isEmpty()) {
                 $branches = collect([
-                    (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A', 'alamat' => 'Jl. Sudirman No. 1'],
-                    (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B', 'alamat' => 'Jl. Thamrin No. 2'],
-                    (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
+                    (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A', 'display_name' => 'Cabang A', 'alamat' => 'Jl. Sudirman No. 1'],
+                    (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B', 'display_name' => 'Cabang B', 'alamat' => 'Jl. Thamrin No. 2'],
+                    (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'display_name' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
                 ]);
+            } else {
+                // Normalize naming to simple "Cabang A/B/C"
+                $branches = $branches->values()->map(function ($branch, $idx) {
+                    $label = 'Cabang ' . chr(65 + $idx);
+                    $branch->display_name = $label;
+                    return $branch;
+                });
             }
             
-            // Preselected test via query param
+            // Determine selected tests (priority: old input -> explicit query -> remembered intent)
+            $selectedIds = [];
+            $oldTesIds = $request->old('tes_ids');
+            if (is_array($oldTesIds) && count($oldTesIds) > 0) {
+                $selectedIds = $oldTesIds;
+            }
+            if (empty($selectedIds)) {
+                $queryId = $request->query('test_id');
+                if ($queryId) {
+                    $selectedIds[] = $queryId;
+                }
+            }
+            if (empty($selectedIds)) {
+                $intended = session('intended_test_id');
+                if ($intended) {
+                    $selectedIds[] = $intended;
+                }
+            }
+            session()->forget('intended_test_id');
+
             $selectedTests = collect();
-            $testId = $request->get('test_id');
-            if ($testId) {
-                $pre = JenisTes::where('tes_id', $testId)->get();
-                if ($pre->isNotEmpty()) {
-                    $selectedTests = $pre;
+            if (!empty($selectedIds)) {
+                $selectedTests = JenisTes::whereIn('tes_id', $selectedIds)->get();
+                // Fallback if DB lookup failed but tests collection exists (e.g., demo data)
+                if ($selectedTests->isEmpty() && isset($tests)) {
+                    $fromAll = $tests->whereIn('tes_id', $selectedIds);
+                    if ($fromAll->isNotEmpty()) {
+                        $selectedTests = $fromAll;
+                    }
                 }
             }
 
@@ -66,19 +98,34 @@ class BookingController extends Controller
             ]);
             
             $branches = collect([
-                (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A', 'alamat' => 'Jl. Sudirman No. 1'],
-                (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B', 'alamat' => 'Jl. Thamrin No. 2'],
-                (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
+                (object) ['cabang_id' => 1, 'nama_cabang' => 'Cabang A', 'display_name' => 'Cabang A', 'alamat' => 'Jl. Sudirman No. 1'],
+                (object) ['cabang_id' => 2, 'nama_cabang' => 'Cabang B', 'display_name' => 'Cabang B', 'alamat' => 'Jl. Thamrin No. 2'],
+                (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'display_name' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
             ]);
 
             // Preselected test via query param (fallback)
-            $selectedTests = collect();
-            $testId = $request->get('test_id');
-            if ($testId) {
-                $pre = $tests->where('tes_id', $testId);
-                if ($pre->isNotEmpty()) {
-                    $selectedTests = $pre;
+            $selectedIds = [];
+            $oldTesIds = $request->old('tes_ids');
+            if (is_array($oldTesIds) && count($oldTesIds) > 0) {
+                $selectedIds = $oldTesIds;
+            }
+            if (empty($selectedIds)) {
+                $queryId = $request->query('test_id');
+                if ($queryId) {
+                    $selectedIds[] = $queryId;
                 }
+            }
+            if (empty($selectedIds)) {
+                $intended = session('intended_test_id');
+                if ($intended) {
+                    $selectedIds[] = $intended;
+                }
+            }
+            session()->forget('intended_test_id');
+
+            $selectedTests = collect();
+            if (!empty($selectedIds)) {
+                $selectedTests = $tests->whereIn('tes_id', $selectedIds);
             }
 
             $sessions = [

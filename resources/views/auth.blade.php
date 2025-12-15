@@ -50,7 +50,7 @@
             <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                 <!-- Toggle between Login and Register -->
                 <div class="flex mb-6">
-                    <button id="login-tab" class="flex-1 py-2 px-4 text-center text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 rounded-l-md">
+                    <button id="login-tab" class="flex-1 py-2 px-4 text-center text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-l-md">
                         Sign In
                     </button>
                     <button id="register-tab" class="flex-1 py-2 px-4 text-center text-sm font-medium text-gray-700 bg-gray-100 rounded-r-md hover:bg-gray-200">
@@ -63,6 +63,9 @@
                     @csrf
                     @if(session('success'))
                         <div class="p-3 rounded-md bg-green-50 text-green-700 text-sm">{{ session('success') }}</div>
+                    @endif
+                    @if(isset($errors) && $errors->has('error'))
+                        <div class="p-3 rounded-md bg-red-50 text-red-700 text-sm">{{ $errors->first('error') }}</div>
                     @endif
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Username</label>
@@ -84,7 +87,7 @@
                     @if(session('error'))
                         <div class="text-red-500 text-sm">{{ session('error') }}</div>
                     @endif
-                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
                         <i data-feather="log-in" class="mr-2"></i> Sign In
                     </button>
                 </form>
@@ -122,18 +125,19 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" name="password" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="••••••••">
+                        <input type="password" name="password" required minlength="8" title="Password minimal 8 karakter" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Minimal 8 karakter">
+                        <p class="mt-1 text-xs text-gray-500">Password minimal 8 karakter dan hindari spasi di awal/akhir.</p>
                         @if(isset($errors) && $errors->has('password')) <span class="text-red-500 text-sm">{{ $errors->first('password') }}</span> @endif
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                        <input type="password" name="password_confirmation" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="••••••••">
+                        <input type="password" name="password_confirmation" required minlength="8" title="Password minimal 8 karakter" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm" placeholder="Ulangi password">
                         @if(isset($errors) && $errors->has('password_confirmation')) <span class="text-red-500 text-sm">{{ $errors->first('password_confirmation') }}</span> @endif
                     </div>
                     @if(session('error'))
                         <div class="text-red-500 text-sm">{{ session('error') }}</div>
                     @endif
-                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                    <button type="submit" class="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700">
                         <i data-feather="user-plus" class="mr-2"></i> Create Account
                     </button>
                 </form>
@@ -158,7 +162,7 @@
             const registerForm = document.getElementById('register-form');
 
             loginTab.addEventListener('click', function() {
-                loginTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 rounded-l-md';
+                loginTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-l-md';
                 registerTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-gray-700 bg-gray-100 rounded-r-md hover:bg-gray-200';
                 loginForm.classList.remove('hidden');
                 registerForm.classList.add('hidden');
@@ -167,7 +171,7 @@
             });
 
             registerTab.addEventListener('click', function() {
-                registerTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 rounded-r-md';
+                registerTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-r-md';
                 loginTab.className = 'flex-1 py-2 px-4 text-center text-sm font-medium text-gray-700 bg-gray-100 rounded-l-md hover:bg-gray-200';
                 registerForm.classList.remove('hidden');
                 loginForm.classList.add('hidden');

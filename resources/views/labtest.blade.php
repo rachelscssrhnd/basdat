@@ -57,7 +57,7 @@
                     </div>
                 @else
                     <div class="flex items-center space-x-2">
-                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                    <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-green-600 hover:bg-green-700">
                         <i data-feather="user" class="mr-2"></i> Sign In
                     </a>
                     </div>
@@ -140,7 +140,7 @@
                                     </span>
                                 @endif
                             </div>
-                            <a href="{{ route('booking', ['test_id' => $test->tes_id]) }}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                            <a href="{{ route('booking', ['test_id' => $test->tes_id]) }}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                                 Book Now
                             </a>
                         </div>
@@ -293,7 +293,7 @@
                                         </span>
                                     ` : ''}
                                 </div>
-                                <a href="/booking?test_id=${test.tes_id}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                                <a href="/booking?test_id=${test.tes_id}" class="mt-6 w-full flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                                     Book Now
                                 </a>
                             </div>

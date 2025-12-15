@@ -94,7 +94,7 @@
                     </div>
                 @else
                     <div class="flex items-center space-x-2">
-                        <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                        <a href="{{ route('auth') }}" class="text-white px-4 py-2 rounded-md text-sm font-medium flex items-center bg-green-600 hover:bg-green-700">
                             <i data-feather="user" class="mr-2"></i> Sign In
                         </a>
                     </div>

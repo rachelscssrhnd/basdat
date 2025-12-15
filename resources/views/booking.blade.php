@@ -128,7 +128,7 @@
                                 <select name="cabang_id" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 sm:text-sm">
                                     <option value="">Select Branch</option>
                                     @foreach($branches as $branch)
-                                        <option value="{{ $branch->cabang_id }}" {{ old('cabang_id') == $branch->cabang_id ? 'selected' : '' }}>{{ $branch->nama_cabang }}</option>
+                                        <option value="{{ $branch->cabang_id }}" {{ old('cabang_id') == $branch->cabang_id ? 'selected' : '' }}>{{ $branch->display_name ?? $branch->nama_cabang }}</option>
                                     @endforeach
                                 </select>
                                 @if(isset($errors) && $errors->has('cabang_id')) <span class="text-red-500 text-sm">{{ $errors->first('cabang_id') }}</span> @endif
@@ -137,10 +137,17 @@
                     </div>
 
                 <!-- Test Details -->
+                    @php
+                        $selected = isset($selectedTests) ? $selectedTests : collect();
+                        $selectedNames = $selected->pluck('nama_tes')->filter()->implode(', ');
+                        $selectedSubtotal = $selected->sum('harga');
+                        $serviceFee = 5000;
+                        $serverTotal = $selectedSubtotal + $serviceFee;
+                    @endphp
+
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                     <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="flask" class="mr-2 text-green-600"></i> Test Details</h2>
                     <div class="mt-4 space-y-3" id="test-details">
-                        @php($selected = isset($selectedTests) ? $selectedTests : collect())
                         @if($selected->isNotEmpty())
                             @foreach($selected as $test)
                                 <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
@@ -163,10 +170,10 @@
                     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
                         <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="list" class="mr-2 text-green-600"></i> Payment Details</h2>
                         <dl class="mt-4 space-y-2 text-sm text-gray-700" id="payment-summary">
-                            <div class="flex justify-between"><dt>Selected Test(s)</dt><dd class="font-medium" id="selected-tests-list">-</dd></div>
-                            <div class="flex justify-between"><dt>Subtotal</dt><dd class="font-medium" id="subtotal">Rp0</dd></div>
-                            <div class="flex justify-between"><dt>Service Fee</dt><dd class="font-medium">Rp5.000</dd></div>
-                            <div class="flex justify-between border-t pt-2 text-base font-semibold text-gray-900"><dt>Total</dt><dd id="total">Rp5.000</dd></div>
+                            <div class="flex justify-between"><dt>Selected Test(s)</dt><dd class="font-medium" id="selected-tests-list">{{ $selectedNames ?: '-' }}</dd></div>
+                            <div class="flex justify-between"><dt>Subtotal</dt><dd class="font-medium" id="subtotal">Rp{{ number_format($selectedSubtotal, 0, ',', '.') }}</dd></div>
+                            <div class="flex justify-between"><dt>Service Fee</dt><dd class="font-medium">Rp{{ number_format($serviceFee, 0, ',', '.') }}</dd></div>
+                            <div class="flex justify-between border-t pt-2 text-base font-semibold text-gray-900"><dt>Total</dt><dd id="total">Rp{{ number_format($serverTotal, 0, ',', '.') }}</dd></div>
                         </dl>
                     </div>
 
