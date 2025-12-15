@@ -36,6 +36,7 @@
             <p class="mt-2 text-gray-600">Manage bookings and lab tests</p>
             <div class="mt-4 flex space-x-3">
                 <button id="tab-bookings" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400">Booking Management</button>
+                <button id="tab-payments" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Payment Management</button>
                 <button id="tab-tests" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Test Management</button>
             </div>
         </div>
@@ -61,7 +62,8 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Proof</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
@@ -81,6 +83,7 @@
                                             {{ strtoupper($booking->status_pembayaran) }}
                                         </span>
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->status_tes }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         @if(optional($booking->pembayaran)->bukti_path)
                                             <a href="{{ Storage::disk('public')->url($booking->pembayaran->bukti_path) }}" target="_blank" class="text-primary-600 hover:text-primary-700">View</a>
@@ -93,16 +96,46 @@
                                             <button onclick="viewPaymentProof({{ $booking->pembayaran->pembayaran_id }})" class="px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700">View Proof</button>
                                         @endif
                                         <button onclick="verifyPayment({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700">Verify Payment</button>
-                                        <button onclick="editBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Edit</button>
+                                        <button onclick='editBooking({{ $booking->booking_id }}, @json($booking->status_pembayaran), @json($booking->status_tes))' class="ml-2 px-3 py-1 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
                                         <button onclick="deleteBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-sm text-gray-500">No bookings found</td>
+                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No bookings found</td>
                                 </tr>
                                 @endforelse
                             </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payment Management -->
+            <section id="panel-payments" class="space-y-6 hidden">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="credit-card" class="mr-2 text-green-600"></i> Payments</h2>
+                        <div class="flex space-x-2">
+                            <button id="refresh-payments" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
+                                <i data-feather="refresh-cw" class="mr-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-4 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proof</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payment-rows" class="bg-white divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -160,26 +193,120 @@
 
         const el = (id) => document.getElementById(id);
         const panelBookings = el('panel-bookings');
+        const panelPayments = el('panel-payments');
         const panelTests = el('panel-tests');
+        const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
         function setActive(tab) {
             const b = el('tab-bookings');
+            const p = el('tab-payments');
             const t = el('tab-tests');
             if (tab === 'bookings') {
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
+                p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelBookings.classList.remove('hidden');
+                panelPayments.classList.add('hidden');
+                panelTests.classList.add('hidden');
+            } else if (tab === 'payments') {
+                p.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
+                b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                panelPayments.classList.remove('hidden');
+                panelBookings.classList.add('hidden');
                 panelTests.classList.add('hidden');
             } else {
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelTests.classList.remove('hidden');
                 panelBookings.classList.add('hidden');
+                panelPayments.classList.add('hidden');
             }
         }
 
         el('tab-bookings').addEventListener('click', () => setActive('bookings'));
+        el('tab-payments').addEventListener('click', () => { setActive('payments'); loadPayments(); });
         el('tab-tests').addEventListener('click', () => setActive('tests'));
+
+        function escapeHtml(s) {
+            return String(s ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        function loadBookings() {
+            fetch('/admin/bookings')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) throw new Error(res.message || 'Failed');
+                    const rows = res.data.map(b => {
+                        const patient = b.pasien?.nama || 'Unknown';
+                        const proof = (b.pembayaran?.bukti_pembayaran || b.pembayaran?.bukti_path) ? 'Yes' : '-';
+                        const payStatus = b.status_pembayaran || '-';
+                        const testStatus = b.status_tes || '-';
+                        const date = b.tanggal_booking || '';
+                        const sesi = b.sesi || '';
+                        const viewBtn = b.pembayaran?.pembayaran_id ? `<button onclick=\"viewPaymentProof(${b.pembayaran.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700\">View Proof</button>` : '';
+                        return `
+                            <tr>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${b.booking_id}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(patient)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(date)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(payStatus)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(testStatus)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(proof)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-right text-sm\">
+                                    ${viewBtn}
+                                    <button onclick=\"verifyPayment(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700\">Verify Payment</button>
+                                    <button onclick=\"editBooking(${b.booking_id}, '${escapeHtml(payStatus)}', '${escapeHtml(testStatus)}', '${escapeHtml(date)}', '${escapeHtml(sesi)}')\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700\">Edit</button>
+                                    <button onclick=\"deleteBooking(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700\">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    el('booking-rows').innerHTML = rows || `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">No bookings found</td></tr>`;
+                })
+                .catch(() => {
+                    el('booking-rows').innerHTML = `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">Failed to load bookings</td></tr>`;
+                });
+        }
+
+        function loadPayments() {
+            fetch('/admin/payments')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) throw new Error(res.message || 'Failed');
+                    const rows = res.data.map(p => {
+                        const patient = p.booking?.pasien?.nama || 'Unknown';
+                        const proof = p.bukti_pembayaran || p.bukti_path;
+                        const proofBtn = proof ? `<button onclick=\"viewPaymentProof(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700\">Proof</button>` : '-';
+                        return `
+                            <tr>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${p.pembayaran_id}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${p.booking_id}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(patient)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${Number(p.jumlah || 0).toLocaleString('id-ID')}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(p.status)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm\">${proofBtn}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-right text-sm\">
+                                    <button onclick=\"confirmPayment(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-green-600 hover:bg-green-700\">Confirm</button>
+                                    <button onclick=\"rejectPayment(${p.pembayaran_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-yellow-600 hover:bg-yellow-700\">Reject</button>
+                                    <button onclick="editPayment(${p.pembayaran_id}, '${escapeHtml(p.status)}', '${escapeHtml(p.metode_bayar)}', '${escapeHtml(p.jumlah)}')" class="ml-2 px-3 py-1 rounded-md text-white bg-blue-600 hover:bg-blue-700">Edit</button>
+                                    <button onclick=\"deletePayment(${p.pembayaran_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700\">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    el('payment-rows').innerHTML = rows || `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">No payments found</td></tr>`;
+                })
+                .catch(() => {
+                    el('payment-rows').innerHTML = `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">Failed to load payments</td></tr>`;
+                });
+        }
 
         // Load tests dynamically
         function loadTests() {
@@ -194,7 +321,7 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${test.deskripsi || 'No description'}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp${parseInt(test.harga).toLocaleString('id-ID')}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                <button onclick="editTest(${test.tes_id})" class="px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Edit</button>
+                                <button onclick="editTest(${test.tes_id})" class="px-3 py-1 rounded-md text-white bg-indigo-600 hover:bg-indigo-700">Edit</button>
                                 <button onclick="deleteTest(${test.tes_id})" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
                             </td>
                         </tr>
@@ -255,7 +382,7 @@
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') 
+                    'X-CSRF-TOKEN': csrf
                 },
                 body: JSON.stringify({
                     nama_tes: name,
@@ -280,7 +407,7 @@
                 fetch(`/admin/tests/${id}`, {
                     method: 'DELETE',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': csrf
                     }
                 })
                 .then(response => response.json())
@@ -299,9 +426,73 @@
             }
         }
 
-        function editBooking(id) {
-            // Implementation for editing booking
-            console.log('Edit booking:', id);
+        function editBooking(id, currentPayStatus = '', currentTestStatus = '', currentDate = '', currentSesi = '') {
+            openModal('Edit Booking', `
+                <label class="text-sm text-gray-700">Tanggal Booking</label>
+                <input id="b-date" type="date" class="w-full px-3 py-2 border rounded-md" />
+                <label class="text-sm text-gray-700">Sesi</label>
+                <input id="b-sesi" class="w-full px-3 py-2 border rounded-md" placeholder="(optional)" />
+                <label class="text-sm text-gray-700">Status Pembayaran</label>
+                <select id="b-pay" class="w-full px-3 py-2 border rounded-md">
+                    <option value="belum_bayar">belum_bayar</option>
+                    <option value="pending">pending</option>
+                    <option value="waiting_confirmation">waiting_confirmation</option>
+                    <option value="paid">paid</option>
+                    <option value="confirmed">confirmed</option>
+                    <option value="rejected">rejected</option>
+                    <option value="failed">failed</option>
+                </select>
+                <label class="text-sm text-gray-700">Status Tes</label>
+                <select id="b-test" class="w-full px-3 py-2 border rounded-md">
+                    <option value="menunggu">menunggu</option>
+                    <option value="pending_approval">pending_approval</option>
+                    <option value="scheduled">scheduled</option>
+                    <option value="approved">approved</option>
+                    <option value="in_progress">in_progress</option>
+                    <option value="completed">completed</option>
+                    <option value="cancelled">cancelled</option>
+                    <option value="confirmed">confirmed</option>
+                    <option value="rejected">rejected</option>
+                </select>
+            `, () => {
+                fetch(`/admin/bookings/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrf
+                    },
+                    body: JSON.stringify({
+                        tanggal_booking: el('b-date').value || null,
+                        sesi: el('b-sesi').value || null,
+                        status_pembayaran: el('b-pay').value,
+                        status_tes: el('b-test').value
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message || (data.success ? 'Booking updated' : 'Update failed'));
+                    if (data.success) {
+                        closeModal();
+                        loadBookings();
+                    }
+                })
+                .catch(() => alert('Update failed'));
+            });
+
+            if (currentDate) {
+                try {
+                    el('b-date').value = String(currentDate).slice(0, 10);
+                } catch (e) {}
+            }
+            if (currentSesi) {
+                el('b-sesi').value = currentSesi;
+            }
+            if (currentPayStatus) {
+                el('b-pay').value = currentPayStatus;
+            }
+            if (currentTestStatus) {
+                el('b-test').value = currentTestStatus;
+            }
         }
 
         function deleteBooking(id) {
@@ -309,13 +500,13 @@
                 fetch(`/admin/bookings/${id}`, {
                     method: 'DELETE',
                     headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        'X-CSRF-TOKEN': csrf
                     }
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        location.reload();
+                        loadBookings();
                     } else {
                         alert('Failed to delete booking');
                     }
@@ -344,14 +535,86 @@
         function verifyPayment(id) {
             fetch(`/admin/bookings/${id}/approve-payment`, {
                 method: 'POST',
-                headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') }
+                headers: { 'X-CSRF-TOKEN': csrf }
             })
             .then(r => r.json())
             .then(data => {
                 alert(data.message || (data.success ? 'Payment verified' : 'Verification failed'));
-                if (data.success) location.reload();
+                if (data.success) loadBookings();
             })
             .catch(() => alert('Verification failed'));
+        }
+
+        function confirmPayment(id) {
+            fetch(`/admin/payments/${id}/confirm`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf } })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message || (data.success ? 'Payment confirmed' : 'Failed'));
+                    if (data.success) loadPayments();
+                })
+                .catch(() => alert('Failed'));
+        }
+
+        function rejectPayment(id) {
+            openModal('Reject Payment', `
+                <textarea id="p-reason" class="w-full px-3 py-2 border rounded-md" placeholder="Reason" required></textarea>
+            `, () => {
+                fetch(`/admin/payments/${id}/reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify({ reason: el('p-reason').value })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message || (data.success ? 'Payment rejected' : 'Failed'));
+                    if (data.success) { closeModal(); loadPayments(); }
+                })
+                .catch(() => alert('Failed'));
+            });
+        }
+
+        function editPayment(id, status, metode, jumlah) {
+            openModal('Edit Payment', `
+                <label class="text-sm text-gray-700">Status</label>
+                <input id="p-status" class="w-full px-3 py-2 border rounded-md" value="${escapeHtml(status)}" />
+                <label class="text-sm text-gray-700">Method</label>
+                <input id="p-method" class="w-full px-3 py-2 border rounded-md" value="${escapeHtml(metode)}" />
+                <label class="text-sm text-gray-700">Amount</label>
+                <input id="p-amount" type="number" class="w-full px-3 py-2 border rounded-md" value="${escapeHtml(jumlah)}" />
+                <label class="text-sm text-gray-700">Tanggal Bayar</label>
+                <input id="p-date" type="date" class="w-full px-3 py-2 border rounded-md" />
+                <label class="text-sm text-gray-700">Alasan Reject</label>
+                <textarea id="p-reason" class="w-full px-3 py-2 border rounded-md" placeholder="(optional)"></textarea>
+            `, () => {
+                fetch(`/admin/payments/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf },
+                    body: JSON.stringify({
+                        status: el('p-status').value,
+                        metode_bayar: el('p-method').value,
+                        jumlah: el('p-amount').value
+                        ,tanggal_bayar: el('p-date').value || null
+                        ,alasan_reject: el('p-reason').value || null
+                    })
+                })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message || (data.success ? 'Payment updated' : 'Failed'));
+                    if (data.success) { closeModal(); loadPayments(); }
+                })
+                .catch(() => alert('Failed'));
+            });
+        }
+
+        function deletePayment(id) {
+            if (!confirm('Delete this payment?')) return;
+            fetch(`/admin/payments/${id}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf } })
+                .then(r => r.json())
+                .then(data => {
+                    alert(data.message || (data.success ? 'Deleted' : 'Failed'));
+                    if (data.success) loadPayments();
+                })
+                .catch(() => alert('Failed'));
         }
 
         // Add test functionality
@@ -395,13 +658,17 @@
         });
 
         // Refresh buttons
-        el('refresh-bookings').addEventListener('click', () => location.reload());
+        el('refresh-bookings').addEventListener('click', () => loadBookings());
+        el('refresh-payments').addEventListener('click', () => loadPayments());
         el('refresh-tests').addEventListener('click', () => loadTests());
 
         // Load tests when tests tab is clicked
         el('tab-tests').addEventListener('click', () => {
             loadTests();
         });
+
+        // Initial load for bookings
+        loadBookings();
     </script>
 </body>
 </html>
