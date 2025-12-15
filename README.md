@@ -3,6 +3,13 @@
 Repository GitHub: https://github.com/rachelscssrhnd/basdat
 
 ## Prasyarat
+- Miska Chirzia (164231008)
+- Rachel Sunarko (164231025)
+- I Made Adi Karunia Putra (164231057)
+- Sarah Alya Azizah (164231105)
+- Za’ima Rafifa Salsabila (164231116)
+
+## Prasyarat
 
 Pastikan sudah ter-install:
 
