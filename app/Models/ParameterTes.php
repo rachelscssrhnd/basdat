@@ -38,7 +38,7 @@ class ParameterTes extends Model
      */
     public function jenisTes()
     {
-        return $this->belongsToMany(JenisTes::class, 'detail_tes', 'param_id', 'tes_id');
+        return $this->belongsTo(JenisTes::class, 'tes_id', 'tes_id');
     }
 
     /**

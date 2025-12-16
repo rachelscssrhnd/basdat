@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\HasilTesHeader;
 
 class Booking extends Model
 {
@@ -70,6 +71,11 @@ class Booking extends Model
     public function riwayatBooking()
     {
         return $this->hasMany(RiwayatBooking::class, 'booking_id', 'booking_id');
+    }
+
+    public function hasilTesHeader()
+    {
+        return $this->hasMany(HasilTesHeader::class, 'booking_id', 'booking_id');
     }
 
     /**

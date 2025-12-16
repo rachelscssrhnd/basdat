@@ -133,7 +133,10 @@
                         </div>
                         <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold 
                             @if($booking->status_pembayaran == 'pending') text-yellow-700 bg-yellow-50 border border-yellow-200
+                            @elseif($booking->status_pembayaran == 'waiting_confirmation') text-yellow-700 bg-yellow-50 border border-yellow-200
                             @elseif($booking->status_pembayaran == 'paid') text-green-700 bg-green-50 border border-green-200
+                            @elseif($booking->status_pembayaran == 'confirmed') text-green-700 bg-green-50 border border-green-200
+                            @elseif($booking->status_pembayaran == 'completed') text-green-700 bg-green-50 border border-green-200
                             @else text-red-700 bg-red-50 border border-red-200
                             @endif">
                             {{ strtoupper($booking->status_pembayaran) }}
