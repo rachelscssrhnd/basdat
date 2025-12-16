@@ -41,6 +41,7 @@
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
 </head>
@@ -323,6 +324,12 @@
 
         const charts = {};
 
+        try {
+            if (window.ChartZoom) {
+                Chart.register(window.ChartZoom);
+            }
+        } catch (e) {}
+
         function setActive(tab) {
             const b = el('tab-bookings');
             const p = el('tab-payments');
@@ -400,6 +407,82 @@
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#039;');
+        }
+
+        function formatNumberId(value) {
+            const n = Number(value || 0);
+            return Number.isFinite(n) ? n.toLocaleString('id-ID') : String(value ?? '');
+        }
+
+        function formatRupiah(value) {
+            const n = Number(value || 0);
+            const body = Number.isFinite(n) ? n.toLocaleString('id-ID') : String(value ?? '');
+            return `Rp${body}`;
+        }
+
+        function openInfoModal(title, bodyHtml) {
+            openModal(title, bodyHtml, () => closeModal());
+            const submit = el('modal-submit');
+            if (submit) submit.textContent = 'Close';
+        }
+
+        function attachResetZoom(canvasId, chartKey) {
+            const canvas = el(canvasId);
+            if (!canvas) return;
+            canvas.ondblclick = () => {
+                const c = charts[chartKey];
+                if (c && typeof c.resetZoom === 'function') c.resetZoom();
+            };
+        }
+
+        function makeInteractiveOptions({ title, showLegend = false, legendPosition = 'top', enableZoom = false, valueFormatter } = {}) {
+            const formatValue = typeof valueFormatter === 'function' ? valueFormatter : (v) => String(v ?? '');
+            return {
+                responsive: true,
+                interaction: { mode: enableZoom ? 'index' : 'nearest', intersect: false },
+                plugins: {
+                    legend: { display: !!showLegend, position: legendPosition },
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: (ctx) => {
+                                const raw = ctx.raw ?? (ctx.parsed && (ctx.parsed.y ?? ctx.parsed));
+                                const v = formatValue(raw);
+                                const prefix = ctx.dataset?.label ? `${ctx.dataset.label}: ` : '';
+                                return `${prefix}${v}`;
+                            }
+                        }
+                    },
+                    zoom: enableZoom ? {
+                        pan: { enabled: true, mode: 'x' },
+                        zoom: {
+                            wheel: { enabled: true },
+                            drag: { enabled: true },
+                            mode: 'x'
+                        }
+                    } : undefined
+                },
+                onHover: (event, elements) => {
+                    const target = event?.native?.target;
+                    if (target) target.style.cursor = elements && elements.length ? 'pointer' : 'default';
+                },
+                onClick: (event, elements, chart) => {
+                    if (!elements || !elements.length || !chart) return;
+                    const first = elements[0];
+                    const label = chart.data?.labels?.[first.index] ?? '';
+                    const dataset = chart.data?.datasets?.[first.datasetIndex];
+                    const datasetLabel = dataset?.label ? ` (${dataset.label})` : '';
+                    const rawValue = dataset?.data?.[first.index];
+                    const value = formatValue(rawValue);
+                    openInfoModal(title || 'Chart Detail', `
+                        <div class="space-y-2">
+                            <div class="text-sm text-gray-700"><span class="font-semibold">Label:</span> ${escapeHtml(label)}</div>
+                            <div class="text-sm text-gray-700"><span class="font-semibold">Value${escapeHtml(datasetLabel)}:</span> ${escapeHtml(value)}</div>
+                            ${enableZoom ? '<div class="text-xs text-gray-500">Tip: scroll or drag to zoom, and double-click to reset zoom.</div>' : ''}
+                        </div>
+                    `);
+                }
+            };
         }
 
         function loadBookings() {
@@ -535,8 +618,9 @@
                                 fill: true,
                             }]
                         },
-                        options: { responsive: true, plugins: { legend: { display: false } } }
+                        options: makeInteractiveOptions({ title: 'Booking Trend (Monthly)', enableZoom: true, valueFormatter: formatNumberId })
                     });
+                    attachResetZoom('chart-booking-bulanan', 'bookingBulanan');
 
                     const bookingPerCabang = (data.bookingPerCabang || []).map(x => ({
                         label: x.nama_cabang,
@@ -553,7 +637,7 @@
                                 backgroundColor: '#16a34a',
                             }]
                         },
-                        options: { responsive: true, plugins: { legend: { display: false } } }
+                        options: makeInteractiveOptions({ title: 'Bookings by Branch', valueFormatter: formatNumberId })
                     });
 
                     const revPerKuartal = (data.revenuePerKuartal || []).map(x => ({
@@ -574,8 +658,9 @@
                                 fill: true,
                             }]
                         },
-                        options: { responsive: true, plugins: { legend: { display: false } } }
+                        options: makeInteractiveOptions({ title: 'Revenue by Quarter', enableZoom: true, valueFormatter: formatRupiah })
                     });
+                    attachResetZoom('chart-revenue-kuartal', 'revenueKuartal');
 
                     const revPerCabang = (data.revenuePerCabang || []).map(x => ({
                         label: x.nama_cabang,
@@ -592,7 +677,7 @@
                                 backgroundColor: '#f59e0b',
                             }]
                         },
-                        options: { responsive: true, plugins: { legend: { display: false } } }
+                        options: makeInteractiveOptions({ title: 'Revenue by Branch', valueFormatter: formatRupiah })
                     });
 
                     const distribusiTes = (data.distribusiTes || []).map(x => ({
@@ -609,7 +694,7 @@
                                 backgroundColor: ['#16a34a','#22c55e','#4ade80','#f59e0b','#eab308','#facc15','#fde047','#f97316'],
                             }]
                         },
-                        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+                        options: makeInteractiveOptions({ title: 'Test Distribution', showLegend: true, legendPosition: 'bottom', valueFormatter: formatNumberId })
                     });
 
                     const trenTes = (data.trenTesPerBulan || []).map(x => ({
@@ -630,8 +715,9 @@
                                 fill: true,
                             }]
                         },
-                        options: { responsive: true, plugins: { legend: { display: false } } }
+                        options: makeInteractiveOptions({ title: 'Test Trend (Monthly)', enableZoom: true, valueFormatter: formatNumberId })
                     });
+                    attachResetZoom('chart-tren-tes', 'trenTes');
                 })
                 .catch(() => {
                     showAnalyticsError('Failed to load analytics. Check warehouse DB connection.');
@@ -770,6 +856,7 @@
             el('modal-title').textContent = title;
             el('modal-form').innerHTML = formHtml;
             el('modal').classList.remove('hidden');
+            el('modal-submit').textContent = 'Save';
             el('modal-cancel').onclick = () => el('modal').classList.add('hidden');
             el('modal-submit').onclick = (e) => { e.preventDefault(); onSubmit(); };
         }
