@@ -72,9 +72,9 @@ class BookingController extends Controller
                     (object) ['cabang_id' => 3, 'nama_cabang' => 'Cabang C', 'display_name' => 'Cabang C', 'alamat' => 'Jl. Gatot Subroto No. 3'],
                 ]);
             } else {
-                $branches = $branches->values()->map(function ($branch, $idx) {
-                    $label = 'Cabang ' . chr(65 + $idx);
-                    $branch->display_name = $label;
+                // Prefer the actual values stored in table `cabang`
+                $branches = $branches->values()->map(function ($branch) {
+                    $branch->display_name = $branch->nama_cabang;
                     return $branch;
                 });
             }
@@ -207,7 +207,7 @@ class BookingController extends Controller
         $validated = $request->validate([
             'tanggal_booking' => "required|date|after_or_equal:{$minDate}|before_or_equal:{$maxDate}",
             'sesi' => 'required|in:1,2,3,4',
-            'cabang_id' => 'required|integer',
+            'cabang_id' => 'required|integer|exists:cabang,cabang_id',
             'tes_ids' => 'required|array',
             'tes_ids.*' => 'exists:jenis_tes,tes_id',
             'payment_method' => 'required|in:ewallet,transfer'
