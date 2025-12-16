@@ -39,9 +39,6 @@
                 @if(session()->has('user_id'))
                     <div class="flex items-center space-x-4">
                         <span class="text-gray-700">Welcome, {{ session('username') }}</span>
-                        <a href="{{ route('myorder') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            <i data-feather="shopping-bag" class="mr-1"></i> My Orders
-                        </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="text-white px-4 py-2 rounded-md text-sm font-medium bg-red-500 hover:bg-red-600">
@@ -62,7 +59,7 @@
     </nav>
 
     <!-- Header -->
-    <div class="bg-gradient-to-r from-primary-50 to-secondary-50 py-8">
+    <div class="bg-white py-5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-extrabold text-gray-900 flex items-center"><i data-feather="clipboard" class="mr-3 text-green-600"></i> Test Result Summary</h1>
             <p class="mt-2 text-gray-600">Patient: {{ $patientName ?? (session('username') ?? '-') }}</p>
@@ -70,7 +67,7 @@
     </div>
 
     <!-- Results -->
-    <div class="bg-white py-10">
+    <div class="bg-white py-6">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <?php if (!empty($error)) : ?>
                 <div class="text-center py-12">

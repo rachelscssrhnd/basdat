@@ -18,7 +18,7 @@ class ResultController extends Controller
     public function index(Request $request)
     {
         $transactionId = $request->get('transaction_id');
-        
+
         try {
             $userId = session('user_id');
             $pasien = Pasien::where('user_id', $userId)->first();
@@ -29,11 +29,14 @@ class ResultController extends Controller
 
             $patientName = $pasien->nama ?? session('username') ?? '-';
 
+            // Latest hasil_id per booking that actually has values
             $latestHeaderByBooking = DB::table('hasil_tes_header as hth')
                 ->join('hasil_tes_value as htv', 'hth.hasil_id', '=', 'htv.hasil_id')
                 ->select('hth.booking_id', DB::raw('MAX(hth.hasil_id) as hasil_id'))
                 ->groupBy('hth.booking_id');
 
+            // Equivalent to:
+            // booking_id, nama_parameter, nilai_hasil, satuan (plus tanggal_tes & nama_tes for UI)
             $rowsQuery = DB::table('booking as b')
                 ->joinSub($latestHeaderByBooking, 'lh', function ($join) {
                     $join->on('b.booking_id', '=', 'lh.booking_id');

@@ -39,9 +39,6 @@
                 @if(session()->has('user_id'))
                     <div class="flex items-center space-x-4">
                         <span class="text-gray-700">Welcome, {{ session('username') }}</span>
-                        <a href="{{ route('myorder') }}" class="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">
-                            <i data-feather="shopping-bag" class="mr-1"></i> My Orders
-                        </a>
                         <form method="POST" action="{{ route('logout') }}" class="inline">
                             @csrf
                             <button type="submit" class="text-white px-4 py-2 rounded-md text-sm font-medium bg-red-500 hover:bg-red-600">
@@ -151,7 +148,7 @@
                         <p class="text-lg font-bold text-gray-900">Rp{{ number_format($amount, 0, ',', '.') }}</p>
                     </div>
                     <div class="mt-4 flex justify-end">
-                        <a href="{{ route('myorder.show', $booking->booking_id) }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
+                        <a href="{{ route('myorder.show', $booking->booking_id) }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-green-600 hover:bg-green-700">
                             View Details
                             <i data-feather="arrow-right" class="ml-2"></i>
                         </a>
