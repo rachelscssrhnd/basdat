@@ -30,8 +30,8 @@ class MyOrderController extends Controller
             // Filter bookings based on tab
             if ($tab === 'history') {
                 $bookings = $allBookings->filter(function($booking) {
-                    return in_array($booking->status_pembayaran, ['paid', 'completed']) || 
-                           in_array($booking->status_tes, ['completed', 'cancelled']);
+                    return in_array($booking->status_pembayaran, ['paid', 'completed', 'confirmed']) || 
+                           in_array($booking->status_tes, ['completed', 'cancelled', 'confirmed']);
                 });
             } else {
                 $bookings = $allBookings->filter(function($booking) {
@@ -145,8 +145,8 @@ class MyOrderController extends Controller
             // Filter bookings based on tab
             if ($tab === 'history') {
                 $bookings = $allBookings->filter(function($booking) {
-                    return in_array($booking->status_pembayaran, ['paid']) || 
-                           in_array($booking->status_tes, ['completed']);
+                    return in_array($booking->status_pembayaran, ['paid', 'confirmed']) || 
+                           in_array($booking->status_tes, ['completed', 'confirmed']);
                 });
             } else {
                 $bookings = $allBookings->filter(function($booking) {
