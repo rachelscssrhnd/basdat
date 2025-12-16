@@ -34,14 +34,16 @@ composer install
 npm install
 ```
 
-3) Buat file environment
+3) Download file database (basdat.sql) dan data warehouse (dw_basdat.sql) lalu import ke MySQL. Setelah itu aktifkan MySQL dengan start.
+
+4) Buat file environment
 
 Project ini membutuhkan file `.env`.
 
 - Jika ada `.env.example`, copy menjadi `.env`.
 - Jika tidak ada, buat file `.env` baru lalu isi minimal seperti contoh di bawah ini.
 
-Contoh konfigurasi (sesuaikan user/password/nama database di komputer kamu):
+Contoh konfigurasi (sesuaikan user/password/nama database di komputer):
 
 ```env
 APP_NAME="Basdat"
@@ -51,16 +53,16 @@ APP_DEBUG=true
 APP_URL=http://127.0.0.1:8000
 
 DB_CONNECTION=mysql
+
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_DATABASE=basdat
 DB_USERNAME=root
 DB_PASSWORD=
 
-# Koneksi database warehouse untuk fitur Analytics (Admin Dashboard)
 DB_WAREHOUSE_HOST=127.0.0.1
 DB_WAREHOUSE_PORT=3306
-DB_WAREHOUSE_DATABASE=basdat_warehouse
+DB_WAREHOUSE_DATABASE=dw_basdat
 DB_WAREHOUSE_USERNAME=root
 DB_WAREHOUSE_PASSWORD=
 ```
@@ -79,30 +81,8 @@ php artisan migrate --seed
 
 ## Menjalankan Aplikasi
 
-### Opsi A (disarankan): 1 perintah
-
-Jalankan server Laravel + Vite (frontend) sekaligus:
-
-```bash
-composer run dev
-```
-
-Aplikasi akan berjalan di:
-
-- `http://127.0.0.1:8000`
-
-### Opsi B: manual (2 terminal)
-
-Terminal 1:
-
 ```bash
 php artisan serve
-```
-
-Terminal 2:
-
-```bash
-npm run dev
 ```
 
 ## Akun Default (Seeder)
@@ -145,7 +125,3 @@ Solusi:
 - Jika error koneksi database:
   - Pastikan MySQL aktif.
   - Cek `DB_*` dan `DB_WAREHOUSE_*` di `.env`.
-
-- Jika CSS/JS tidak muncul:
-  - Pastikan `npm install` sudah dijalankan.
-  - Jalankan `npm run dev` atau gunakan `composer run dev`.
