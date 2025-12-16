@@ -28,15 +28,9 @@ Jalankan perintah berikut di folder project (`basdat/`):
 composer install
 ```
 
-2) Install dependency frontend
+2) Download file database (basdat.sql) dan data warehouse (dw_basdat.sql) lalu import ke MySQL. Setelah itu aktifkan MySQL dengan start.
 
-```bash
-npm install
-```
-
-3) Download file database (basdat.sql) dan data warehouse (dw_basdat.sql) lalu import ke MySQL. Setelah itu aktifkan MySQL dengan start.
-
-4) Buat file environment
+3) Buat file environment
 
 Project ini membutuhkan file `.env`.
 
