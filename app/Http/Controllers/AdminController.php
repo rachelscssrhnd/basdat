@@ -576,7 +576,7 @@ class AdminController extends Controller
             
             $booking = Booking::findOrFail($id);
             $booking->update([
-                'status_tes' => 'approved'
+                'status_tes' => 'confirmed'
             ]);
 
             LogActivity::create([
@@ -587,10 +587,10 @@ class AdminController extends Controller
 
             DB::commit();
             
-            return response()->json(['success' => true, 'message' => 'Booking approved successfully']);
+            return response()->json(['success' => true, 'message' => 'Booking confirmed successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Failed to approve booking']);
+            return response()->json(['success' => false, 'message' => 'Failed to confirm booking']);
         }
     }
 
@@ -687,8 +687,7 @@ class AdminController extends Controller
             ]);
 
             $payment->booking->update([
-                'status_pembayaran' => 'confirmed',
-                'status_tes' => 'confirmed'
+                'status_pembayaran' => 'confirmed'
             ]);
 
             LogActivity::create([
@@ -699,10 +698,10 @@ class AdminController extends Controller
 
             DB::commit();
             
-            return response()->json(['success' => true, 'message' => 'Payment confirmed successfully']);
+            return response()->json(['success' => true, 'message' => 'Payment verified successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json(['success' => false, 'message' => 'Failed to confirm payment']);
+            return response()->json(['success' => false, 'message' => 'Failed to verify payment']);
         }
     }
 

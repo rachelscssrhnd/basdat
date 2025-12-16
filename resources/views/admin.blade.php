@@ -98,10 +98,10 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Test Status</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Proof</th>
                                     <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
@@ -110,36 +110,23 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->booking_id }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->pasien->nama ?? 'Unknown' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ data_get($booking, 'cabang.nama_cabang', '-') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->sesi ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::parse($booking->tanggal_booking)->format('d M Y') }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                            @if($booking->status_pembayaran == 'pending') bg-yellow-100 text-yellow-800
-                                            @elseif($booking->status_pembayaran == 'paid') bg-green-100 text-green-800
-                                            @else bg-red-100 text-red-800
-                                            @endif">
-                                            {{ strtoupper($booking->status_pembayaran) }}
-                                        </span>
-                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->status_tes }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        @if(optional($booking->pembayaran)->bukti_path)
-                                            <a href="{{ Storage::disk('public')->url($booking->pembayaran->bukti_path) }}" target="_blank" class="text-primary-600 hover:text-primary-700">View</a>
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                        @if($booking->pembayaran && $booking->pembayaran->bukti_pembayaran)
-                                            <button onclick="viewPaymentProof({{ $booking->pembayaran->pembayaran_id }})" class="px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">View Proof</button>
+                                        @if($booking->status_tes === 'confirmed')
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Confirmed</span>
+                                        @else
+                                            <button onclick="confirmBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Confirm Booking</button>
                                         @endif
-                                        <button onclick="verifyPayment({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">Verify Payment</button>
                                         <button onclick='editBooking({{ $booking->booking_id }}, @json($booking->status_pembayaran), @json($booking->status_tes))' class="ml-2 px-3 py-1 rounded-md text-white bg-secondary-500 hover:bg-secondary-600">Edit</button>
                                         <button onclick="deleteBooking({{ $booking->booking_id }})" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
                                     </td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No bookings found</td>
+                                    <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">No bookings found</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -194,6 +181,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Method</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Proof</th>
@@ -421,24 +409,25 @@
                     if (!res.success) throw new Error(res.message || 'Failed');
                     const rows = res.data.map(b => {
                         const patient = b.pasien?.nama || 'Unknown';
-                        const proof = (b.pembayaran?.bukti_pembayaran || b.pembayaran?.bukti_path) ? 'Yes' : '-';
-                        const payStatus = b.status_pembayaran || '-';
                         const testStatus = b.status_tes || '-';
                         const date = b.tanggal_booking || '';
                         const sesi = b.sesi || '';
-                        const viewBtn = b.pembayaran?.pembayaran_id ? `<button onclick=\"viewPaymentProof(${b.pembayaran.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">View Proof</button>` : '';
+                        const branch = b.cabang?.nama_cabang || '-';
+                        const isConfirmed = String(testStatus).toLowerCase() === 'confirmed';
+                        const confirmBtn = isConfirmed
+                            ? `<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800\">Confirmed</span>`
+                            : `<button onclick=\"confirmBooking(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Confirm Booking</button>`;
                         return `
                             <tr>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${b.booking_id}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(patient)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(branch)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(sesi || '-')}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(date)}</td>
-                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(payStatus)}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(testStatus)}</td>
-                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(proof)}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-right text-sm\">
-                                    ${viewBtn}
-                                    <button onclick=\"verifyPayment(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Verify Payment</button>
-                                    <button onclick=\"editBooking(${b.booking_id}, '${escapeHtml(payStatus)}', '${escapeHtml(testStatus)}', '${escapeHtml(date)}', '${escapeHtml(sesi)}')\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-secondary-500 hover:bg-secondary-600\">Edit</button>
+                                    ${confirmBtn}
+                                    <button onclick=\"editBooking(${b.booking_id}, '${escapeHtml(b.status_pembayaran || '')}', '${escapeHtml(testStatus)}', '${escapeHtml(date)}', '${escapeHtml(sesi)}')\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-secondary-500 hover:bg-secondary-600\">Edit</button>
                                     <button onclick=\"deleteBooking(${b.booking_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700\">Delete</button>
                                 </td>
                             </tr>
@@ -460,16 +449,21 @@
                         const patient = p.booking?.pasien?.nama || 'Unknown';
                         const proof = p.bukti_pembayaran || p.bukti_path;
                         const proofBtn = proof ? `<button onclick=\"viewPaymentProof(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Proof</button>` : '-';
+                        const isVerified = String(p.status || '').toLowerCase() === 'confirmed';
+                        const verifyBtn = isVerified
+                            ? `<span class=\"inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800\">Verified</span>`
+                            : `<button onclick=\"verifyPayment(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Verify Payment</button>`;
                         return `
                             <tr>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${p.pembayaran_id}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${p.booking_id}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(patient)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(p.metode_bayar || '-')}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${Number(p.jumlah || 0).toLocaleString('id-ID')}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(p.status)}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm\">${proofBtn}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-right text-sm\">
-                                    <button onclick=\"confirmPayment(${p.pembayaran_id})\" class=\"px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700\">Confirm</button>
+                                    ${verifyBtn}
                                     <button onclick=\"rejectPayment(${p.pembayaran_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-yellow-500 hover:bg-yellow-600\">Reject</button>
                                     <button onclick=\"editPayment(${p.pembayaran_id}, '${escapeHtml(p.status)}', '${escapeHtml(p.metode_bayar)}', '${escapeHtml(p.jumlah)}')\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-yellow-500 hover:bg-yellow-600\">Edit</button>
                                     <button onclick=\"deletePayment(${p.pembayaran_id})\" class=\"ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700\">Delete</button>
@@ -477,10 +471,10 @@
                             </tr>
                         `;
                     }).join('');
-                    el('payment-rows').innerHTML = rows || `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">No payments found</td></tr>`;
+                    el('payment-rows').innerHTML = rows || `<tr><td colspan=\"8\" class=\"px-6 py-4 text-center text-sm text-gray-500\">No payments found</td></tr>`;
                 })
                 .catch(() => {
-                    el('payment-rows').innerHTML = `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">Failed to load payments</td></tr>`;
+                    el('payment-rows').innerHTML = `<tr><td colspan=\"8\" class=\"px-6 py-4 text-center text-sm text-gray-500\">Failed to load payments</td></tr>`;
                 });
         }
 
@@ -974,24 +968,24 @@
             .catch(() => alert('Failed to load payment proof'));
         }
 
-        function verifyPayment(id) {
-            fetch(`/admin/bookings/${id}/approve-payment`, {
+        function confirmBooking(id) {
+            fetch(`/admin/bookings/${id}/approve`, {
                 method: 'POST',
                 headers: { 'X-CSRF-TOKEN': csrf }
             })
             .then(r => r.json())
             .then(data => {
-                alert(data.message || (data.success ? 'Payment verified' : 'Verification failed'));
+                alert(data.message || (data.success ? 'Booking confirmed' : 'Failed'));
                 if (data.success) loadBookings();
             })
-            .catch(() => alert('Verification failed'));
+            .catch(() => alert('Failed'));
         }
 
-        function confirmPayment(id) {
+        function verifyPayment(id) {
             fetch(`/admin/payments/${id}/confirm`, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf } })
                 .then(r => r.json())
                 .then(data => {
-                    alert(data.message || (data.success ? 'Payment confirmed' : 'Failed'));
+                    alert(data.message || (data.success ? 'Payment verified' : 'Failed'));
                     if (data.success) loadPayments();
                 })
                 .catch(() => alert('Failed'));
