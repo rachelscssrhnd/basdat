@@ -113,8 +113,8 @@ Seeder membuat akun:
   - Username: `admin`
   - Password: `admin123`
 - User/Pasien
-  - Username: `user`
-  - Password: `user123`
+  - Username: `test`
+  - Password: `test1234`
 
 ## URL Penting
 
