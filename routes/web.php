@@ -43,16 +43,16 @@ Route::middleware(['auth.session', 'role:pasien'])->group(function () {
     Route::get('/myorder/{id}', [MyOrderController::class, 'show'])->name('myorder.show');
     Route::get('/myorder/search', [MyOrderController::class, 'search'])->name('myorder.search');
     Route::post('/myorder/{bookingId}/upload-proof', [MyOrderController::class, 'uploadProof'])->name('myorder.upload_proof');
+
+    // Result routes
+    Route::get('/result', [ResultController::class, 'index'])->name('result');
+    Route::get('/result/download/{transactionId}', [ResultController::class, 'download'])->name('result.download');
 });
 
 // Lab test routes (public for demo)
 Route::get('/labtest', [LabTestController::class, 'index'])->name('labtest');
 Route::get('/labtest/search', [LabTestController::class, 'search'])->name('labtest.search');
 Route::get('/labtest/filter', [LabTestController::class, 'filter'])->name('labtest.filter');
-
-// Result routes
-Route::get('/result', [ResultController::class, 'index'])->name('result');
-Route::get('/result/download/{transactionId}', [ResultController::class, 'download'])->name('result.download');
 
 // Branch routes
 Route::get('/branches', [BranchController::class, 'index'])->name('branches');
@@ -93,4 +93,9 @@ Route::middleware(['auth.session', 'isAdmin'])->group(function () {
     Route::post('/admin/tests/{testId}/parameters', [AdminController::class, 'createParameter'])->name('admin.parameters.create');
     Route::put('/admin/parameters/{paramId}', [AdminController::class, 'updateParameter'])->name('admin.parameters.update');
     Route::delete('/admin/parameters/{paramId}', [AdminController::class, 'deleteParameter'])->name('admin.parameters.delete');
+
+    Route::get('/admin/test-results/bookings', [AdminController::class, 'getResultBookings'])->name('admin.test_results.bookings');
+    Route::get('/admin/test-results/{bookingId}', [AdminController::class, 'getResultDetail'])->name('admin.test_results.detail');
+    Route::post('/admin/test-results/{bookingId}', [AdminController::class, 'saveResult'])->name('admin.test_results.save');
+    Route::delete('/admin/test-results/{bookingId}', [AdminController::class, 'deleteResult'])->name('admin.test_results.delete');
 });

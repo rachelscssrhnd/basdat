@@ -73,6 +73,7 @@
                 <button id="tab-bookings" class="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500">Booking Management</button>
                 <button id="tab-payments" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Payment Management</button>
                 <button id="tab-tests" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Test Management</button>
+                <button id="tab-results" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Test Result Management</button>
                 <button id="tab-analytics" class="px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white">Dashboard Analytics</button>
             </div>
         </div>
@@ -142,6 +143,34 @@
                                 </tr>
                                 @endforelse
                             </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="panel-results" class="space-y-6 hidden">
+                <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center"><i data-feather="file-text" class="mr-2 text-primary-600"></i> Test Results</h2>
+                        <div class="flex space-x-2">
+                            <button id="refresh-results" class="inline-flex items-center px-3 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
+                                <i data-feather="refresh-cw" class="mr-2"></i>Refresh
+                            </button>
+                        </div>
+                    </div>
+                    <div class="mt-4 overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking ID</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tests</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result</th>
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="result-rows" class="bg-white divide-y divide-gray-100"></tbody>
                         </table>
                     </div>
                 </div>
@@ -300,6 +329,7 @@
         const panelBookings = el('panel-bookings');
         const panelPayments = el('panel-payments');
         const panelTests = el('panel-tests');
+        const panelResults = el('panel-results');
         const panelAnalytics = el('panel-analytics');
         const csrf = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -309,23 +339,39 @@
             const b = el('tab-bookings');
             const p = el('tab-payments');
             const t = el('tab-tests');
+            const r = el('tab-results');
             const a = el('tab-analytics');
             if (tab === 'bookings') {
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                r.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelBookings.classList.remove('hidden');
                 panelPayments.classList.add('hidden');
                 panelTests.classList.add('hidden');
+                panelResults.classList.add('hidden');
                 panelAnalytics.classList.add('hidden');
             } else if (tab === 'payments') {
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                r.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelPayments.classList.remove('hidden');
                 panelBookings.classList.add('hidden');
+                panelTests.classList.add('hidden');
+                panelResults.classList.add('hidden');
+                panelAnalytics.classList.add('hidden');
+            } else if (tab === 'results') {
+                r.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
+                b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                panelResults.classList.remove('hidden');
+                panelBookings.classList.add('hidden');
+                panelPayments.classList.add('hidden');
                 panelTests.classList.add('hidden');
                 panelAnalytics.classList.add('hidden');
             } else if (tab === 'analytics') {
@@ -333,25 +379,30 @@
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                r.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelAnalytics.classList.remove('hidden');
                 panelBookings.classList.add('hidden');
                 panelPayments.classList.add('hidden');
                 panelTests.classList.add('hidden');
+                panelResults.classList.add('hidden');
             } else {
                 t.className = 'px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-secondary-500';
                 b.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 p.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
+                r.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 a.className = 'px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 bg-white';
                 panelTests.classList.remove('hidden');
                 panelBookings.classList.add('hidden');
                 panelPayments.classList.add('hidden');
                 panelAnalytics.classList.add('hidden');
+                panelResults.classList.add('hidden');
             }
         }
 
         el('tab-bookings').addEventListener('click', () => setActive('bookings'));
         el('tab-payments').addEventListener('click', () => { setActive('payments'); loadPayments(); });
         el('tab-tests').addEventListener('click', () => setActive('tests'));
+        el('tab-results').addEventListener('click', () => { setActive('results'); loadResultBookings(); });
         el('tab-analytics').addEventListener('click', () => { setActive('analytics'); loadAnalytics(); });
 
         function escapeHtml(s) {
@@ -613,6 +664,112 @@
                     `).join('');
                 })
                 .catch(error => console.error('Error loading tests:', error));
+        }
+
+        function loadResultBookings() {
+            fetch('/admin/test-results/bookings')
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) throw new Error(res.message || 'Failed');
+                    const rows = (res.data || []).map(b => {
+                        const tests = (b.tests || []).map(t => t.nama_tes).join(', ');
+                        const has = b.has_result ? 'Available' : 'Not yet';
+                        const btnLabel = b.has_result ? 'Edit' : 'Input';
+                        return `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${b.booking_id}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${escapeHtml(b.patient?.nama || 'Unknown')}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${escapeHtml(b.tanggal_booking || '')}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(tests || '-') }</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${escapeHtml(has)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm">
+                                    <button onclick="openResultEditor('${b.booking_id}')" class="px-3 py-1 rounded-md text-white bg-primary-600 hover:bg-primary-700">${btnLabel}</button>
+                                    <button onclick="deleteResult('${b.booking_id}')" class="ml-2 px-3 py-1 rounded-md text-white bg-red-600 hover:bg-red-700">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    el('result-rows').innerHTML = rows || `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">No bookings found</td></tr>`;
+                })
+                .catch(() => {
+                    el('result-rows').innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-sm text-gray-500">Failed to load results</td></tr>`;
+                });
+        }
+
+        function openResultEditor(bookingId) {
+            fetch(`/admin/test-results/${bookingId}`)
+                .then(r => r.json())
+                .then(res => {
+                    if (!res.success) throw new Error(res.message || 'Failed');
+                    const data = res.data || {};
+                    const tests = data.tests || [];
+                    const tanggal = data.hasil?.tanggal_input || '';
+
+                    const blocks = tests.map(t => {
+                        const rows = (t.parameters || []).map(p => {
+                            const val = p.nilai_hasil ?? '';
+                            const unit = p.satuan ? ` <span class="text-xs text-gray-500">(${escapeHtml(p.satuan)})</span>` : '';
+                            return `
+                                <div class="flex items-center justify-between gap-3 py-2 border-b border-gray-100">
+                                    <div class="text-sm text-gray-800">${escapeHtml(p.nama_parameter)}${unit}</div>
+                                    <input data-param-id="${p.param_id}" class="w-48 px-3 py-2 border rounded-md" value="${escapeHtml(val)}" placeholder="value" />
+                                </div>
+                            `;
+                        }).join('');
+
+                        return `
+                            <div class="border border-gray-200 rounded-lg p-3 mb-3">
+                                <div class="font-semibold text-gray-900 mb-2">${escapeHtml(t.nama_tes)}</div>
+                                <div>${rows || '<div class="text-sm text-gray-500">No parameters</div>'}</div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    openModal(`Test Result - ${bookingId}`, `
+                        <label class="text-sm text-gray-700">Tanggal Input</label>
+                        <input id="r-date" type="date" class="w-full px-3 py-2 border rounded-md" value="${escapeHtml(String(tanggal).slice(0,10))}" />
+                        <div class="mt-3">${blocks || '<div class="text-sm text-gray-500">No tests found for this booking.</div>'}</div>
+                    `, () => {
+                        const values = {};
+                        document.querySelectorAll('#modal-form input[data-param-id]').forEach(inp => {
+                            const pid = inp.getAttribute('data-param-id');
+                            values[pid] = inp.value;
+                        });
+
+                        fetch(`/admin/test-results/${bookingId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                            body: JSON.stringify({
+                                tanggal_input: el('r-date').value || null,
+                                values: values
+                            })
+                        })
+                        .then(async (r) => {
+                            const text = await r.text();
+                            try { return JSON.parse(text); } catch (e) { return { success: false, message: text || 'Failed to save test result' }; }
+                        })
+                        .then(saveRes => {
+                            alert(saveRes.message || (saveRes.success ? 'Saved' : 'Failed'));
+                            if (saveRes.success) {
+                                closeModal();
+                                loadResultBookings();
+                            }
+                        })
+                        .catch(() => alert('Failed to save test result'));
+                    });
+                })
+                .catch(() => alert('Failed to load result detail'));
+        }
+
+        function deleteResult(bookingId) {
+            if (!confirm('Delete test result for this booking?')) return;
+            fetch(`/admin/test-results/${bookingId}`, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf } })
+                .then(r => r.json())
+                .then(res => {
+                    alert(res.message || (res.success ? 'Deleted' : 'Failed'));
+                    if (res.success) loadResultBookings();
+                })
+                .catch(() => alert('Failed to delete test result'));
         }
 
         function openModal(title, formHtml, onSubmit) {
@@ -946,6 +1103,7 @@
         el('refresh-bookings').addEventListener('click', () => loadBookings());
         el('refresh-payments').addEventListener('click', () => loadPayments());
         el('refresh-tests').addEventListener('click', () => loadTests());
+        el('refresh-results').addEventListener('click', () => loadResultBookings());
         el('refresh-analytics').addEventListener('click', () => loadAnalytics());
 
         // Load tests when tests tab is clicked

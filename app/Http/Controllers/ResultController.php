@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use App\Models\HasilTesHeader;
 use App\Models\HasilTesValue;
 use App\Models\Booking;
-use App\Models\ParameterTes;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\DB;
+use App\Models\Pasien;
 
 class ResultController extends Controller
 {
@@ -19,114 +20,115 @@ class ResultController extends Controller
         $transactionId = $request->get('transaction_id');
         
         try {
+            $userId = session('user_id');
+            $pasien = Pasien::where('user_id', $userId)->first();
+            if (!$pasien) {
+                $availableResults = collect();
+                return view('result', ['result' => null, 'availableResults' => $availableResults, 'error' => 'Unauthorized']);
+            }
+
+            $patientName = $pasien->nama ?? session('username') ?? '-';
+
+            $latestHeaderByBooking = DB::table('hasil_tes_header as hth')
+                ->join('hasil_tes_value as htv', 'hth.hasil_id', '=', 'htv.hasil_id')
+                ->select('hth.booking_id', DB::raw('MAX(hth.hasil_id) as hasil_id'))
+                ->groupBy('hth.booking_id');
+
+            $rowsQuery = DB::table('booking as b')
+                ->joinSub($latestHeaderByBooking, 'lh', function ($join) {
+                    $join->on('b.booking_id', '=', 'lh.booking_id');
+                })
+                ->join('hasil_tes_header as hth', 'lh.hasil_id', '=', 'hth.hasil_id')
+                ->join('hasil_tes_value as htv', 'hth.hasil_id', '=', 'htv.hasil_id')
+                ->join('parameter_tes as p', 'htv.param_id', '=', 'p.param_id')
+                ->leftJoin('jenis_tes as jt', 'p.tes_id', '=', 'jt.tes_id')
+                ->where('b.pasien_id', $pasien->pasien_id)
+                ->select(
+                    'b.booking_id',
+                    'hth.tanggal_input as tanggal_tes',
+                    'p.tes_id',
+                    'jt.nama_tes',
+                    'p.nama_parameter',
+                    'htv.nilai_hasil',
+                    'p.satuan'
+                )
+                ->orderBy('b.booking_id')
+                ->orderBy('p.nama_parameter');
+
             if ($transactionId) {
-                // Find booking by transaction ID
-                $booking = Booking::with(['pasien', 'jenisTes'])
-                    ->where('booking_id', $transactionId)
-                    ->first();
-                
-                if (!$booking) {
-                    return view('result', ['result' => null, 'error' => 'Transaction not found']);
-                }
+                $rowsQuery->where('b.booking_id', $transactionId);
+            }
 
-                // Enforce: only show results if payment verified and results exist
-                $isVerified = optional($booking->pembayaran)->status === 'verified';
-                if (!$isVerified) {
-                    return view('result', ['result' => ['tests' => []], 'error' => null]);
-                }
+            $rows = collect($rowsQuery->get());
 
-                // Load all headers and their values for this booking
-                $headers = HasilTesHeader::with(['detailHasil.parameter'])
-                    ->where('booking_id', $booking->booking_id)
-                    ->get();
+            if ($transactionId && $rows->isEmpty()) {
+                return view('result', [
+                    'error' => null,
+                    'patientName' => $patientName,
+                    'resultSets' => [[
+                        'transaction_id' => $transactionId,
+                        'booking_id' => $transactionId,
+                        'tanggal_tes' => null,
+                        'tests' => [],
+                        'status' => 'pending',
+                        'message' => 'Hasil tes belum tersedia. Silakan cek kembali nanti.',
+                    ]],
+                ]);
+            }
 
-                // Flatten values and group by their parameter's tes_id to derive jenis tes grouping
-                $allValues = collect();
-                foreach ($headers as $h) {
-                    foreach ($h->detailHasil as $v) {
-                        $allValues->push($v);
-                    }
-                }
+            $resultSets = [];
+            $byBooking = $rows->groupBy(function ($r) {
+                return (string) $r->booking_id;
+            });
 
-                // Build tests array grouped by jenis tes
+            foreach ($byBooking as $bookingId => $bookingRows) {
+                $tanggalTes = optional($bookingRows->first())->tanggal_tes;
                 $tests = [];
-                $jenisTes = $booking->jenisTes ?? collect();
-                foreach ($jenisTes as $jt) {
-                    $params = $allValues->filter(function($v) use ($jt) {
-                        return optional($v->parameter)->tes_id === $jt->tes_id;
-                    })->map(function($v) {
+                $byTes = $bookingRows->groupBy(function ($r) {
+                    return (string) ($r->tes_id ?? 0);
+                });
+
+                foreach ($byTes as $tesId => $tesRows) {
+                    $testName = optional($tesRows->first())->nama_tes;
+                    if (empty($testName)) {
+                        $testName = ((string) $tesId === '0') ? 'Hasil Tes' : ('Tes #' . $tesId);
+                    }
+
+                    $params = $tesRows->map(function ($r) {
                         return [
-                            'name' => optional($v->parameter)->nama_parameter,
-                            'value' => $v->nilai_hasil,
+                            'name' => $r->nama_parameter,
+                            'value' => $r->nilai_hasil,
+                            'unit' => $r->satuan,
                         ];
-                    })->values();
+                    })->values()->all();
+
                     $tests[] = [
-                        'name' => $jt->nama_tes,
+                        'tes_id' => (string) $tesId,
+                        'name' => $testName,
                         'parameters' => $params,
                     ];
                 }
 
-                // Use first header date if available
-                $tanggalTes = optional($headers->first())->tanggal_input ?? optional($headers->first())->tanggal_tes;
-
-                $result = [
-                    'transaction_id' => $transactionId,
-                    'booking_id' => $booking->booking_id,
+                $resultSets[] = [
+                    'transaction_id' => $bookingId,
+                    'booking_id' => $bookingId,
                     'tanggal_tes' => $tanggalTes,
                     'tests' => $tests,
                 ];
-            } else {
-                // No transaction provided → render demo results
-                $result = [
-                    'transaction_id' => 'DEMO',
-                    'booking_id' => 'DEMO',
-                    'tanggal_tes' => now()->toDateString(),
-                    'tests' => [
-                        [
-                            'name' => 'Tes Darah (Hemoglobin)',
-                            'parameters' => [
-                                ['name' => 'Hemoglobin', 'value' => '13.6 g/dL', 'range' => '12.0 - 16.0', 'flag' => 'Normal'],
-                                ['name' => 'Hematokrit', 'value' => '40 %', 'range' => '36 - 46', 'flag' => 'Normal'],
-                            ],
-                        ],
-                        [
-                            'name' => 'Tes Urine',
-                            'parameters' => [
-                                ['name' => 'pH', 'value' => '6.0', 'range' => '5.0 - 8.0', 'flag' => 'Normal'],
-                                ['name' => 'Protein', 'value' => 'Negative', 'range' => 'Negative', 'flag' => 'Normal'],
-                            ],
-                        ],
-                        [
-                            'name' => 'Tes Darah (Golongan Darah)',
-                            'parameters' => [
-                                ['name' => 'ABO', 'value' => 'O', 'range' => 'A/B/AB/O', 'flag' => 'Normal'],
-                                ['name' => 'Rhesus', 'value' => '+', 'range' => '+ / -', 'flag' => 'Normal'],
-                            ],
-                        ],
-                        [
-                            'name' => 'Tes Kehamilan (Anti-CMV IgG)',
-                            'parameters' => [
-                                ['name' => 'CMV IgG', 'value' => '180 AU/mL', 'range' => '< 10', 'flag' => 'Slightly High'],
-                                ['name' => 'Interpretasi', 'value' => 'Reaktif', 'range' => 'Non-reaktif', 'flag' => 'Slightly High'],
-                            ],
-                        ],
-                        [
-                            'name' => 'Tes Darah (Agregasi Trombosit)',
-                            'parameters' => [
-                                ['name' => 'Agregasi ADP', 'value' => '55 %', 'range' => '50 - 80', 'flag' => 'Normal'],
-                                ['name' => 'Agregasi Epinefrin', 'value' => '45 %', 'range' => '50 - 80', 'flag' => 'High'],
-                            ],
-                        ],
-                    ],
-                ];
             }
 
-            return view('result', compact('result'));
+            return view('result', [
+                'error' => null,
+                'patientName' => $patientName,
+                'resultSets' => $resultSets,
+            ]);
         } catch (\Exception $e) {
             // On exception, render empty cards rather than sample data
-            $result = ['tests' => []];
-
-            return view('result', compact('result'));
+            return view('result', [
+                'error' => 'Failed to load results',
+                'patientName' => session('username') ?? '-',
+                'resultSets' => [],
+            ]);
         }
     }
 
@@ -136,11 +138,17 @@ class ResultController extends Controller
     public function download($transactionId)
     {
         try {
+            $userId = session('user_id');
+            $pasien = Pasien::where('user_id', $userId)->first();
+            if (!$pasien) {
+                return redirect()->route('result')->withErrors(['error' => 'Unauthorized']);
+            }
+
             $booking = Booking::with(['pasien', 'jenisTes'])
                 ->where('booking_id', $transactionId)
                 ->first();
             
-            if (!$booking) {
+            if (!$booking || $booking->pasien_id !== $pasien->pasien_id) {
                 return redirect()->route('result')->withErrors(['error' => 'Transaction not found']);
             }
 
@@ -148,6 +156,10 @@ class ResultController extends Controller
             $hasilTes = HasilTesHeader::with(['detailHasil.parameter'])
                 ->where('booking_id', $booking->booking_id)
                 ->get();
+
+            if ($hasilTes->isEmpty()) {
+                return redirect()->route('result', ['transaction_id' => $transactionId])->withErrors(['error' => 'Result not available']);
+            }
 
             // Render HTML and convert to PDF using dompdf (barryvdh/laravel-dompdf)
             $html = View::make('pdf.result', [

@@ -65,91 +65,109 @@
     <div class="bg-gradient-to-r from-primary-50 to-secondary-50 py-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-3xl font-extrabold text-gray-900 flex items-center"><i data-feather="clipboard" class="mr-3 text-green-600"></i> Test Result Summary</h1>
-        @if(isset($result) && $result)
-            @php($txnId = data_get($result, 'booking_id'))
-            @php($tanggalTes = data_get($result, 'tanggal_tes'))
-            @if($txnId)
-                <p class="mt-2 text-gray-600">Booking ID: {{ $txnId }}</p>
-            @endif
-            @if($tanggalTes)
-                <p class="mt-1 text-sm text-gray-500">Tanggal Tes: {{ \Carbon\Carbon::parse($tanggalTes)->format('d M Y') }}</p>
-            @endif
-        @endif
+            <p class="mt-2 text-gray-600">Patient: {{ $patientName ?? (session('username') ?? '-') }}</p>
         </div>
     </div>
 
     <!-- Results -->
     <div class="bg-white py-10">
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            @if(isset($result) && $result)
-                @if(isset($result['status']) && $result['status'] === 'pending')
-                    <!-- Pending Status -->
+            <?php if (!empty($error)) : ?>
+                <div class="text-center py-12">
+                    <div class="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i data-feather="alert-triangle" class="h-12 w-12 text-red-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-semibold text-gray-900 mb-4">Error</h3>
+                    <p class="text-lg text-gray-600 mb-6">{{ $error }}</p>
+                </div>
+            <?php else : ?>
+                <?php $resultSets = (array) ($resultSets ?? []); ?>
+                <?php if (count($resultSets) === 0) : ?>
                     <div class="text-center py-12">
-                        <div class="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <i data-feather="clock" class="h-12 w-12 text-yellow-600"></i>
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <i data-feather="clipboard" class="h-12 w-12 text-gray-500"></i>
                         </div>
-                        <h3 class="text-2xl font-semibold text-gray-900 mb-4">Results Pending</h3>
-                        <p class="text-lg text-gray-600 mb-6">{{ $result['message'] ?? 'Your test results are being processed. Please check back later.' }}</p>
-                        <div class="inline-flex items-center px-4 py-2 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                            <i data-feather="info" class="h-4 w-4 mr-2"></i>
-                            Status: Processing
-                        </div>
+                        <h3 class="text-2xl font-semibold text-gray-900 mb-4">No Results Yet</h3>
+                        <p class="text-lg text-gray-600 mb-6">Belum ada hasil tes yang tersedia untuk akun kamu.</p>
                     </div>
-                @elseif(data_get($result, 'tests') && count(data_get($result, 'tests')) > 0)
-                    @foreach(data_get($result, 'tests') as $test)
-                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6">
-                    <div class="px-6 py-4 border-b bg-gray-50 flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900">{{ data_get($test, 'name') }}</h2>
-                        <a href="{{ route('result.download', data_get($result,'transaction_id')) }}" class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium text-white bg-primary-600 hover:bg-primary-700">
-                            <i data-feather="download" class="mr-1"></i> Download
-                        </a>
-                    </div>
-                    <div class="p-6">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parameter</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reference Range</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flag</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-100">
-                                    @foreach(data_get($test, 'parameters', []) as $parameter)
-                                    <tr>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ data_get($parameter, 'name') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ data_get($parameter, 'value') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ data_get($parameter, 'range') }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm 
-                                            @if(data_get($parameter, 'flag') == 'Normal') text-green-700
-                                            @elseif(data_get($parameter, 'flag') == 'Slightly High') text-yellow-700
-                                            @else text-red-700
-                                            @endif">{{ data_get($parameter, 'flag') }}</td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            @endif
-            @endif
-                    <div class="mt-6 flex items-center justify-between">
-                        <a href="{{ route('labtest') }}" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-gray-700 border border-gray-200 hover:bg-gray-50">
-                            <i data-feather="arrow-left" class="mr-2"></i> Back to Tests
-                        </a>
-                        <div class="space-x-3">
-                            <button id="download-result" class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-green-500 to-yellow-400 hover:from-green-600 hover:to-yellow-500">
-                                <i data-feather="download" class="mr-2"></i> Download Result
-                            </button>
-                            <button class="inline-flex items-center px-4 py-2 rounded-md text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
-                                <i data-feather="share-2" class="mr-2"></i> Share
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                <?php else : ?>
+                    <?php foreach ($resultSets as $set) : ?>
+                        <?php
+                            $txnId = data_get($set, 'transaction_id');
+                            $tanggalTes = data_get($set, 'tanggal_tes');
+                            $tests = data_get($set, 'tests', []);
+                        ?>
+
+                        <?php if (isset($set['status']) && $set['status'] === 'pending') : ?>
+                            <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6 result-card" data-transaction-id="{{ $txnId }}">
+                                <div class="px-6 py-4 bg-green-600 flex items-center justify-between text-white">
+                                    <div>
+                                        <div class="text-lg font-semibold">Hasil Tes</div>
+                                        <div class="text-sm opacity-90">Transaction ID: {{ $txnId }}</div>
+                                    </div>
+                                    <button type="button" class="no-print inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-800 hover:bg-green-900 print-card">
+                                        <i data-feather="download" class="mr-1"></i> Download
+                                    </button>
+                                </div>
+                                <div class="p-6">
+                                    <div class="text-center py-8">
+                                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                            <i data-feather="clock" class="h-8 w-8 text-yellow-600"></i>
+                                        </div>
+                                        <h3 class="text-xl font-semibold text-gray-900">Results Pending</h3>
+                                        <p class="mt-2 text-gray-600">{{ data_get($set,'message') ?? 'Hasil tes belum tersedia. Silakan cek kembali nanti.' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else : ?>
+                            <?php foreach ((array) $tests as $test) : ?>
+                                <?php $params = (array) data_get($test, 'parameters', []); ?>
+                                <div class="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden mb-6 result-card" data-transaction-id="{{ $txnId }}">
+                                    <div class="px-6 py-4 bg-green-600 flex items-center justify-between text-white">
+                                        <div>
+                                            <div class="text-lg font-semibold">{{ data_get($test,'name') }}</div>
+                                            <div class="text-sm opacity-90">
+                                                <?php if (!empty($tanggalTes)) : ?>Tanggal Tes: {{ \Carbon\Carbon::parse($tanggalTes)->format('d M Y') }}<?php endif; ?>
+                                            </div>
+                                            <div class="text-sm opacity-90">Transaction ID: {{ $txnId }}</div>
+                                        </div>
+                                        <button type="button" class="no-print inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-green-800 hover:bg-green-900 print-card">
+                                            <i data-feather="download" class="mr-1"></i> Download
+                                        </button>
+                                    </div>
+
+                                    <div class="p-6">
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-full divide-y divide-gray-200">
+                                                <thead class="bg-gray-50">
+                                                    <tr>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parameter</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Value</th>
+                                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Satuan</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="bg-white divide-y divide-gray-100">
+                                                    <?php foreach ($params as $p) : ?>
+                                                        <?php
+                                                            $val = data_get($p,'value');
+                                                            $unit = data_get($p,'unit');
+                                                        ?>
+                                                        <tr>
+                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ data_get($p,'name') }}</td>
+                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $val ?? '-' }}</td>
+                                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $unit ?? '-' }}</td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            <?php endif; ?>
             </div>
         </div>
     </div>
@@ -168,22 +186,40 @@
     <script>
         AOS.init();
         feather.replace();
-        // Simple download as PDF via browser print dialog
+
         (function() {
-            var btn = document.getElementById('download-result');
-            if (btn) {
+            var buttons = document.querySelectorAll('.print-card');
+            function clearPrintState() {
+                document.body.classList.remove('printing-single');
+                var targets = document.querySelectorAll('.result-card.print-target');
+                targets.forEach(function(el) { el.classList.remove('print-target'); });
+            }
+
+            buttons.forEach(function(btn) {
                 btn.addEventListener('click', function() {
+                    var card = btn.closest('.result-card');
+                    if (card) {
+                        document.body.classList.add('printing-single');
+                        card.classList.add('print-target');
+                    }
                     window.print();
                 });
-            }
+            });
+
+            window.addEventListener('afterprint', clearPrintState);
         })();
     </script>
 
     <style>
         @media print {
-            nav, footer, #download-result, .bg-primary-600, .bg-gradient-to-r { display: none !important; }
+            nav, footer, .no-print, .bg-gradient-to-r { display: none !important; }
             body { background: white !important; }
             .shadow-sm, .shadow, .shadow-lg { box-shadow: none !important; }
+        }
+
+        @media print {
+            body.printing-single .result-card { display: none !important; }
+            body.printing-single .result-card.print-target { display: block !important; }
         }
     </style>
 </body>

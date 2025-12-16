@@ -138,5 +138,7 @@ class DatabaseSeeder extends Seeder
             'param_id' => $paramHb,
             'nilai_hasil' => '13.5',
         ]);
+
+        $this->call(ParameterTesSeeder::class);
     }
 }
