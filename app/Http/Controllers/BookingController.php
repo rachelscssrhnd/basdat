@@ -221,17 +221,32 @@ class BookingController extends Controller
             // Use authenticated session user as patient
             $userId = session('user_id');
             $pasien = Pasien::where('user_id', $userId)->firstOrFail();
+            Cabang::where('cabang_id', $validated['cabang_id'])->lockForUpdate()->first();
+
+            $activeStatusesToBlock = ['cancelled', 'rejected'];
 
             // Anti-collision rule: Check if session is full
             $existingBookingsQuery = Booking::where('tanggal_booking', $validated['tanggal_booking'])
                 ->where('cabang_id', $validated['cabang_id'])
-                ->whereIn('status_tes', ['pending_approval', 'approved', 'confirmed']);
+                ->whereNotIn('status_tes', $activeStatusesToBlock);
 
             if ($hasSesiColumn) {
                 $existingBookingsQuery->where('sesi', $validated['sesi']);
             }
 
-            $existingBookings = $existingBookingsQuery->count();
+            $userAlreadyBooked = (clone $existingBookingsQuery)
+                ->where('pasien_id', $pasien->pasien_id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($userAlreadyBooked) {
+                DB::rollBack();
+                return back()->withErrors(['error' => 'Kamu sudah punya booking di sesi ini. Silakan pilih sesi lain.'])->withInput();
+            }
+
+            $existingBookings = (clone $existingBookingsQuery)
+                ->lockForUpdate()
+                ->count();
 
             // Assuming max 5 bookings per session (adjust as needed)
             $maxBookingsPerSession = 5;

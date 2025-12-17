@@ -99,6 +99,8 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nomor HP</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Branch</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Session</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
@@ -111,6 +113,8 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->booking_id }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->pasien->nama ?? 'Unknown' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->pasien->email ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->pasien->no_hp ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ data_get($booking, 'cabang.nama_cabang', '-') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $booking->sesi ?? '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ \Carbon\Carbon::parse($booking->tanggal_booking)->format('d M Y') }}</td>
@@ -127,7 +131,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-4 text-center text-sm text-gray-500">No bookings found</td>
+                                    <td colspan="9" class="px-6 py-4 text-center text-sm text-gray-500">No bookings found</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -492,6 +496,8 @@
                     if (!res.success) throw new Error(res.message || 'Failed');
                     const rows = res.data.map(b => {
                         const patient = b.pasien?.nama || 'Unknown';
+                        const email = b.pasien?.email || '-';
+                        const phone = b.pasien?.no_hp || '-';
                         const testStatus = b.status_tes || '-';
                         const date = b.tanggal_booking || '';
                         const sesi = b.sesi || '';
@@ -504,6 +510,8 @@
                             <tr>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${b.booking_id}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(patient)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(email)}</td>
+                                <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(phone)}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(branch)}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(sesi || '-')}</td>
                                 <td class=\"px-6 py-4 whitespace-nowrap text-sm text-gray-900\">${escapeHtml(date)}</td>
@@ -516,10 +524,10 @@
                             </tr>
                         `;
                     }).join('');
-                    el('booking-rows').innerHTML = rows || `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">No bookings found</td></tr>`;
+                    el('booking-rows').innerHTML = rows || `<tr><td colspan=\"9\" class=\"px-6 py-4 text-center text-sm text-gray-500\">No bookings found</td></tr>`;
                 })
                 .catch(() => {
-                    el('booking-rows').innerHTML = `<tr><td colspan=\"7\" class=\"px-6 py-4 text-center text-sm text-gray-500\">Failed to load bookings</td></tr>`;
+                    el('booking-rows').innerHTML = `<tr><td colspan=\"9\" class=\"px-6 py-4 text-center text-sm text-gray-500\">Failed to load bookings</td></tr>`;
                 });
         }
 
